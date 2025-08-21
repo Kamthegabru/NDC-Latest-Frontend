@@ -57,27 +57,27 @@ export default function Footer() {
               </h4>
               <span className="space-y-2  list-none  text-sm text-[#C5C8C9]">
                 <li>
-                  <a href="#home" className="no-underline text-white hover:underline">
+                  <a href="../#home" className="no-underline text-white hover:underline">
                     {t("footer.column1.home")}
                   </a>
                 </li>
                 <li>
-                  <a href="#about" className="no-underline text-white hover:underline">
+                  <a href="../#about" className="no-underline text-white hover:underline">
                     {t("footer.column1.about")}
                   </a>
                 </li>
                 <li>
-                  <a href="#stores" className="no-underline text-white hover:underline">
+                  <a href="../#service" className="no-underline text-white hover:underline">
                     {t("footer.column1.stores")}
                   </a>
                 </li>
                 <li>
-                  <a href="#how" className="no-underline text-white hover:underline">
+                  <a href="../#how" className="no-underline text-white hover:underline">
                     {t("footer.column1.how")}
                   </a>
                 </li>
                 <li>
-                  <a href="#contact" className="no-underline text-white hover:underline">
+                  <a href="../#contact" className="no-underline text-white hover:underline">
                     {t("footer.column1.contact")}
                   </a>
                 </li>
@@ -92,7 +92,7 @@ export default function Footer() {
             <span className="space-y-2 list-none text-sm text-[#C5C8C9]">
   <li>
     <a
-      href="#stores"
+      href="../service"
       className="no-underline text-white hover:underline"
     >
       {t("footer.column2.who")}
@@ -100,7 +100,7 @@ export default function Footer() {
   </li>
   <li>
     <a
-      href="#stores"
+      href="../#service"
       className="no-underline text-white hover:underline"
     >
       {t("footer.column2.access")}
@@ -108,7 +108,7 @@ export default function Footer() {
   </li>
   <li>
     <a
-      href="#about"
+      href="../#about"
       className="no-underline text-white hover:underline"
     >
       {t("footer.column2.benefits")}
@@ -116,7 +116,7 @@ export default function Footer() {
   </li>
   <li>
     <a
-      href="#about"
+      href="../#about"
       className="no-underline text-white hover:underline"
     >
       {t("footer.column2.data")}
@@ -124,7 +124,7 @@ export default function Footer() {
   </li>
   <li>
     <a
-      href="#contact"
+      href="../#contact"
       className="no-underline text-white hover:underline"
     >
       {t("footer.column2.partner")}
