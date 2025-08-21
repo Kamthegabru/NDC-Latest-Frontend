@@ -1,0 +1,210 @@
+{
+  "nav": {
+    "home": "Home",
+    "about": "About",
+    "stores": "Pricing",
+    "how": "Services",
+    "contact": "Contact",
+    "button":"Sign Up Now",
+    "button1":"Login"
+  },
+"hero": {
+  "badgeLabel": "Live Now",
+  "badgeText": "Fast Testing Service",
+  "title1": "Comprehensive DOT Drug Testing Services",
+  "title2": "Simple Fast Accurate ",
+  "subtitle": " Ensure workplace safety and compliance with our comprehensive DOT drug testing services. We offer reliable and efficient testing solutions tailored to meet your specific needs.",
+  "searchPlaceholder": "Enter a product reference number...",
+  "searchButton": "Search",
+ "box1": {
+  "title": "Schedule Your Test Today",
+  "description": "Book DOT-compliant drug and alcohol testing with ease. Fast appointments, certified labs, and nationwide coverage.",
+  "button": "Book Now"
+},
+"box2": {
+  "title": "Fast & Reliable Drug Testing",
+  "label": "Tests Completed",
+  "subtitle": "Thousands of DOT and Non-DOT tests successfully conducted every month with speed, accuracy, and full compliance."
+}
+,
+"box4": {
+  "title": "Certified & Reliable Results",
+  "subtitle": "All tests are conducted by SAMHSA-certified labs and reviewed by qualified Medical Review Officers (MROs)."
+},
+"box6": {
+  "title": "Trusted by",
+  "title2": "Employers & Trucking Companies",
+  "subtitle": "Partnering with thousands of",
+  "subtitle2": " DOT-compliant",
+  "subtitle3": " businesses nationwide to ensure safety and legal compliance."
+}
+
+},
+"services": {
+  "heading": {
+    "title": "Our Testing Process",
+    "subtitle": "Simple. Fast. Compliant.",
+    "description": "We make DOT testing hassle-free with nationwide coverage and certified accuracy."
+  },
+  "card1": {
+    "title": "Register & Order a Test",
+    "description": "Create an account with us and easily order a DOT drug test for your drivers or employees."
+  },
+  "card2": {
+    "title": "Certified Sample Collection",
+    "description": "All collections are performed by trained professionals following strict DOT guidelines to ensure accuracy and confidentiality."
+  },
+  "card3": {
+    "title": "Get Accurate Results",
+    "description": "Lab results are reviewed by a certified Medical Review Officer (MRO) and delivered quickly to keep your business compliant."
+  }
+}
+,
+  "hiring": {
+ "heading": {
+  "label": "Who We Serve",
+  "title": "Built for Safety & Compliance",
+  "subtitle": {
+    "part1": "Supporting",
+    "part2": "Employers, Drivers & Fleets"
+  }
+},
+"card1": {
+  "title": "For Employers",
+  "description": "End-to-end compliance solutions including pre-employment screening, random drug testing program management, supervisor training, and DOT documentation support."
+},
+"card2": {
+  "title": "For Truck Drivers",
+  "description": "Fast and convenient DOT and non-DOT testing with secure online results, enrollment certificates, and FMCSA Clearinghouse assistance to stay compliant."
+},
+"card3": {
+  "title": "For Fleets & Owner-Operators",
+  "description": "Nationwide consortium programs, 24/7 post-accident collections, custom test panels, and audit-ready reporting designed to keep your fleet safe and compliant."
+}
+
+  },
+"recruitment": {
+  "top": {
+    "heading": "Backed by Certified Labs & Nationwide Network",
+    "paragraph": "We partner with SAMHSA-certified laboratories, professional collectors, and FMCSA Clearinghouse specialists to deliver fast, accurate, and compliant drug & alcohol testing services across the country.",
+    "button": "Register & Order a Test",
+    "card1": {
+      "title": "Nationwide Collection Network",
+      "description": "Access over 20,000 certified collection sites with 24/7 post-accident and onsite testing options for maximum convenience and coverage."
+    },
+    "card2": {
+      "title": "Comprehensive Compliance Support",
+      "description": "From pre-employment screening to random program management and audit readiness, we provide full DOT and non-DOT compliance support for employers and drivers."
+    }
+  },
+  "bottom": {
+    "heading": "Ensuring Safety, Compliance & Peace of Mind",
+    "paragraph": "Empowering employers, drivers, and fleets with secure testing solutions, real-time results, and end-to-end compliance management nationwide.",
+    "button": "Explore Our Services",
+    "card1": {
+      "title": "Certified Drug & Alcohol Testing",
+      "desc": "DOT and non-DOT panels, breath alcohol testing, return-to-duty programs, and Medical Review Officer (MRO) certified results."
+    },
+    "card2": {
+      "title": "FMCSA Clearinghouse Assistance",
+      "desc": "One-on-one registration guidance, query support for new hires, violation reporting, and annual compliance management."
+    },
+    "card3": {
+      "title": "Random Testing Program Management",
+      "desc": "Full consortium and pool management with secure reporting, electronic chain-of-custody forms (eCCF), and audit-ready documentation."
+    },
+    "card4": {
+      "title": "Onsite & Emergency Collections",
+      "desc": "Mobile and after-hours collections available for post-accident, reasonable suspicion, and remote job site testing needs."
+    }
+  }
+},
+"results": {
+  "heading": "Trusted Nationwide Drug & Alcohol Testing",
+  "paragraph": "Register today and access fast, reliable, and DOT-compliant testing solutions. From pre-employment to random and post-accident testing, we keep your workforce safe and compliant.",
+  "button": "See How It Works",
+  "trustedBy": "Trusted by",
+  "globalRetailers": "Employers & Fleets Nationwide",
+  "description": "Thousands of employers, drivers, and fleet operators rely on NDC for certified testing, FMCSA Clearinghouse support, and comprehensive compliance management across all industries."
+}
+,"carousel": {
+  "card1": {
+    "title": "Real-Time Test Results",
+    "desc": "Employers and drivers receive fast, secure, and confidential drug & alcohol test results reviewed by certified Medical Review Officers (MROs)."
+  },
+  "card2": {
+    "title": "Nationwide Collection Network",
+    "desc": "With over 20,000 certified locations and mobile units, we make DOT and non-DOT testing accessible anytime, anywhere."
+  },
+  "card3": {
+    "title": "Complete Compliance Management",
+    "desc": "From FMCSA Clearinghouse support to random testing pools and recordkeeping, we provide full compliance solutions for employers and fleets."
+  },
+  "card4": {
+    "title": "Ensuring Safer Workplaces",
+    "desc": "Our mission is to help businesses maintain safe, drug-free environments while staying fully compliant with DOT and state regulations."
+  }
+}
+,"testimonial": {
+  "heading": {
+    "title": "Trusted by Leading",
+    "titleLine2": "Employers & Fleets Nationwide",
+    "subtitle": "Real clients. Real compliance."
+  },
+  "card1": {
+    "quote": "The registration process was quick and we had our drivers tested the same day. Results came back fast and secure.",
+    "name": "Sarah P.",
+    "role": "HR Manager, Logistics Company"
+  },
+  "card2": {
+    "quote": "Their random testing program and Clearinghouse support saved us so much time. Compliance has never been this easy.",
+    "name": "Michael R.",
+    "role": "Fleet Compliance Officer"
+  },
+  "card3": {
+    "quote": "24/7 post-accident testing gave us peace of mind. Having a reliable partner like NDC keeps our company audit-ready.",
+    "name": "David L.",
+    "role": "Operations Director, Trucking Firm"
+  }
+}
+,"contact": {
+  "heading": "Need Help or Have a Question?",
+  "subheading": "Talk to our experts for support or to explore working together.",
+  "form": {
+    "name": "Jane Smith",
+    "email": "jane@email.com",
+    "select": "Select...",
+    "subject": "Subject (Optional)",
+    "message": "Type Your Message...",
+    "submit": "Submit",
+    "other": "Other"
+  }
+},"footer": {
+  "tagline": {
+    "line1": "Keeping Workplaces Safe",
+    "line2": "Through Trusted Drug & Alcohol Testing"
+  },
+  "links": {
+    "privacy": "Privacy Policy",
+    "terms": "Terms & Conditions"
+  },
+  "copyright": "All Rights Reserved by Nationwide Drug Center (NDC)",
+  "column1": {
+    "heading": "Quick Links",
+    "home": "Home",
+    "about": "About Us",
+    "stores": "Our Services",
+    "how": "How It Works",
+    "contact": "Contact Us"
+  },
+  "column2": {
+    "heading": "Compliance & Support",
+    "who": "Who We Serve",
+    "access": "DOT Consortium Programs",
+    "benefits": "FMCSA Clearinghouse",
+    "data": "Supervisor Training",
+    "partner": "Employer Resources"
+  }
+}
+
+}

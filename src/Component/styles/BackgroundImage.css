@@ -1,0 +1,103 @@
+/* styles/BackgroundImage.css */
+.bg-custom {
+  background-image:
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
+    url('../../../public/Images/Mack-Anthem.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-blend-mode: darken;
+}
+
+/* styles/BackgroundImage.css */
+/* Keep your existing .bg-custom as is, just add this below */
+
+.bg-custom {
+  animation: bgSlide 18s infinite ease-in-out;
+   transition: background-image 2s ease-in-out, background-size 6s ease-in-out;
+}
+
+/* Keyframes for background image loop with zoom effect */
+@keyframes bgSlide {
+  0% {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../../../public/Images/Mack-Anthem.jpg');
+    background-size: 110%;
+  }
+  30% {
+    background-size: 100%;
+  }
+  33% {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../../../public/Images/mack-anthem1.jpg');
+    background-size: 110%;
+  }
+  63% {
+    background-size: 100%;
+  }
+  66% {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../../../public/Images/mack-anthem4.jpg');
+    background-size: 110%;
+  }
+  96% {
+    background-size: 100%;
+  }
+  100% {
+    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../../../public/Images/mack-anthem3.jpg');
+    background-size: 110%;
+  }
+}
+
+
+@media (max-width: 768px) {
+  .bg-custom {
+    background-size: cover; /* or 100% if fixed width needed */
+    background-position: center;
+  }
+}
+
+/* Loader Style */
+.fullscreen-loader {
+  position: fixed;
+  z-index: 9999;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  width: 100vw;
+  /* background-color: rgba(255, 255, 255, 0.8);  */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.loader-ring {
+  width: 80px;
+  height: 80px;
+  border: 6px solid transparent;
+  border-top: 6px solid #007bff;
+  border-right: 6px solid #007bff;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+
+
+.scale-wrapper {
+  width: 100%;
+  overflow-x: auto;
+}
+
+@media (max-width: 768px) {
+  .scale-wrapper {
+    transform: scale(0.55);              /* Shrink to fit mobile */
+    transform-origin: top left;          /* Anchor from top left */
+    width: 180vw;                        /* Prevent horizontal cutoff */
+    height: auto;
+    overflow-x: hidden;
+  }
+}
+

@@ -1,0 +1,206 @@
+{
+  "nav": {
+    "home": "Startseite",
+    "about": "Über uns",
+    "stores": "Preise",
+    "how": "Dienstleistungen",
+    "contact": "Kontakt",
+    "button": "Jetzt registrieren",
+    "button1": "Anmelden"
+  },
+  "hero": {
+    "badgeLabel": "Jetzt live",
+    "badgeText": "Schneller Testservice",
+    "title1": "Umfassende DOT-Drogentest-Services",
+    "title2": "Einfach Schnell Genau",
+    "subtitle": "Sorgen Sie für Sicherheit und Compliance am Arbeitsplatz mit unseren umfassenden DOT-Drogentest-Dienstleistungen. Wir bieten zuverlässige und effiziente Testlösungen, die auf Ihre spezifischen Bedürfnisse zugeschnitten sind.",
+    "searchPlaceholder": "Geben Sie eine Produktreferenznummer ein...",
+    "searchButton": "Suchen",
+    "box1": {
+      "title": "Planen Sie Ihren Test noch heute",
+      "description": "Buchen Sie einfach DOT-konforme Drogen- und Alkoholtests. Schnelle Termine, zertifizierte Labore und landesweite Abdeckung.",
+      "button": "Jetzt buchen"
+    },
+    "box2": {
+      "title": "Schnelle & zuverlässige Drogentests",
+      "label": "Abgeschlossene Tests",
+      "subtitle": "Tausende DOT- und Nicht-DOT-Tests werden jeden Monat erfolgreich mit Geschwindigkeit, Genauigkeit und voller Konformität durchgeführt."
+    },
+    "box4": {
+      "title": "Zertifizierte & verlässliche Ergebnisse",
+      "subtitle": "Alle Tests werden von SAMHSA-zertifizierten Laboren durchgeführt und von qualifizierten Medical Review Officers (MROs) überprüft."
+    },
+    "box6": {
+      "title": "Vertraut von",
+      "title2": "Arbeitgebern & Transportunternehmen",
+      "subtitle": "Partnerschaft mit Tausenden",
+      "subtitle2": " DOT-konformen",
+      "subtitle3": " Unternehmen im ganzen Land, um Sicherheit und gesetzliche Compliance zu gewährleisten."
+    }
+  },
+  "services": {
+    "heading": {
+      "title": "Unser Testprozess",
+      "subtitle": "Einfach. Schnell. Konform.",
+      "description": "Wir machen DOT-Tests stressfrei mit landesweiter Abdeckung und zertifizierter Genauigkeit."
+    },
+    "card1": {
+      "title": "Registrieren & Test bestellen",
+      "description": "Erstellen Sie ein Konto bei uns und bestellen Sie einfach einen DOT-Drogentest für Ihre Fahrer oder Mitarbeiter."
+    },
+    "card2": {
+      "title": "Zertifizierte Probenentnahme",
+      "description": "Alle Proben werden von geschulten Fachleuten nach strengen DOT-Richtlinien gesammelt, um Genauigkeit und Vertraulichkeit sicherzustellen."
+    },
+    "card3": {
+      "title": "Erhalten Sie präzise Ergebnisse",
+      "description": "Laborergebnisse werden von einem zertifizierten Medical Review Officer (MRO) überprüft und schnell bereitgestellt, damit Ihr Unternehmen konform bleibt."
+    }
+  },
+  "hiring": {
+    "heading": {
+      "label": "Wem wir dienen",
+      "title": "Entwickelt für Sicherheit & Compliance",
+      "subtitle": {
+        "part1": "Unterstützung für",
+        "part2": "Arbeitgeber, Fahrer & Flotten"
+      }
+    },
+    "card1": {
+      "title": "Für Arbeitgeber",
+      "description": "Umfassende Compliance-Lösungen einschließlich Einstellungs-Screening, Verwaltung von Zufallstests, Schulung von Vorgesetzten und DOT-Dokumentationsunterstützung."
+    },
+    "card2": {
+      "title": "Für Lkw-Fahrer",
+      "description": "Schnelle und bequeme DOT- und Nicht-DOT-Tests mit sicheren Online-Ergebnissen, Teilnahmezertifikaten und FMCSA Clearinghouse-Unterstützung zur Einhaltung der Vorschriften."
+    },
+    "card3": {
+      "title": "Für Flotten & Eigentümer-Operatoren",
+      "description": "Landesweite Konsortiumsprogramme, 24/7-Post-Unfall-Sammlungen, benutzerdefinierte Testpanels und auditbereite Berichte, um Ihre Flotte sicher und konform zu halten."
+    }
+  },
+  "recruitment": {
+    "top": {
+      "heading": "Unterstützt durch zertifizierte Labore & ein landesweites Netzwerk",
+      "paragraph": "Wir arbeiten mit SAMHSA-zertifizierten Laboren, professionellen Sammlern und FMCSA Clearinghouse-Spezialisten zusammen, um schnelle, genaue und konforme Drogen- und Alkoholtests im ganzen Land bereitzustellen.",
+      "button": "Registrieren & Test bestellen",
+      "card1": {
+        "title": "Landesweites Sammelnetzwerk",
+        "description": "Zugang zu über 20.000 zertifizierten Sammelstellen mit 24/7 Post-Unfall- und Vor-Ort-Testoptionen für maximale Bequemlichkeit und Abdeckung."
+      },
+      "card2": {
+        "title": "Umfassende Compliance-Unterstützung",
+        "description": "Von Einstellungs-Screenings bis hin zu Zufallsprogrammen und Audit-Vorbereitung bieten wir vollständige DOT- und Nicht-DOT-Compliance-Unterstützung für Arbeitgeber und Fahrer."
+      }
+    },
+    "bottom": {
+      "heading": "Sicherheit, Compliance & Seelenfrieden gewährleisten",
+      "paragraph": "Wir ermöglichen Arbeitgebern, Fahrern und Flotten sichere Testlösungen, Echtzeitergebnisse und vollständiges Compliance-Management im ganzen Land.",
+      "button": "Unsere Dienstleistungen entdecken",
+      "card1": {
+        "title": "Zertifizierte Drogen- & Alkoholtests",
+        "desc": "DOT- und Nicht-DOT-Panels, Alkoholtests, Wiedereinstiegsprogramme und von MRO zertifizierte Ergebnisse."
+      },
+      "card2": {
+        "title": "FMCSA Clearinghouse Unterstützung",
+        "desc": "Individuelle Registrierungsanleitung, Unterstützung bei Anfragen für Neueinstellungen, Meldung von Verstößen und jährliches Compliance-Management."
+      },
+      "card3": {
+        "title": "Verwaltung von Zufallstestprogrammen",
+        "desc": "Vollständige Konsortial- und Poolverwaltung mit sicheren Berichten, elektronischen Chain-of-Custody-Formularen (eCCF) und auditgerechter Dokumentation."
+      },
+      "card4": {
+        "title": "Vor-Ort- & Notfall-Sammlungen",
+        "desc": "Mobile und außerhalb der Geschäftszeiten verfügbare Sammlungen für Post-Unfall, begründeten Verdacht und entfernte Einsatzorte."
+      }
+    }
+  },
+  "results": {
+    "heading": "Vertrauenswürdige landesweite Drogen- & Alkoholtests",
+    "paragraph": "Registrieren Sie sich noch heute und erhalten Sie schnelle, zuverlässige und DOT-konforme Testlösungen. Von der Einstellung über Zufallstests bis hin zu Post-Unfall-Tests sorgen wir für die Sicherheit und Compliance Ihrer Belegschaft.",
+    "button": "So funktioniert es",
+    "trustedBy": "Vertraut von",
+    "globalRetailers": "Arbeitgebern & Flotten im ganzen Land",
+    "description": "Tausende Arbeitgeber, Fahrer und Flottenbetreiber verlassen sich auf NDC für zertifizierte Tests, FMCSA Clearinghouse-Unterstützung und umfassendes Compliance-Management in allen Branchen."
+  },
+  "carousel": {
+    "card1": {
+      "title": "Echtzeit-Testergebnisse",
+      "desc": "Arbeitgeber und Fahrer erhalten schnelle, sichere und vertrauliche Drogen- & Alkoholtestergebnisse, die von zertifizierten MROs überprüft werden."
+    },
+    "card2": {
+      "title": "Landesweites Sammelnetzwerk",
+      "desc": "Mit über 20.000 zertifizierten Standorten und mobilen Einheiten machen wir DOT- und Nicht-DOT-Tests jederzeit und überall zugänglich."
+    },
+    "card3": {
+      "title": "Vollständiges Compliance-Management",
+      "desc": "Von der FMCSA Clearinghouse-Unterstützung bis hin zu Zufallspools und Aufzeichnungen bieten wir umfassende Compliance-Lösungen für Arbeitgeber und Flotten."
+    },
+    "card4": {
+      "title": "Sicherere Arbeitsplätze gewährleisten",
+      "desc": "Unsere Mission ist es, Unternehmen zu helfen, sichere, drogenfreie Arbeitsumgebungen aufrechtzuerhalten und gleichzeitig die vollständige Einhaltung von DOT- und staatlichen Vorschriften zu gewährleisten."
+    }
+  },
+  "testimonial": {
+    "heading": {
+      "title": "Vertraut von führenden",
+      "titleLine2": "Arbeitgebern & Flotten im ganzen Land",
+      "subtitle": "Echte Kunden. Echte Compliance."
+    },
+    "card1": {
+      "quote": "Der Registrierungsprozess war schnell und wir konnten unsere Fahrer noch am selben Tag testen. Ergebnisse kamen schnell und sicher zurück.",
+      "name": "Sarah P.",
+      "role": "HR-Managerin, Logistikunternehmen"
+    },
+    "card2": {
+      "quote": "Ihr Zufallstestprogramm und die Clearinghouse-Unterstützung haben uns so viel Zeit gespart. Compliance war noch nie so einfach.",
+      "name": "Michael R.",
+      "role": "Flotten-Compliance-Beauftragter"
+    },
+    "card3": {
+      "quote": "24/7 Post-Unfall-Tests gaben uns Sicherheit. Einen zuverlässigen Partner wie NDC zu haben, hält unser Unternehmen auditbereit.",
+      "name": "David L.",
+      "role": "Betriebsleiter, Transportunternehmen"
+    }
+  },
+  "contact": {
+    "heading": "Brauchen Sie Hilfe oder haben Sie eine Frage?",
+    "subheading": "Sprechen Sie mit unseren Experten für Unterstützung oder um eine Zusammenarbeit zu prüfen.",
+    "form": {
+      "name": "Max Mustermann",
+      "email": "max@email.com",
+      "select": "Auswählen...",
+      "subject": "Betreff (optional)",
+      "message": "Ihre Nachricht eingeben...",
+      "submit": "Absenden",
+      "other": "Andere"
+    }
+  },
+  "footer": {
+    "tagline": {
+      "line1": "Sichere Arbeitsplätze gewährleisten",
+      "line2": "Durch vertrauenswürdige Drogen- & Alkoholtests"
+    },
+    "links": {
+      "privacy": "Datenschutzrichtlinie",
+      "terms": "Allgemeine Geschäftsbedingungen"
+    },
+    "copyright": "Alle Rechte vorbehalten von Nationwide Drug Center (NDC)",
+    "column1": {
+      "heading": "Schnellzugriff",
+      "home": "Startseite",
+      "about": "Über uns",
+      "stores": "Unsere Dienstleistungen",
+      "how": "So funktioniert es",
+      "contact": "Kontakt"
+    },
+    "column2": {
+      "heading": "Compliance & Support",
+      "who": "Wem wir dienen",
+      "access": "DOT-Konsortiumsprogramme",
+      "benefits": "FMCSA Clearinghouse",
+      "data": "Schulung für Vorgesetzte",
+      "partner": "Ressourcen für Arbeitgeber"
+    }
+  }
+}

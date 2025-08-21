@@ -1,0 +1,206 @@
+{
+  "nav": {
+    "home": "Accueil",
+    "about": "À propos",
+    "stores": "Tarifs",
+    "how": "Services",
+    "contact": "Contact",
+    "button": "Inscrivez-vous maintenant",
+    "button1": "Connexion"
+  },
+  "hero": {
+    "badgeLabel": "En direct",
+    "badgeText": "Service de test rapide",
+    "title1": "Services complets de dépistage de drogues",
+    "title2": "Simple Rapide Précis",
+    "subtitle": "Assurez la sécurité et la conformité sur le lieu de travail grâce à nos services complets de dépistage de drogues DOT. Nous offrons des solutions fiables et efficaces adaptées à vos besoins spécifiques.",
+    "searchPlaceholder": "Entrez un numéro de référence produit...",
+    "searchButton": "Rechercher",
+    "box1": {
+      "title": "Planifiez votre test dès aujourd'hui",
+      "description": "Réservez facilement un test de dépistage de drogues et d’alcool conforme au DOT. Rendez-vous rapides, laboratoires certifiés et couverture nationale.",
+      "button": "Réserver maintenant"
+    },
+    "box2": {
+      "title": "Dépistage rapide et fiable",
+      "label": "Tests réalisés",
+      "subtitle": "Des milliers de tests DOT et non-DOT sont effectués avec succès chaque mois avec rapidité, précision et pleine conformité."
+    },
+    "box4": {
+      "title": "Résultats certifiés et fiables",
+      "subtitle": "Tous les tests sont effectués par des laboratoires certifiés SAMHSA et vérifiés par des médecins examinateurs qualifiés (MRO)."
+    },
+    "box6": {
+      "title": "Fiable pour",
+      "title2": "Employeurs & Entreprises de transport",
+      "subtitle": "Partenariat avec des milliers",
+      "subtitle2": " d'entreprises conformes au DOT",
+      "subtitle3": " à travers le pays pour garantir sécurité et conformité légale."
+    }
+  },
+  "services": {
+    "heading": {
+      "title": "Notre processus de test",
+      "subtitle": "Simple. Rapide. Conforme.",
+      "description": "Nous simplifions le dépistage DOT avec une couverture nationale et une précision certifiée."
+    },
+    "card1": {
+      "title": "Inscrivez-vous & Commandez un test",
+      "description": "Créez un compte et commandez facilement un test de dépistage DOT pour vos chauffeurs ou employés."
+    },
+    "card2": {
+      "title": "Collecte certifiée des échantillons",
+      "description": "Toutes les collectes sont réalisées par des professionnels formés suivant les directives strictes du DOT pour garantir exactitude et confidentialité."
+    },
+    "card3": {
+      "title": "Obtenez des résultats précis",
+      "description": "Les résultats sont examinés par un Médecin Examinateur Certifié (MRO) et livrés rapidement afin d’assurer la conformité de votre entreprise."
+    }
+  },
+  "hiring": {
+    "heading": {
+      "label": "À qui s’adressent nos services",
+      "title": "Conçu pour la sécurité & la conformité",
+      "subtitle": {
+        "part1": "Nous aidons",
+        "part2": "Employeurs, Chauffeurs & Flottes"
+      }
+    },
+    "card1": {
+      "title": "Pour les employeurs",
+      "description": "Solutions complètes de conformité incluant le dépistage pré-emploi, la gestion des tests aléatoires, la formation des superviseurs et l’assistance documentaire DOT."
+    },
+    "card2": {
+      "title": "Pour les chauffeurs routiers",
+      "description": "Tests DOT et non-DOT rapides et pratiques avec résultats en ligne sécurisés, certificats d’inscription et assistance Clearinghouse FMCSA pour rester conforme."
+    },
+    "card3": {
+      "title": "Pour les flottes & propriétaires-exploitants",
+      "description": "Programmes de consortium nationaux, collectes post-accident 24/7, panels de tests personnalisés et rapports prêts pour audit conçus pour assurer la sécurité et la conformité de votre flotte."
+    }
+  },
+  "recruitment": {
+    "top": {
+      "heading": "Soutenu par des laboratoires certifiés & un réseau national",
+      "paragraph": "Nous collaborons avec des laboratoires certifiés SAMHSA, des collecteurs professionnels et des spécialistes FMCSA Clearinghouse pour fournir des services de dépistage rapides, précis et conformes dans tout le pays.",
+      "button": "Inscrivez-vous & Commandez un test",
+      "card1": {
+        "title": "Réseau national de collecte",
+        "description": "Accédez à plus de 20 000 sites certifiés avec options de collecte sur site et après accident 24/7 pour une couverture maximale."
+      },
+      "card2": {
+        "title": "Support complet de conformité",
+        "description": "Du dépistage pré-emploi à la gestion des programmes aléatoires et à la préparation aux audits, nous offrons un soutien complet DOT et non-DOT aux employeurs et chauffeurs."
+      }
+    },
+    "bottom": {
+      "heading": "Assurer sécurité, conformité & tranquillité d’esprit",
+      "paragraph": "Nous donnons aux employeurs, chauffeurs et flottes des solutions sécurisées, des résultats en temps réel et une gestion complète de la conformité à l’échelle nationale.",
+      "button": "Découvrez nos services",
+      "card1": {
+        "title": "Dépistage certifié drogues & alcool",
+        "desc": "Panels DOT et non-DOT, tests d’alcoolémie, programmes de retour au travail et résultats certifiés par un MRO."
+      },
+      "card2": {
+        "title": "Assistance Clearinghouse FMCSA",
+        "desc": "Accompagnement individuel pour l’inscription, support pour les requêtes de nouveaux employés, signalement des violations et gestion annuelle de la conformité."
+      },
+      "card3": {
+        "title": "Gestion des tests aléatoires",
+        "desc": "Gestion complète des consortiums et des pools avec rapports sécurisés, formulaires électroniques de chaîne de garde (eCCF) et documentation prête pour audit."
+      },
+      "card4": {
+        "title": "Collectes sur site & d’urgence",
+        "desc": "Collectes mobiles et hors heures disponibles pour tests post-accident, soupçon raisonnable et besoins de chantiers éloignés."
+      }
+    }
+  },
+  "results": {
+    "heading": "Dépistage de drogues & alcool de confiance à l’échelle nationale",
+    "paragraph": "Inscrivez-vous dès aujourd'hui et accédez à des solutions rapides, fiables et conformes au DOT. Du pré-emploi aux tests aléatoires et post-accident, nous assurons la sécurité et la conformité de votre personnel.",
+    "button": "Voir comment ça marche",
+    "trustedBy": "Fiable pour",
+    "globalRetailers": "Employeurs & Flottes à travers le pays",
+    "description": "Des milliers d’employeurs, chauffeurs et exploitants de flotte font confiance à NDC pour le dépistage certifié, l’assistance Clearinghouse FMCSA et la gestion complète de la conformité dans tous les secteurs."
+  },
+  "carousel": {
+    "card1": {
+      "title": "Résultats en temps réel",
+      "desc": "Employeurs et chauffeurs reçoivent des résultats rapides, sécurisés et confidentiels, vérifiés par des Médecins Examinateurs Certifiés (MRO)."
+    },
+    "card2": {
+      "title": "Réseau national de collecte",
+      "desc": "Avec plus de 20 000 sites certifiés et unités mobiles, nous rendons le dépistage DOT et non-DOT accessible à tout moment et partout."
+    },
+    "card3": {
+      "title": "Gestion complète de la conformité",
+      "desc": "Du support Clearinghouse FMCSA à la gestion des pools aléatoires et de la tenue de registres, nous offrons des solutions complètes aux employeurs et flottes."
+    },
+    "card4": {
+      "title": "Assurer des lieux de travail plus sûrs",
+      "desc": "Notre mission est d’aider les entreprises à maintenir des environnements de travail sûrs et sans drogue tout en restant pleinement conformes aux réglementations DOT et étatiques."
+    }
+  },
+  "testimonial": {
+    "heading": {
+      "title": "Fiable pour les principaux",
+      "titleLine2": "Employeurs & Flottes à l’échelle nationale",
+      "subtitle": "De vrais clients. Une vraie conformité."
+    },
+    "card1": {
+      "quote": "Le processus d’inscription a été rapide et nous avons pu tester nos chauffeurs le jour même. Les résultats sont arrivés rapidement et en toute sécurité.",
+      "name": "Sarah P.",
+      "role": "Responsable RH, Société de logistique"
+    },
+    "card2": {
+      "quote": "Leur programme de tests aléatoires et leur support Clearinghouse nous ont fait gagner énormément de temps. La conformité n’a jamais été aussi simple.",
+      "name": "Michael R.",
+      "role": "Responsable de conformité flotte"
+    },
+    "card3": {
+      "quote": "Les tests post-accident 24/7 nous ont apporté une tranquillité d’esprit. Avoir un partenaire fiable comme NDC nous garde prêts pour tout audit.",
+      "name": "David L.",
+      "role": "Directeur des opérations, Entreprise de transport"
+    }
+  },
+  "contact": {
+    "heading": "Besoin d’aide ou une question ?",
+    "subheading": "Parlez à nos experts pour obtenir de l’aide ou explorer une collaboration.",
+    "form": {
+      "name": "Jane Dupont",
+      "email": "jane@email.com",
+      "select": "Sélectionner...",
+      "subject": "Sujet (Optionnel)",
+      "message": "Écrivez votre message...",
+      "submit": "Envoyer",
+      "other": "Autre"
+    }
+  },
+  "footer": {
+    "tagline": {
+      "line1": "Assurer la sécurité des lieux de travail",
+      "line2": "Grâce au dépistage fiable de drogues & alcool"
+    },
+    "links": {
+      "privacy": "Politique de confidentialité",
+      "terms": "Termes & Conditions"
+    },
+    "copyright": "Tous droits réservés par Nationwide Drug Center (NDC)",
+    "column1": {
+      "heading": "Liens rapides",
+      "home": "Accueil",
+      "about": "À propos de nous",
+      "stores": "Nos services",
+      "how": "Comment ça marche",
+      "contact": "Contactez-nous"
+    },
+    "column2": {
+      "heading": "Conformité & Support",
+      "who": "À qui nous servons",
+      "access": "Programmes de consortium DOT",
+      "benefits": "Clearinghouse FMCSA",
+      "data": "Formation des superviseurs",
+      "partner": "Ressources employeurs"
+    }
+  }
+}
