@@ -68,14 +68,13 @@ export default function Header() {
 
         {/* Desktop Nav */}
         <nav className="hidden md:flex items-center space-x-6 text-white text-md font-medium">
-         <a href="#home">
+         <a href="../#home">
            <button className="hover:text-[#032B59]  text-white    transition">{t("nav.home")}</button>
           </a>
-          
-          <a href="#pricing" > <button className="hover:text-[#032B59] text-white transition" >{t("nav.stores")}</button></a>
-          <a href="#service" > <button className="hover:text-[#032B59] text-white transition" >{t("nav.how")}</button></a>
-          <a href="#about" > <button className="hover:text-[#032B59] text-white transition" >{t("nav.about")}</button></a>
-          <a href="#contact" > <button className="hover:text-[#032B59] text-white transition" >{t("nav.contact")}</button></a>
+          <a href="../#pricing" > <button className="hover:text-[#032B59] text-white transition" >{t("nav.stores")}</button></a>
+          <a href="../#service" > <button className="hover:text-[#032B59] text-white transition" >{t("nav.how")}</button></a>
+          <a href="../#about" > <button className="hover:text-[#032B59] text-white transition" >{t("nav.about")}</button></a>
+          <a href="../#contact" > <button className="hover:text-[#032B59] text-white transition" >{t("nav.contact")}</button></a>
         </nav>  
 
         {/* Right Side */}
@@ -122,13 +121,13 @@ export default function Header() {
 
           {/* CTA Buttons */}
           <a href="/login" className="no-underline">
-            <button className="bg-[#032B59]  text-white md:block hidden hover:bg-transparent border-[2px] text-[12px] border-[#032B59] hover:border-[#032B59] max-h-[60px] px-2 hover:text-white text-center text-black font-semibold py-3 rounded-[10px]">
+            <button className="bg-[#032B59]  text-white md:block hidden md:text-[16px] hover:bg-transparent border-[2px] text-[12px] border-[#032B59] hover:border-[#032B59] max-h-[60px] px-2 hover:text-white text-center text-black font-semibold py-3 rounded-[10px]">
               <p className="min-w-[70px]">{t("nav.button1")}</p>
             </button>
           </a>
 
           <a href="/pricing" className="no-underline">
-            <button className="bg-[#032B59] text-white md:block hidden hover:bg-transparent border-[2px] text-[12px] border-[#032B59] hover:border-[#032B59] max-h-[60px] px-2 hover:text-white text-black font-semibold py-3 rounded-[10px]">
+            <button className="bg-[#032B59] text-white md:block hidden hover:bg-transparent border-[2px] md:text-[16px] text-[12px] border-[#032B59] hover:border-[#032B59] max-h-[60px] px-2 hover:text-white text-black font-semibold py-3 rounded-[10px]">
               <p className="min-w-[130px]">{t("nav.button")}</p>
             </button>
           </a>
@@ -137,15 +136,13 @@ export default function Header() {
    
       {mobileMenuOpen && (
         <div className="md:hidden bg-[#031318] border-t border-[#BFFF47] text-white px-6 py-4 space-y-4">
-          <a href="./#home" className="block hover:text-[#BFFF47]">{t("nav.home")}</a>
-          <a href="../#about" className="block hover:text-[#BFFF47]">{t("nav.about")}</a>
-          <a href="#price" className="block hover:text-[#BFFF47]">{t("nav.stores")}</a>
-          <a href="#service" className="block hover:text-[#BFFF47]">{t("nav.how")}</a>
-          <a href="#contact" className="block hover:text-[#BFFF47]">{t("nav.contact")}</a>
-
-          {/* Mobile Language Selector */}
+          <a href="../#home" className="block no-underline text-white hover:text-[#BFFF47]">{t("nav.home")}</a>
+          <a href="../#about" className="block no-underline text-white hover:text-[#BFFF47]">{t("nav.about")}</a>
+          <a href="../#price" className="block no-underline text-white hover:text-[#BFFF47]">{t("nav.stores")}</a>
+          <a href="../#service" className="block no-underline text-white hover:text-[#BFFF47]">{t("nav.how")}</a>
+          <a href="../#contact" className="block no-underline text-white hover:text-[#BFFF47]">{t("nav.contact")}</a>
           <div className="pt-3">
-            <label htmlFor="language" className="text-sm text-[#BFFF47] mb-1 block">🌍 Language</label>
+            <label htmlFor="language" className="text-sm text-white mb-1 block">🌍 Language</label>
             <select
               id="language"
               value={locale}
@@ -159,9 +156,13 @@ export default function Header() {
               ))}
             </select>
           </div>
-
-          <a href="#contact">
-            <button className="w-full mt-4 hover:bg-transparent border-[1px] border-[#585958] hover:border-[#585958] hover:text-[#BFFF47] bg-[#BFFF47] text-black font-semibold px-4 py-3 rounded-[10px]">
+          <a href="/login">
+            <button className="w-full mt-4 hover:bg-transparent border-[1px] bg-[#032B59] border-[#032B59] hover:border-[#032B59]  hover:text-white text-white font-semibold px-4 py-3 rounded-[10px]">
+              {t("nav.button1")}
+            </button>
+          </a>
+          <a href="/pricing">
+            <button className="w-full mt-4 hover:bg-transparent border-[1px] bg-[#032B59] border-[#032B59] hover:border-[#032B59]  hover:text-white text-white font-semibold px-4 py-3 rounded-[10px]">
               {t("nav.button")}
             </button>
           </a>
