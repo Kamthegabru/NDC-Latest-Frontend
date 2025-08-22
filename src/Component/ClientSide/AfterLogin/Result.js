@@ -28,7 +28,8 @@ import {
   Card,
   CardContent,
   Grid,
-  Collapse
+  Collapse,
+  CircularProgress
 } from "@mui/material";
 import { 
   Visibility, 
@@ -59,6 +60,7 @@ export default function Result() {
   const [range, setRange] = useState({ from: undefined, to: undefined });
   const [showCalendar, setShowCalendar] = useState(false);
   const [expandedCard, setExpandedCard] = useState(null);
+  const [loading, setLoading] = useState(false);
 
   // Modal states
   const [openViewModal, setOpenViewModal] = useState(false);
@@ -193,12 +195,16 @@ export default function Result() {
                 {result.driverName}
               </Typography>
               <Box>
-                <IconButton size="small" onClick={() => handleView(result)} color="primary">
-                  <Visibility />
-                </IconButton>
-                <IconButton size="small" onClick={() => handleOpenDownload(result)} color="secondary">
-                  <Download />
-                </IconButton>
+                <Tooltip title="View Details">
+                  <IconButton size="small" onClick={() => handleView(result)} color="primary">
+                    <Visibility />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title="Download">
+                  <IconButton size="small" onClick={() => handleOpenDownload(result)} color="secondary">
+                    <Download />
+                  </IconButton>
+                </Tooltip>
                 <IconButton size="small" onClick={() => handleCardExpand(index)}>
                   {expandedCard === index ? <ExpandLess /> : <ExpandMore />}
                 </IconButton>
@@ -217,6 +223,7 @@ export default function Result() {
                 color={getStatusColor(result.resultStatus)}
                 variant="filled"
                 size="small"
+                sx={{ fontWeight: "bold" }}
               />
             </Box>
 
@@ -234,6 +241,7 @@ export default function Result() {
                     color={getStatusColor(result.orderStatus)}
                     variant="filled"
                     size="small"
+                    sx={{ fontWeight: "bold" }}
                   />
                 </Typography>
               </Box>
@@ -243,6 +251,15 @@ export default function Result() {
       ))}
     </Box>
   );
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 300 }}>
+        <CircularProgress color="primary" size={60} />
+        <Typography sx={{ mt: 2, fontWeight: "bold", color: "#1976d2" }}>Loading Results...</Typography>
+      </Box>
+    );
+  }
 
   return (
     <div className="container" style={{ marginTop: 100 }}>
@@ -261,19 +278,22 @@ export default function Result() {
         My Test Results
       </Typography>
 
-      <Paper sx={{ p: 2, borderRadius: 2, boxShadow: 3 }}>
+      <TableContainer component={Paper} sx={{
+        mt: 3, p: 2, borderRadius: 3, boxShadow: 6,
+        background: "linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 100%)"
+      }}>
         {/* Filters */}
         <Box
           sx={{
-            mb: 2,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
+            mb: 2,
             flexWrap: "wrap",
             gap: 2
           }}
         >
-          <Typography variant="h6" sx={{
+          <Typography variant="h5" sx={{
             fontWeight: "bold",
             color: "#003366",
             letterSpacing: 1,
@@ -293,7 +313,7 @@ export default function Result() {
               label="Search Name"
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              sx={{ minWidth: 150 }}
+              sx={{ minWidth: 180 }}
             />
             
             {!isMobile && (
@@ -306,7 +326,7 @@ export default function Result() {
                     <Chip
                       label={
                         range.from && range.to
-                          ? `${dayjs(range.from).format("DD MMM")} - ${dayjs(range.to).format("DD MMM")}`
+                          ? `${dayjs(range.from).format("DD MMM YYYY")} - ${dayjs(range.to).format("DD MMM YYYY")}`
                           : "Select Range"
                       }
                       color="info"
@@ -317,19 +337,20 @@ export default function Result() {
                     {showCalendar && (
                       <Box sx={{
                         position: "absolute",
+                        top: "100%",
+                        left: 0,
                         zIndex: 10,
                         mt: 1,
                         background: "#fff",
                         boxShadow: 6,
                         borderRadius: 2,
-                        p: 2,
-                        right: 0
+                        p: 2
                       }}>
                         <DayPicker
                           mode="range"
                           selected={range}
                           onSelect={setRange}
-                          numberOfMonths={isMobile ? 1 : 2}
+                          numberOfMonths={2}
                           showOutsideDays
                           footer={
                             <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
@@ -347,11 +368,11 @@ export default function Result() {
                   </Box>
                 </Box>
                 
-                <FormControl size="small" sx={{ minWidth: 100 }}>
-                  <InputLabel>Result</InputLabel>
+                <FormControl size="small" sx={{ minWidth: 120 }}>
+                  <InputLabel>Result Status</InputLabel>
                   <Select
                     value={resultStatus}
-                    label="Result"
+                    label="Result Status"
                     onChange={(e) => { setResultStatus(e.target.value); setPage(1); }}
                   >
                     {STATUS_OPTIONS.map((status) => (
@@ -360,11 +381,11 @@ export default function Result() {
                   </Select>
                 </FormControl>
                 
-                <FormControl size="small" sx={{ minWidth: 100 }}>
-                  <InputLabel>Order</InputLabel>
+                <FormControl size="small" sx={{ minWidth: 120 }}>
+                  <InputLabel>Order Status</InputLabel>
                   <Select
                     value={orderStatus}
-                    label="Order"
+                    label="Order Status"
                     onChange={(e) => { setOrderStatus(e.target.value); setPage(1); }}
                   >
                     {ORDER_STATUS_OPTIONS.map((status) => (
@@ -418,67 +439,73 @@ export default function Result() {
         {isMobile ? (
           renderMobileView()
         ) : (
-          <TableContainer sx={{ overflowX: "auto" }}>
-            <Table>
-              <TableHead>
-                <TableRow sx={{ backgroundColor: "#003366" }}>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Sr</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Driver Name</TableCell>
-                  {!isTablet && <TableCell sx={{ color: "white", fontWeight: "bold" }}>License #</TableCell>}
-                  {!isTablet && <TableCell sx={{ color: "white", fontWeight: "bold" }}>Date</TableCell>}
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Test Type</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Order Status</TableCell>
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }}>Result Status</TableCell>
-                  {!isTablet && <TableCell sx={{ color: "white", fontWeight: "bold" }}>Case Number</TableCell>}
-                  <TableCell sx={{ color: "white", fontWeight: "bold" }} align="right">Actions</TableCell>
+          <Table stickyHeader>
+            <TableHead>
+              <TableRow sx={{ backgroundColor: "#003366" }}>
+                <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Sr</TableCell>
+                <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Driver Name</TableCell>
+                {!isTablet && <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>License #</TableCell>}
+                {!isTablet && <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Test Date</TableCell>}
+                <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Test Type</TableCell>
+                <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Result Status</TableCell>
+                <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Order Status</TableCell>
+                {!isTablet && <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Case Number</TableCell>}
+                <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Actions</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {paginatedResults.length === 0 ? (
+                <TableRow>
+                  <TableCell colSpan={isTablet ? 6 : 9} align="center">
+                    <Typography color="text.secondary" sx={{ py: 4 }}>
+                      No results found.
+                    </Typography>
+                  </TableCell>
                 </TableRow>
-              </TableHead>
-              <TableBody>
-                {paginatedResults.length === 0 ? (
-                  <TableRow>
-                    <TableCell colSpan={isTablet ? 6 : 9} align="center">
-                      <Typography color="text.secondary" sx={{ py: 4 }}>
-                        No results found.
-                      </Typography>
+              ) : (
+                paginatedResults.map((result, index) => (
+                  <TableRow key={index} hover>
+                    <TableCell align="center">
+                      {(page - 1) * PAGE_SIZE + index + 1}
                     </TableCell>
-                  </TableRow>
-                ) : (
-                  paginatedResults.map((result, index) => (
-                    <TableRow key={index} hover>
+                    <TableCell align="center">
+                      <Typography fontWeight="bold">{result.driverName}</Typography>
+                    </TableCell>
+                    {!isTablet && <TableCell align="center">{result.licenseNumber}</TableCell>}
+                    {!isTablet && (
                       <TableCell align="center">
-                        {(page - 1) * PAGE_SIZE + index + 1}
-                      </TableCell>
-                      <TableCell>{result.driverName}</TableCell>
-                      {!isTablet && <TableCell>{result.licenseNumber}</TableCell>}
-                      {!isTablet && (
-                        <TableCell>
-                          <Chip
-                            label={formatDate(result.date)}
-                            color="secondary"
-                            variant="outlined"
-                            sx={{ fontWeight: "bold", fontSize: 11 }}
-                          />
-                        </TableCell>
-                      )}
-                      <TableCell>{result.testType}</TableCell>
-                      <TableCell>
                         <Chip
-                          label={result.orderStatus || "N/A"}
-                          color={getStatusColor(result.orderStatus)}
-                          variant="filled"
-                          sx={{ fontWeight: "bold" }}
+                          label={formatDate(result.date)}
+                          color="secondary"
+                          variant="outlined"
+                          sx={{ fontWeight: "bold", fontSize: 15 }}
                         />
                       </TableCell>
-                      <TableCell>
-                        <Chip
-                          label={result.resultStatus || "N/A"}
-                          color={getStatusColor(result.resultStatus)}
-                          variant="filled"
-                          sx={{ fontWeight: "bold" }}
-                        />
+                    )}
+                    <TableCell align="center">{result.testType}</TableCell>
+                    <TableCell align="center">
+                      <Chip
+                        label={result.resultStatus || "N/A"}
+                        color={getStatusColor(result.resultStatus)}
+                        variant="filled"
+                        sx={{ fontWeight: "bold" }}
+                      />
+                    </TableCell>
+                    <TableCell align="center">
+                      <Chip
+                        label={result.orderStatus || "N/A"}
+                        color={getStatusColor(result.orderStatus)}
+                        variant="filled"
+                        sx={{ fontWeight: "bold" }}
+                      />
+                    </TableCell>
+                    {!isTablet && (
+                      <TableCell align="center">
+                        <Typography fontWeight="medium">{result.caseNumber}</Typography>
                       </TableCell>
-                      {!isTablet && <TableCell>{result.caseNumber}</TableCell>}
-                      <TableCell align="right">
+                    )}
+                    <TableCell align="center">
+                      <Tooltip title="View Details">
                         <IconButton 
                           onClick={() => handleView(result)}
                           color="primary"
@@ -486,6 +513,8 @@ export default function Result() {
                         >
                           <Visibility />
                         </IconButton>
+                      </Tooltip>
+                      <Tooltip title="Download">
                         <IconButton 
                           onClick={() => handleOpenDownload(result)}
                           color="secondary"
@@ -493,13 +522,13 @@ export default function Result() {
                         >
                           <Download />
                         </IconButton>
-                      </TableCell>
-                    </TableRow>
-                  ))
-                )}
-              </TableBody>
-            </Table>
-          </TableContainer>
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                ))
+              )}
+            </TableBody>
+          </Table>
         )}
 
         {/* Pagination */}
@@ -515,7 +544,7 @@ export default function Result() {
             size={isMobile ? "small" : "medium"}
           />
         </Stack>
-      </Paper>
+      </TableContainer>
 
       {/* View Modal */}
       <Dialog open={openViewModal} onClose={handleCloseView} maxWidth="md" fullWidth>
@@ -527,45 +556,29 @@ export default function Result() {
           Result Details
         </DialogTitle>
         <DialogContent sx={{ p: 3 }}>
-          <Grid container spacing={2} sx={{ mb: 3 }}>
-            <Grid item xs={12} sm={6}>
-              <Typography gutterBottom sx={{ fontWeight: "bold", color: "#003366" }}>
-                <strong>Name:</strong> {selectedResult?.driverName}
-              </Typography>
-              <Typography gutterBottom sx={{ fontWeight: "bold", color: "#003366" }}>
-                <strong>License #:</strong> {selectedResult?.licenseNumber}
-              </Typography>
-              <Typography gutterBottom sx={{ fontWeight: "bold", color: "#003366" }}>
-                <strong>Date:</strong> {formatDate(selectedResult?.date)}
-              </Typography>
-              <Typography gutterBottom sx={{ fontWeight: "bold", color: "#003366" }}>
-                <strong>Test Type:</strong> {selectedResult?.testType}
-              </Typography>
-            </Grid>
-            <Grid item xs={12} sm={6}>
-              <Typography gutterBottom sx={{ fontWeight: "bold", color: "#003366" }}>
-                <strong>Order Status:</strong>{" "}
-                <Chip 
-                  label={selectedResult?.orderStatus || "N/A"} 
-                  color={getStatusColor(selectedResult?.orderStatus)}
-                  variant="filled"
-                  size="small"
-                />
-              </Typography>
-              <Typography gutterBottom sx={{ fontWeight: "bold", color: "#003366" }}>
-                <strong>Result Status:</strong>{" "}
-                <Chip 
-                  label={selectedResult?.resultStatus || "N/A"} 
-                  color={getStatusColor(selectedResult?.resultStatus)}
-                  variant="filled"
-                  size="small"
-                />
-              </Typography>
-              <Typography gutterBottom sx={{ fontWeight: "bold", color: "#003366" }}>
-                <strong>Case Number:</strong> {selectedResult?.caseNumber}
-              </Typography>
-            </Grid>
-          </Grid>
+          <Box sx={{ mb: 3 }}>
+            <Typography gutterBottom sx={{ fontWeight: "bold", color: "#003366" }}>
+              <strong>Name:</strong> {selectedResult?.driverName}
+            </Typography>
+            <Typography gutterBottom sx={{ fontWeight: "bold", color: "#003366" }}>
+              <strong>License Number:</strong> {selectedResult?.licenseNumber}
+            </Typography>
+            <Typography gutterBottom sx={{ fontWeight: "bold", color: "#003366" }}>
+              <strong>Date:</strong> {formatDate(selectedResult?.date)}
+            </Typography>
+            <Typography gutterBottom sx={{ fontWeight: "bold", color: "#003366" }}>
+              <strong>Test Type:</strong> {selectedResult?.testType}
+            </Typography>
+            <Typography gutterBottom sx={{ fontWeight: "bold", color: "#003366" }}>
+              <strong>Order Status:</strong> {selectedResult?.orderStatus}
+            </Typography>
+            <Typography gutterBottom sx={{ fontWeight: "bold", color: "#003366" }}>
+              <strong>Result Status:</strong> {selectedResult?.resultStatus}
+            </Typography>
+            <Typography gutterBottom sx={{ fontWeight: "bold", color: "#003366" }}>
+              <strong>Case Number:</strong> {selectedResult?.caseNumber}
+            </Typography>
+          </Box>
 
           {selectedResult?.resultImages?.length > 0 ? (
             selectedResult.resultImages.map((file, i) => {
@@ -599,20 +612,12 @@ export default function Result() {
                       }}
                     />
                   )}
-                  <Button 
-                    sx={{ mt: 1 }} 
-                    variant="outlined" 
-                    startIcon={<Download />}
-                    onClick={() => downloadFile(file)}
-                  >
-                    Download {file.filename}
-                  </Button>
                 </Box>
               );
             })
           ) : (
             <Typography sx={{ mt: 2, fontStyle: "italic", textAlign: "center", color: "text.secondary" }}>
-              No files available to view/download.
+              No image available to show.
             </Typography>
           )}
         </DialogContent>
@@ -630,7 +635,7 @@ export default function Result() {
           color: "white",
           fontWeight: "bold"
         }}>
-          Download Files
+          Select file to download
         </DialogTitle>
         <DialogContent sx={{ p: 3 }}>
           {selectedResult?.resultImages?.length > 0 ? (
