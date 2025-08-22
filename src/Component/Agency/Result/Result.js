@@ -28,6 +28,7 @@ import {
   Pagination
 } from "@mui/material";
 import { Visibility, Download, Refresh } from "@mui/icons-material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "axios";
 import dayjs from "dayjs";
 import { DayPicker } from 'react-day-picker';
@@ -252,7 +253,7 @@ export default function DisplayResult() {
   }
 
   return (
-    <Box>
+    <>
       {/* Remove Dialog */}
       <Dialog open={showRemoveDialog} onClose={() => setShowRemoveDialog(false)}>
         <DialogTitle>Confirm Removal</DialogTitle>
@@ -271,18 +272,19 @@ export default function DisplayResult() {
         </DialogActions>
       </Dialog>
 
-      <TableContainer component={Paper} sx={{ mt: 3, p: 2, borderRadius: 2, boxShadow: 3 }}>
+      <TableContainer component={Paper} sx={{
+        mt: 3, p: 2, borderRadius: 3, boxShadow: 6,
+        background: "linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 100%)"
+      }}>
         <Box
           sx={{
-            mb: 2,
             display: "flex",
             justifyContent: "space-between",
             alignItems: "center",
-            flexWrap: "wrap",
-            gap: 2
+            mb: 2,
           }}
         >
-          <Typography variant="h6" sx={{
+          <Typography variant="h5" sx={{
             fontWeight: "bold",
             color: "#003366",
             letterSpacing: 1,
@@ -295,7 +297,8 @@ export default function DisplayResult() {
           }}>
             Result List
           </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+          
+          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
             <TextField
               size="small"
               label="Search Name/Company"
@@ -303,6 +306,7 @@ export default function DisplayResult() {
               onChange={(e) => setSearchTerm(e.target.value)}
               sx={{ minWidth: 180 }}
             />
+            
             <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Typography variant="body2" sx={{ fontWeight: "bold", color: "#003366" }}>
                 Date Range:
@@ -322,13 +326,14 @@ export default function DisplayResult() {
                 {showCalendar && (
                   <Box sx={{
                     position: "absolute",
+                    top: "100%",
+                    left: 0,
                     zIndex: 10,
-                    mt: 2,
+                    mt: 1,
                     background: "#fff",
                     boxShadow: 6,
                     borderRadius: 2,
-                    p: 2,
-                    right: 0
+                    p: 2
                   }}>
                     <DayPicker
                       mode="range"
@@ -351,6 +356,7 @@ export default function DisplayResult() {
                 )}
               </Box>
             </Box>
+            
             <FormControl size="small" sx={{ minWidth: 120 }}>
               <InputLabel>Result Status</InputLabel>
               <Select
@@ -363,6 +369,7 @@ export default function DisplayResult() {
                 ))}
               </Select>
             </FormControl>
+            
             <FormControl size="small" sx={{ minWidth: 120 }}>
               <InputLabel>Order Status</InputLabel>
               <Select
@@ -375,15 +382,17 @@ export default function DisplayResult() {
                 ))}
               </Select>
             </FormControl>
+            
             <Button
               variant="contained"
               color="error"
-              startIcon={<Download />}
+              startIcon={<DeleteIcon />}
               disabled={selectedIds.length === 0}
               onClick={handleRemoveSelected}
             >
               Remove
             </Button>
+            
             <Tooltip title="Reset Filters">
               <IconButton onClick={handleResetFilters} color="info">
                 <Refresh />
@@ -391,11 +400,11 @@ export default function DisplayResult() {
             </Tooltip>
           </Box>
         </Box>
-
-        <Table>
+        
+        <Table stickyHeader>
           <TableHead>
             <TableRow sx={{ backgroundColor: "#003366" }}>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>
                 <Checkbox
                   checked={
                     paginatedResults.length > 0 &&
@@ -409,27 +418,23 @@ export default function DisplayResult() {
                   color="primary"
                 />
               </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Sr</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Company Name</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Name</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>License #</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Test Date</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Test Type</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Result Status</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Order Status</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Case Number</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }} align="right">
-                Actions
-              </TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Sr</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Company Name</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Name</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>License #</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Test Date</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Test Type</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Result Status</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Order Status</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Case Number</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {paginatedResults.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={11} align="center">
-                  <Typography color="text.secondary" sx={{ py: 4 }}>
-                    No results found.
-                  </Typography>
+                  <Typography color="text.secondary">No results found.</Typography>
                 </TableCell>
               </TableRow>
             ) : (
@@ -445,19 +450,21 @@ export default function DisplayResult() {
                   <TableCell align="center">
                     {(page - 1) * PAGE_SIZE + index + 1}
                   </TableCell>
-                  <TableCell>{result.companyName}</TableCell>
-                  <TableCell>{result.driverName}</TableCell>
-                  <TableCell>{result.licenseNumber}</TableCell>
-                  <TableCell>
+                  <TableCell align="center">
+                    <Typography fontWeight="bold">{result.companyName}</Typography>
+                  </TableCell>
+                  <TableCell align="center">{result.driverName}</TableCell>
+                  <TableCell align="center">{result.licenseNumber}</TableCell>
+                  <TableCell align="center">
                     <Chip
                       label={formatDate(result.testDate)}
                       color="secondary"
                       variant="outlined"
-                      sx={{ fontWeight: "bold", fontSize: 12 }}
+                      sx={{ fontWeight: "bold", fontSize: 15 }}
                     />
                   </TableCell>
-                  <TableCell>{result.testType}</TableCell>
-                  <TableCell>
+                  <TableCell align="center">{result.testType}</TableCell>
+                  <TableCell align="center">
                     <Chip
                       label={result.resultStatus}
                       color={
@@ -471,7 +478,7 @@ export default function DisplayResult() {
                       sx={{ fontWeight: "bold" }}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell align="center">
                     <Chip
                       label={result.orderStatus}
                       color={
@@ -485,29 +492,35 @@ export default function DisplayResult() {
                       sx={{ fontWeight: "bold" }}
                     />
                   </TableCell>
-                  <TableCell>{result.caseNumber}</TableCell>
-                  <TableCell align="right">
-                    <IconButton 
-                      onClick={() => handleView(result)}
-                      color="primary"
-                      size="small"
-                    >
-                      <Visibility />
-                    </IconButton>
-                    <IconButton 
-                      onClick={() => handleOpenDownload(result)}
-                      color="secondary"
-                      size="small"
-                    >
-                      <Download />
-                    </IconButton>
+                  <TableCell align="center">
+                    <Typography fontWeight="medium">{result.caseNumber}</Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Tooltip title="View Details">
+                      <IconButton 
+                        onClick={() => handleView(result)}
+                        color="primary"
+                        size="small"
+                      >
+                        <Visibility />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Download">
+                      <IconButton 
+                        onClick={() => handleOpenDownload(result)}
+                        color="secondary"
+                        size="small"
+                      >
+                        <Download />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
-
+        
         <Stack direction="row" justifyContent="center" alignItems="center" sx={{ mt: 2 }}>
           <Pagination
             count={Math.ceil(filteredResults.length / PAGE_SIZE)}
@@ -644,6 +657,6 @@ export default function DisplayResult() {
           </Button>
         </DialogActions>
       </Dialog>
-    </Box>
+    </>
   );
 }
