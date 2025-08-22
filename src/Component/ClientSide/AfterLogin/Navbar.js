@@ -44,9 +44,9 @@ function Navbar({ isMobileOpen, setIsMobileOpen }) {
   ];
 
   const drawerContent = (
-    <Box sx={{ width: drawerWidth, backgroundColor: "#0a0a42", color: "white", height: "100vh", p: 2 }}>
+    <Box sx={{ width: drawerWidth, backgroundColor: "#0a0a42", color: "white", height: "100%", p: 2 }}>
       <Typography variant="h6" sx={{ textAlign: "center", mb: 2 }}>
-        <img src="./Images/BeforeLogin/logo.png" alt="Logo" style={{ width: "100px" }} />
+        <img src="./Images/BeforeLogin/logo.png" alt="Logo" className="w-full mx-auto" style={{ width: "100px" }} />
       </Typography>
       <Typography variant="caption" sx={{ textAlign: "center", display: "block", mb: 2 }}>DASHBOARD</Typography>
       <Divider sx={{ backgroundColor: "white", mb: 2 }} />
