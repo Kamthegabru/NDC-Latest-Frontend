@@ -86,7 +86,7 @@ function Home() {
       </div>
        
       
-      <div id="how" className="     md:pt-56 pt-[750px]">
+      <div id="how" className="     md:pt-[420px] pt-[750px]">
     <ServiceCards/>
       </div>
 

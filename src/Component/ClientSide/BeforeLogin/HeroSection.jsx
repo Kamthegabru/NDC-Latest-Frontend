@@ -85,7 +85,7 @@ export default function HeroComponent() {
 
         {/* Grid Section */}
         <div className="flex items-center justify-center min-h-screen">
-          <section className="py-12 px-6 mt-[150px] md:mt-[-300px] absolute sm:px-6 overflow-hidden">
+          <section className="py-12 px-6 mt-[150px] md:mt-[-150px] absolute sm:px-6 overflow-hidden">
             <motion.div
               initial="hidden"
               whileInView="visible"
