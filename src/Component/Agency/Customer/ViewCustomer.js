@@ -377,15 +377,7 @@ function ViewCustomer() {
                                 )}
                             </Box>
                         </Box>
-                        <Button
-                            variant="contained"
-                            color="error"
-                            startIcon={<DeleteIcon />}
-                            disabled={selectedIds.length === 0}
-                            onClick={handleRemoveSelected}
-                        >
-                            Remove
-                        </Button>
+                       
                         <Tooltip title="Refresh Data">
                             <IconButton onClick={handleRefreshData} color="info">
                                 <RefreshIcon />
