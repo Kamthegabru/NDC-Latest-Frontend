@@ -10,13 +10,14 @@ import {
     TableRow,
     TableCell,
     TableBody,
-    Typography,
+    Typography, 
 } from "@mui/material";
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import axios from "axios";
+import { formatDateUS } from "../../Utils/formatDateUs";
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = "http://localhost:8000/api";
 
 function ExportDriver() {
     const [open, setOpen] = useState(false);
@@ -33,19 +34,20 @@ function ExportDriver() {
         }
     };
 
-    const handleDownload = () => {
-        const excelData = driverData.map(driver => ({
-            "Driver Name": `${driver.first_name} ${driver.last_name}`,
-            "DOB": driver.dob,
-            "License Number": driver.government_id,
-            "Company Name": driver.companyName,
-            "Company Email": driver.companyEmail,
-            "Date Added": new Date(driver.creationDate).toLocaleDateString("en-US") || "N/A",
-            "Date Deleted": driver?.deletionDate
-                ? new Date(driver.deletionDate).toLocaleDateString("en-US", { year: 'numeric', month: '2-digit', day: '2-digit' })
-                : "Not Deleted",
-            "Agency Name": driver.agencyName,
-        }));
+   const handleDownload = () => {
+    // Always convert to strings in the desired format before exporting
+    const excelData = driverData.map(driver => ({
+      "Driver Name": `${driver.first_name ?? ""} ${driver.last_name ?? ""}`.trim(),
+      "DOB": formatDateUS(driver.dob),
+      "License Number": driver.government_id || "N/A",
+      "Company Name": driver.companyName || "N/A",
+      "Company Email": driver.companyEmail || "N/A",
+      "Date Added": formatDateUS(driver.creationDate),
+      "Date Deleted": driver?.deletionDate
+        ? formatDateUS(driver.deletionDate)
+        : "Not Deleted",
+      "Agency Name": driver.agencyName || "N/A",
+    }));
 
 
         const worksheet = XLSX.utils.json_to_sheet(excelData);
@@ -97,7 +99,7 @@ function ExportDriver() {
                                 {driverData.map((driver, index) => (
                                     <TableRow key={index}>
                                         <TableCell>{driver.first_name} {driver.last_name}</TableCell>
-                                        <TableCell>{driver.dob}</TableCell>
+                                        <TableCell>{formatDateUS(driver.dob)}</TableCell>
                                         <TableCell>{driver.government_id}</TableCell>
                                         <TableCell>{driver.companyName}</TableCell>
                                         <TableCell>{driver.companyEmail}</TableCell>
