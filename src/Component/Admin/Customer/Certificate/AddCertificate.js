@@ -11,6 +11,20 @@ import {
 import CustomerContext from "../../../../Context/Admin/Customer/CustomerContext";
 import CertificateContext from "../../../../Context/Admin/Customer/Certificate/CertificateContext"; 
 
+// Format to professional US style: MM-DD-YYYY (zero-padded)
+const formatDateUS = (value) => {
+    if (!value) return "";
+    const d = new Date(value);
+    if (isNaN(d)) return "";
+    const parts = new Intl.DateTimeFormat("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit"
+    }).formatToParts(d);
+    const get = (t) => parts.find(p => p.type === t)?.value || "";
+    return [get("month"), get("day"), get("year")].join("-");
+};
+
 function AddCertificate() {
     const { currentId ,getSingleUserData} = useContext(CustomerContext);
     const { addCertificate} = useContext(CertificateContext);
@@ -48,8 +62,9 @@ function AddCertificate() {
 
     const handleSave = async () => {
         const formData = new FormData();
-        formData.append("issueDate", certificateData.issueDate);
-        formData.append("expirationDate", certificateData.expirationDate);
+        // convert to MM-DD-YYYY before sending
+        formData.append("issueDate", formatDateUS(certificateData.issueDate));
+        formData.append("expirationDate", formatDateUS(certificateData.expirationDate));
         formData.append("description", certificateData.description);
         formData.append("file", certificateData.file);
         formData.append("currentId", currentId);
