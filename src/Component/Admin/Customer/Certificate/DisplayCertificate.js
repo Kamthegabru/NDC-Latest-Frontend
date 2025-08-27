@@ -7,6 +7,10 @@ import {
 import { Edit, Delete, Visibility, Download } from "@mui/icons-material";
 import CustomerContext from "../../../../Context/Admin/Customer/CustomerContext";
 import CertificateContext from "../../../../Context/Admin/Customer/Certificate/CertificateContext";
+import { formatDateUS } from "../../../Utils/formatDateUs";
+
+
+
 
 function DisplayCertificate() {
     const { currentId, userDetails, getSingleUserData } = useContext(CustomerContext);
@@ -23,14 +27,16 @@ function DisplayCertificate() {
     });
 
     // Helper function to format date as MM/DD/YYYY
-    const formatDate = (dateStr) => {
-        if (!dateStr) return "";
-        const d = new Date(dateStr);
-        const month = String(d.getMonth() + 1).padStart(2, "0"); // months are 0-based
-        const day = String(d.getDate()).padStart(2, "0");
-        const year = d.getFullYear();
-        return `${month}/${day}/${year}`;
-    };
+// Helper function to format date as MM/DD/YYYY
+const formatDate = (dateStr) => {
+  if (!dateStr) return "";
+  const d = new Date(dateStr);
+  const month = String(d.getMonth() + 1).padStart(2, "0");
+  const day = String(d.getDate()).padStart(2, "0");
+  const year = d.getFullYear();
+  return `${month}/${day}/${year}`;
+};
+
 
     useEffect(() => {
         if (userDetails?.certificates) {
@@ -118,8 +124,9 @@ function DisplayCertificate() {
                             <TableRow key={cert._id || index}>
                                 <TableCell>{index + 1}</TableCell>
                                 <TableCell>{cert.description}</TableCell>
-                                <TableCell>{formatDate(cert.issueDate)}</TableCell>
-                                <TableCell>{formatDate(cert.expirationDate)}</TableCell>
+                                <TableCell>{formatDateUS(cert.issueDate, { sep: "-" })}</TableCell>
+<TableCell>{formatDateUS(cert.expirationDate, { sep: "-" })}</TableCell>
+
                                 <TableCell align="right">
                                     <IconButton onClick={() => handleOpen("view", cert)}><Visibility /></IconButton>
                                     <IconButton onClick={() => handleDownload(cert)}><Download /></IconButton>
@@ -138,8 +145,13 @@ function DisplayCertificate() {
                 <DialogTitle>Certificate Details</DialogTitle>
                 <DialogContent>
                     <Typography gutterBottom><strong>Description:</strong> {selectedCert?.description}</Typography>
-                    <Typography gutterBottom><strong>Issue Date:</strong> {formatDate(selectedCert?.issueDate)}</Typography>
-                    <Typography gutterBottom><strong>Expiration Date:</strong> {formatDate(selectedCert?.expirationDate)}</Typography>
+                  <Typography gutterBottom>
+  <strong>Issue Date:</strong> {formatDateUS(selectedCert?.issueDate, { sep: "-" })}
+</Typography>
+<Typography gutterBottom>
+  <strong>Expiration Date:</strong> {formatDateUS(selectedCert?.expirationDate, { sep: "-" })}
+</Typography>
+
 
                     {selectedCert?.certificateFile && (
                         <iframe
