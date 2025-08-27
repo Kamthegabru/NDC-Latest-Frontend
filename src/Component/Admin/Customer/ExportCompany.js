@@ -15,8 +15,9 @@ import {
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import axios from "axios";
+import { formatDateUS } from "../../Utils/formatDateUs";
 
-const API_URL = process.env.REACT_APP_API_URL;
+const API_URL = "http://localhost:8000/api";
 
 function ExportCompany() {
   const [open, setOpen] = useState(false);
@@ -37,7 +38,7 @@ function ExportCompany() {
     const excelData = companyData.map(company => ({
       "Company Name": company["Company Name"] || "N/A",
       "Status": company["Status"] || "Inactive",
-      "Membership Active Date": company["Membership Active Date"] !== "N/A" ? company["Membership Active Date"] : "Not Available",
+      "Membership Active Date": company["Membership Active Date"] !== "N/A" ? formatDateUS(company["Membership Active Date"]) : "Not Available",
       "Membership Price": company["Membership Price"] || "N/A",
       "Agency Name": company["Agency Name"] || "N/A",
       "Total Drivers": company["Total Drivers"] || 0,
@@ -111,7 +112,7 @@ function ExportCompany() {
                   <TableRow key={index}>
                     <TableCell>{company["Company Name"] || "N/A"}</TableCell>
                     <TableCell>{company["Status"] || "Inactive"}</TableCell>
-                    <TableCell>{company["Membership Active Date"] !== "N/A" ? company["Membership Active Date"] : "Not Available"}</TableCell>
+                    <TableCell>{company["Membership Active Date"] !== "N/A" ? formatDateUS(company["Membership Active Date"]) : "Not Available"}</TableCell>
                     <TableCell>{company["Membership Price"] || "N/A"}</TableCell>
                     <TableCell>{company["Agency Name"] || "N/A"}</TableCell>
                     <TableCell>{company["Total Drivers"] || 0}</TableCell>
