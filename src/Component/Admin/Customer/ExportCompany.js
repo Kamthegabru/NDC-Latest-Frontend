@@ -15,7 +15,7 @@ import {
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import axios from "axios";
-import { formatDateUS } from "../../Utils/formatDateUs";
+import { formatDateUS } from "../../Utils/formatDateUS";
 
 const API_URL = "http://localhost:8000/api";
 
