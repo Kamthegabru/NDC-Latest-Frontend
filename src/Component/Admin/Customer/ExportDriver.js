@@ -49,7 +49,6 @@ function ExportDriver() {
       "Agency Name": driver.agencyName || "N/A",
     }));
 
-
         const worksheet = XLSX.utils.json_to_sheet(excelData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, "Drivers");
@@ -86,12 +85,12 @@ function ExportDriver() {
                             <TableHead>
                                 <TableRow>
                                     <TableCell>Driver Name</TableCell>
-                                    <TableCell>DOB</TableCell>
+                                    <TableCell style={{ minWidth: '120px' }}>DOB</TableCell>
                                     <TableCell>License Number</TableCell>
                                     <TableCell>Company Name</TableCell>
                                     <TableCell>Company Email</TableCell>
-                                    <TableCell>Date Added</TableCell>
-                                    <TableCell>Date Deleted</TableCell>
+                                    <TableCell style={{ minWidth: '120px' }}>Date Added</TableCell>
+                                    <TableCell style={{ minWidth: '120px' }}>Date Deleted</TableCell>
                                     <TableCell>Agency Name</TableCell>
                                 </TableRow>
                             </TableHead>
@@ -99,12 +98,12 @@ function ExportDriver() {
                                 {driverData.map((driver, index) => (
                                     <TableRow key={index}>
                                         <TableCell>{driver.first_name} {driver.last_name}</TableCell>
-                                        <TableCell>{formatDateUS(driver.dob)}</TableCell>
+                                        <TableCell style={{ minWidth: '120px' }}>{formatDateUS(driver.dob)}</TableCell>
                                         <TableCell>{driver.government_id}</TableCell>
                                         <TableCell>{driver.companyName}</TableCell>
                                         <TableCell>{driver.companyEmail}</TableCell>
-                                        <TableCell>{driver.creationDate ? new Date(driver.creationDate).toLocaleDateString("en-US") : "N/A"}</TableCell>
-                                        <TableCell>{driver?.deletionDate
+                                        <TableCell style={{ minWidth: '120px' }}>{driver.creationDate ? new Date(driver.creationDate).toLocaleDateString("en-US") : "N/A"}</TableCell>
+                                        <TableCell style={{ minWidth: '120px' }}>{driver?.deletionDate
                                             ? new Date(driver.deletionDate).toLocaleDateString("en-US", { year: 'numeric', month: '2-digit', day: '2-digit' })
                                             : "Not Deleted"}
                                         </TableCell>
