@@ -17,7 +17,7 @@ import { saveAs } from "file-saver";
 import axios from "axios";
 import { formatDateUS } from "../../Utils/formatDateUS";
 
-const API_URL = "http://localhost:8000/api";
+const API_URL = process.env.REACT_APP_API_URL;
 
 function ExportDriver() {
     const [open, setOpen] = useState(false);
