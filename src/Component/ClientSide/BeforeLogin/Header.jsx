@@ -114,60 +114,94 @@ export default function Header() {
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="bg-[#07242D] md:hidden flex p-4 rounded-full text-white"
+            className="bg-[#07242D] md:hidden flex p-3 rounded-full text-white"
           >
-            {mobileMenuOpen ? <X size={20} /> : <Menu size={18} />}
+            {mobileMenuOpen ? <X size={18} /> : <Menu size={16} />}
           </button>
 
           {/* CTA Buttons */}
-          <a href="/login" className="no-underline">
-            <button className="bg-[#032B59]  text-white md:block hidden md:text-[16px] hover:bg-transparent border-[2px] text-[12px] border-[#032B59] hover:border-[#032B59] max-h-[60px] px-2 hover:text-white text-center text-black font-semibold py-3 rounded-[10px]">
-              <p className="min-w-[70px]">{t("nav.button1")}</p>
-            </button>
-          </a>
+         <a href="/login" className="no-underline">
+  <button className="
+    bg-[#032B59] 
+    text-white 
+    hidden md:block 
+    text-sm 
+    font-medium 
+    px-4 py-2 
+    rounded-lg 
+    border-2 border-[#032B59] 
+    transition-all duration-300 
+    hover:bg-transparent 
+    hover:text-[#032B59] 
+    hover:border-[#032B59]
+  ">
+    {t("nav.button1")}
+  </button>
+</a>
 
-          <a href="/pricing" className="no-underline">
-            <button className="bg-[#032B59] text-white md:block hidden hover:bg-transparent border-[2px] md:text-[16px] text-[12px] border-[#032B59] hover:border-[#032B59] max-h-[60px] px-2 hover:text-white text-black font-semibold py-3 rounded-[10px]">
-              <p className="min-w-[130px]">{t("nav.button")}</p>
-            </button>
-          </a>
+
+        <a href="/pricing" className="no-underline">
+  <button className="
+    bg-[#032B59] 
+    text-white 
+    hidden md:block 
+    text-sm 
+    font-medium 
+    px-5 py-2 
+    rounded-lg 
+    border-2 border-[#032B59] 
+    transition-all duration-300 
+    hover:bg-transparent 
+    hover:text-[#032B59] 
+    hover:border-[#032B59]
+    min-w-[130px]
+  ">
+    {t("nav.button")}
+  </button>
+</a>
+
         </div>
       </section>
    
-      {mobileMenuOpen && (
-        <div className="md:hidden bg-[#031318] border-t border-[#BFFF47] text-white px-6 py-4 space-y-4">
-          <a href="../#home" className="block no-underline text-white hover:text-[#BFFF47]">{t("nav.home")}</a>
-          <a href="../#about" className="block no-underline text-white hover:text-[#BFFF47]">{t("nav.about")}</a>
-          <a href="../#price" className="block no-underline text-white hover:text-[#BFFF47]">{t("nav.stores")}</a>
-          <a href="../#service" className="block no-underline text-white hover:text-[#BFFF47]">{t("nav.how")}</a>
-          <a href="../#contact" className="block no-underline text-white hover:text-[#BFFF47]">{t("nav.contact")}</a>
-          <div className="pt-3">
-            <label htmlFor="language" className="text-sm text-white mb-1 block">🌍 Language</label>
-            <select
-              id="language"
-              value={locale}
-              onChange={(e) => handleLanguageChange(e.target.value)}
-              className="w-full bg-[#07242D] border border-[#BFFF47] text-white px-4 py-2 rounded-md"
-            >
-              {languages.map((lang) => (
-                <option key={lang.code} value={lang.code} className="text-white">
-                  {lang.label}
-                </option>
-              ))}
-            </select>
-          </div>
-          <a href="/login">
-            <button className="w-full mt-4 hover:bg-transparent border-[1px] bg-[#032B59] border-[#032B59] hover:border-[#032B59]  hover:text-white text-white font-semibold px-4 py-3 rounded-[10px]">
-              {t("nav.button1")}
-            </button>
-          </a>
-          <a href="/pricing">
-            <button className="w-full mt-4 hover:bg-transparent border-[1px] bg-[#032B59] border-[#032B59] hover:border-[#032B59]  hover:text-white text-white font-semibold px-4 py-3 rounded-[10px]">
-              {t("nav.button")}
-            </button>
-          </a>
-        </div>
-      )}
+     {mobileMenuOpen && (
+  <div className="md:hidden bg-[#031318] border-t-2 border-[#BFFF47] text-white px-4 sm:px-6 py-6 space-y-1">
+    <a href="../#home" className="block no-underline text-white hover:text-[#BFFF47] py-3 px-2 transition-colors duration-200 text-base font-medium">{t("nav.home")}</a>
+    <a href="../#about" className="block no-underline text-white hover:text-[#BFFF47] py-3 px-2 transition-colors duration-200 text-base font-medium">{t("nav.about")}</a>
+    <a href="../#price" className="block no-underline text-white hover:text-[#BFFF47] py-3 px-2 transition-colors duration-200 text-base font-medium">{t("nav.stores")}</a>
+    <a href="../#service" className="block no-underline text-white hover:text-[#BFFF47] py-3 px-2 transition-colors duration-200 text-base font-medium">{t("nav.how")}</a>
+    <a href="../#contact" className="block no-underline text-white hover:text-[#BFFF47] py-3 px-2 transition-colors duration-200 text-base font-medium">{t("nav.contact")}</a>
+    
+    <div className="pt-4 pb-2">
+      <label htmlFor="language" className="text-sm text-gray-300 mb-2 block font-medium">🌍 Language</label>
+      <select
+        id="language"
+        value={locale}
+        onChange={(e) => handleLanguageChange(e.target.value)}
+        className="w-full bg-[#07242D] border-2 border-[#1a3a42] hover:border-[#BFFF47] focus:border-[#BFFF47] text-white px-4 py-3 rounded-lg transition-colors duration-200 text-base appearance-none focus:outline-none"
+      >
+        {languages.map((lang) => (
+          <option key={lang.code} value={lang.code} className="text-white bg-[#07242D]">
+            {lang.label}
+          </option>
+        ))}
+      </select>
+    </div>
+    
+    <div className="space-y-3 pt-2">
+      <a href="/login" className="block">
+        <button className="w-full bg-[#032B59] hover:bg-[#043d7a] active:bg-[#021d3f] border-2 border-transparent hover:border-[#BFFF47] text-white font-semibold px-6 py-4 rounded-xl transition-all duration-200 text-base shadow-md hover:shadow-lg transform hover:-translate-y-0.5 active:translate-y-0">
+          {t("nav.button1")}
+        </button>
+      </a>
+      
+      <a href="/pricing" className="block">
+        <button className="w-full bg-transparent hover:bg-[#BFFF47] border-2 border-[#BFFF47] text-[#BFFF47] hover:text-[#031318] font-semibold px-6 py-4 rounded-xl transition-all duration-200 text-base transform hover:-translate-y-0.5 active:translate-y-0">
+          {t("nav.button")}
+        </button>
+      </a>
+    </div>
+  </div>
+)}
     </header>
   );
 }
