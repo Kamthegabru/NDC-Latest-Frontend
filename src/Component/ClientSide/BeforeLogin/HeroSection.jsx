@@ -29,7 +29,7 @@ export default function HeroComponent() {
 
       <section
         id="hero-section"
-        className="w-full bg-custom h-[55vh] md:h-[80vh] text-white pt-24 px-2 sm:px-6 text-center"
+        className="w-full bg-custom h-[60vh] md:h-[100vh] text-white pt-24 px-2 sm:px-6 text-center"
       >
         <motion.div
           initial="hidden"
@@ -59,7 +59,7 @@ export default function HeroComponent() {
           </h1>
 
           {/* Subheading */}
-          <p className="text-white text-xs max-w-3xl text-center mx-auto sm:text-base mb-6 sm:mb-8">
+          <p className="text-white text-xs max-w-[400px] md:max-w-3xl text-center mx-auto sm:text-base mb-6 sm:mb-8">
             Ensure workplace safety and compliance with our comprehensive DOT drug testing services. We offer reliable and efficient testing solutions tailored to meet your specific needs.
           </p>
 
@@ -73,8 +73,9 @@ export default function HeroComponent() {
         </motion.div>
 
         {/* Grid Section */}
-        <div className="flex items-center justify-center min-h-screen">
-          <section className="py-12 px-6 mt-[150px] md:mt-[-150px] absolute sm:px-6 overflow-hidden">
+      </section>
+        <div className="flex items-center justify-center ">
+          <section className=" px-6 mt-[15px] md:mt-[-170px] z-[100px]  sm:px-6 overflow-hidden">
             <motion.div
               initial="hidden"
               whileInView="visible"
@@ -83,7 +84,7 @@ export default function HeroComponent() {
               className="max-w-7xl mx-auto grid grid-cols-2 gap-3 sm:grid-cols-4 sm:grid-rows-2 sm:gap-4"
             >
               {/* Box 1 */}
-              <div className="col-span-1 row-span-2 bg-[#022B36] rounded-2xl pb-3 px-3 sm:py-6 sm:px-7 flex flex-col items-center text-center justify-center">
+              <div className="col-span-1 row-span-2 h-full z-10 bg-[#022B36] rounded-2xl pb-3 px-3 sm:py-6 sm:px-7 flex flex-col items-center text-center justify-center">
                 <div className="mb-1">
                   <img
                     src="/images/solo.jpg"
@@ -105,12 +106,12 @@ export default function HeroComponent() {
               </div>
 
               {/* Box 2 */}
-              <div className="col-span-1 row-span-1 bg-[#022B36] text-white rounded-2xl p-2.5 sm:p-6 flex flex-col justify-between">
+              <div className="col-span-1 row-span-1 h-full z-10 bg-[#022B36] text-white rounded-2xl p-2.5 sm:p-6 flex flex-col justify-between">
                 <h4 className="font-semibold text-xs sm:text-xl">
                   Fast & Reliable Drug Testing
                 </h4>
                 <p className="text-lg sm:text-2xl font-bold mt-1">
-                  <CountUpOnView end={114705} duration={5000} />+{" "}
+                {"114705+"}{" "}
                   <span className="text-[10px] sm:text-sm text-white font-semibold">
                     Tests Completed
                   </span>
@@ -121,7 +122,7 @@ export default function HeroComponent() {
               </div>
 
               {/* Box 3 */}
-              <div className="col-span-1 row-span-1">
+              <div className="col-span-1 z-10 h-full row-span-1">
                 <img
                   className="rounded-2xl w-full h-full object-cover"
                   src="images/market.jpg"
@@ -130,7 +131,7 @@ export default function HeroComponent() {
               </div>
 
               {/* Box 4 - FIXED */}
-              <div className="col-span-1 row-span-2 bg-[#022B36] rounded-2xl overflow-hidden relative h-full">
+              <div className="col-span-1 z-10 h-full row-span-2 bg-[#022B36] rounded-2xl overflow-hidden relative h-full">
                 <img
                   src="/images/person3.jpg"
                   alt="Global Reach"
@@ -168,7 +169,7 @@ export default function HeroComponent() {
                 <h4 className="text-white text-xs sm:text-lg font-semibold mb-2 sm:mb-1">
                   Trusted by{" "}
                   <span className="text-[#BFFF47]">
-                    <CountUpOnView end={3290} duration={3000} />+
+                   {"3290+"}{" "}
                   </span>{" "}
                   Employers & Trucking Companies
                 </h4>
@@ -240,7 +241,6 @@ export default function HeroComponent() {
             </motion.div>
           </section>
         </div>
-      </section>
     </>
   );
 }
