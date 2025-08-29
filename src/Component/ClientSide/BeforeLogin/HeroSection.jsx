@@ -1,13 +1,8 @@
 import { useState } from "react";
 import { motion } from "framer-motion";
-import { useNavigate } from "react-router-dom"; // ✅ React Router
-import useTranslation from "../../hooks/useTranslation";
+import { useNavigate } from "react-router-dom";
 import "../../styles/BackgroundImage.css";
 import CountUpOnView from "../CountUpOnView";
-
-
-
-
 
 const fadeUp = {
   hidden: { opacity: 0, y: 40 },
@@ -19,15 +14,10 @@ const fadeUp = {
 };
 
 export default function HeroComponent() {
-  const { t, locale } = useTranslation();
   const [searchRef, setSearchRef] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-
- 
-
- 
 
   return (
     <>
@@ -39,7 +29,6 @@ export default function HeroComponent() {
 
       <section
         id="hero-section"
-        key={locale}
         className="w-full bg-custom h-[55vh] md:h-[80vh] text-white pt-24 px-2 sm:px-6 text-center"
       >
         <motion.div
@@ -57,27 +46,27 @@ export default function HeroComponent() {
                 <div className="absolute inset-0 bg-lime-300 rounded-full animate-ping opacity-40" />
               </div>
               <span className="text-white font-semibold">
-                {t("hero.badgeLabel")}
+                Available Now
               </span>
             </div>
-            <span className="text-xs sm:text-sm">{t("hero.badgeText")}</span>
+            <span className="text-xs sm:text-sm">Fast Testing Service</span>
           </div>
 
           {/* Headline */}
           <h1 className="text-2xl sm:text-4xl md:text-5xl font-bold leading-tight mb-4 sm:mb-6">
-            {t("hero.title1")} <br className="hidden sm:block" />
-            <span className="text-white">{t("hero.title2")}</span>
+            Comprehensive DOT Drug Testing Services <br className="hidden sm:block" />
+            <span className="text-white">Simple Fast Accurate</span>
           </h1>
 
           {/* Subheading */}
           <p className="text-white text-xs max-w-3xl text-center mx-auto sm:text-base mb-6 sm:mb-8">
-            {t("hero.subtitle")}
+            Ensure workplace safety and compliance with our comprehensive DOT drug testing services. We offer reliable and efficient testing solutions tailored to meet your specific needs.
           </p>
 
           <div className="w-full max-w-md mx-auto mt-2 sm:mt-6 flex flex-row justify-center ">
              <a href="/pricing" className="no-underline">
             <button className="bg-[#022B36] text-white md:block hidden hover:bg-transparent border-[2px] text-[16px] border-[#575958] hover:text-white max-h-[60px] px-6 hover:text-[#022B36] text-black font-semibold py-3 rounded-[10px]">
-              <p className="min-w-[130px]">{t("nav.button")}</p>
+              <p className="min-w-[130px]">Get Started</p>
             </button>
              </a>
           </div>
@@ -103,14 +92,14 @@ export default function HeroComponent() {
                   />
                 </div>
                 <h3 className="text-xs sm:text-lg font-semibold mb-1">
-                  {t("hero.box1.title")}
+                  Schedule Your Test Today
                 </h3>
                 <p className="text-white opacity-90 mb-3 text-[10px] sm:text-sm">
-                  {t("hero.box1.description")}
+                  Book DOT-compliant drug and alcohol testing with ease. Fast appointments, certified labs, and nationwide coverage.
                 </p>
                 <a href="#home">
                   <button className="border border-white px-2.5 py-1.5 text-xs sm:text-sm rounded-lg hover:bg-white hover:text-black transition">
-                    {t("hero.box1.button")}
+                    Book Now
                   </button>
                 </a>
               </div>
@@ -118,34 +107,34 @@ export default function HeroComponent() {
               {/* Box 2 */}
               <div className="col-span-1 row-span-1 bg-[#022B36] text-white rounded-2xl p-2.5 sm:p-6 flex flex-col justify-between">
                 <h4 className="font-semibold text-xs sm:text-xl">
-                  {t("hero.box2.title")}
+                  Fast & Reliable Drug Testing
                 </h4>
                 <p className="text-lg sm:text-2xl font-bold mt-1">
                   <CountUpOnView end={114705} duration={5000} />+{" "}
                   <span className="text-[10px] sm:text-sm text-white font-semibold">
-                    {t("hero.box2.label")}
+                    Tests Completed
                   </span>
                 </p>
                 <p className="mt-2 text-[9px] sm:text-xs font-medium text-white">
-                  {t("hero.box2.subtitle")}
+                  Thousands of DOT and Non-DOT tests successfully conducted every month with speed, accuracy, and full compliance.
                 </p>
               </div>
 
               {/* Box 3 */}
               <div className="col-span-1 row-span-1">
                 <img
-                  className="rounded-2xl w-full h-46 object-cover"
+                  className="rounded-2xl w-full h-full object-cover"
                   src="images/market.jpg"
                   alt="Team"
                 />
               </div>
 
-              {/* Box 4 */}
-              <div className="col-span-1 row-span-2 bg-[#022B36] rounded-2xl overflow-hidden relative">
+              {/* Box 4 - FIXED */}
+              <div className="col-span-1 row-span-2 bg-[#022B36] rounded-2xl overflow-hidden relative h-full">
                 <img
                   src="/images/person3.jpg"
                   alt="Global Reach"
-                  className="w-full h-full object-cover"
+                  className="absolute inset-0 w-full h-full object-cover"
                 />
 
                 <div className="absolute bottom-1.5 left-1.5 right-1.5 bg-gray-800/70 backdrop-blur-md rounded-xl p-2 sm:p-6 border border-white/10 shadow-md text-left">
@@ -156,32 +145,32 @@ export default function HeroComponent() {
                       </span>
                     </div>
                     <h5 className="font-bold text-[10px] sm:text-xs text-white">
-                      {t("hero.box4.title")}
+                      Certified & Reliable Results
                     </h5>
                   </div>
                   <p className="text-white/80 text-[10px] sm:text-xs">
-                    {t("hero.box4.subtitle")}
+                    All tests are conducted by SAMHSA-certified labs and reviewed by qualified Medical Review Officers (MROs).
                   </p>
                 </div>
               </div>
 
-              {/* Box 5 */}
-              <div className="col-span-1 row-span-1">
+              {/* Box 5 - FIXED */}
+              <div className="col-span-1 row-span-1 h-full">
                 <img
                   src="images/box5.jpg"
                   alt="Satisfied Team"
-                  className="rounded-2xl h-[200px] h-full"
+                  className="rounded-2xl w-full h-full object-cover"
                 />
               </div>
 
               {/* Box 6 */}
               <div className="text-center sm:py-3 py-4 px-4 bg-[#0D1B2A] rounded-lg">
                 <h4 className="text-white text-xs sm:text-lg font-semibold mb-2 sm:mb-1">
-                  {t("hero.box6.title")}{" "}
+                  Trusted by{" "}
                   <span className="text-[#BFFF47]">
-                    <CountUpOnView end={15290} duration={3000} />+
+                    <CountUpOnView end={3290} duration={3000} />+
                   </span>{" "}
-                  {t("hero.box6.title2")}
+                  Employers & Trucking Companies
                 </h4>
 
                 {/* Avatars */}
@@ -241,11 +230,11 @@ export default function HeroComponent() {
                   </svg>
                 </div>
                 <p className="text-white text-[9px] sm:text-[12px] font-medium">
-                  {t("hero.box6.subtitle")}{" "}
+                  Partnering with thousands of{" "}
                   <span className="text-[#BFFF47] font-semibold">
-                    {t("hero.box6.subtitle2")}
+                    DOT-compliant
                   </span>{" "}
-                  {t("hero.box6.subtitle3")}
+                  businesses nationwide to ensure safety and legal compliance.
                 </p>
               </div>
             </motion.div>
