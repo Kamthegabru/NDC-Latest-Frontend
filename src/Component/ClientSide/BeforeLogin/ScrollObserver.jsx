@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect } from "react";
 
 export default function ScrollObserver() {
@@ -10,7 +12,7 @@ export default function ScrollObserver() {
     let lastScrollY = window.scrollY;
     let isHeroVisible = true;
 
-    // Step 1: Track intersection with #how
+    // Step 1: Track intersection with #home
     const observer = new IntersectionObserver(
       ([entry]) => {
         isHeroVisible = entry.isIntersecting;

@@ -21,20 +21,64 @@ import {
   DialogContent,
   DialogContentText,
   DialogActions,
+  Grid,
+  Paper,
+  Avatar,
+  Stack,
+  Alert,
+  Snackbar,
+  InputAdornment,
+  CardContent,
+  useMediaQuery,
+  CircularProgress,
+  IconButton,
+  Tooltip
 } from "@mui/material";
+import { useTheme, alpha } from "@mui/material/styles";
 import {
   Business as BusinessIcon,
   Email as EmailIcon,
   Phone as PhoneIcon,
   Apartment as ApartmentIcon,
-  Code,
+  Code as CodeIcon,
+  Edit as EditIcon,
+  Save as SaveIcon,
+  Cancel as CancelIcon,
+  Delete as DeleteIcon,
+  Search as SearchIcon,
+  CheckCircle as CheckCircleIcon,
+  Warning as WarningIcon,
+  Add as AddIcon
 } from "@mui/icons-material";
 
 import AgencyContext from "../../../Context/Admin/Agency/AgencyContext";
 import axios from "axios";
 import { toast } from "react-toastify";
+
 const API_URL = process.env.REACT_APP_API_URL;
 const normalizePhoneNumber = require("../../Utils/normalizePhone");
+
+// Field configurations
+const fieldConfig = {
+  basic: {
+    title: "Agency Information",
+    icon: <ApartmentIcon />,
+    color: "#1976d2",
+    fields: {
+      agencyName: { label: "Agency Name", icon: <ApartmentIcon />, required: true },
+      agencyCode: { label: "Agency Code", icon: <CodeIcon /> },
+    }
+  },
+  contact: {
+    title: "Contact Details",
+    icon: <PhoneIcon />,
+    color: "#2e7d32",
+    fields: {
+      agencyEmail: { label: "Email", icon: <EmailIcon />, type: "email" },
+      agencyContactNumber: { label: "Phone", icon: <PhoneIcon />, type: "tel" },
+    }
+  }
+};
 
 const CompanyDetails = () => {
   const { agencyDetails, updateAgencyInformation } = useContext(AgencyContext);
@@ -44,6 +88,11 @@ const CompanyDetails = () => {
   const [openDeleteDialog, setOpenDeleteDialog] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [contactNumberError, setContactNumberError] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [snackbar, setSnackbar] = useState({ open: false, message: "", severity: "success" });
+
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     if (agencyDetails) {
@@ -55,6 +104,7 @@ const CompanyDetails = () => {
         handledCompanies: agencyDetails.handledCompanies || [],
         _id: agencyDetails.id,
       });
+      setLoading(false);
     }
   }, [agencyDetails]);
 
@@ -102,6 +152,7 @@ const CompanyDetails = () => {
 
     updateAgencyInformation(formData);
     setEditMode(false);
+    setSnackbar({ open: true, message: "Agency information updated successfully!", severity: "success" });
   };
 
   const handleCancel = () => {
@@ -110,6 +161,7 @@ const CompanyDetails = () => {
         agencyName: agencyDetails.agencyName || "",
         agencyEmail: agencyDetails.agencyEmail || "",
         agencyContactNumber: agencyDetails.agencyContactNumber || "",
+        agencyCode: agencyDetails.agencyCode || "",
         handledCompanies: agencyDetails.handledCompanies || [],
         _id: agencyDetails.id,
       });
@@ -140,198 +192,357 @@ const CompanyDetails = () => {
     setOpenDeleteDialog(false);
   };
 
+  const formatDisplayValue = (key, value) => {
+    if (!value) return "—";
+    if (key === "agencyContactNumber") return normalizePhoneNumber(value);
+    if (key === "agencyCode") return String(value).toUpperCase();
+    return value;
+  };
+
+  const renderField = (fieldKey, fieldInfo, value) => {
+    return (
+      <Box key={fieldKey} sx={{ mb: 1.5 }}>
+        {editMode ? (
+          <TextField
+            fullWidth
+            size="small"
+            label={fieldInfo.label}
+            value={formData[fieldKey] || ""}
+            variant="outlined"
+            type={fieldInfo.type || 'text'}
+            error={fieldKey === 'agencyContactNumber' && contactNumberError}
+            helperText={
+              fieldKey === 'agencyContactNumber' && contactNumberError
+                ? "Contact number must be exactly 10 digits."
+                : ""
+            }
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  {fieldInfo.icon}
+                </InputAdornment>
+              ),
+            }}
+            inputProps={
+              fieldKey === 'agencyContactNumber' 
+                ? {
+                    maxLength: 10,
+                    inputMode: "numeric",
+                    pattern: "[0-9]*",
+                  }
+                : {}
+            }
+            onChange={(e) => {
+              if (fieldKey === 'agencyContactNumber') {
+                const value = e.target.value;
+                if (/^\d{0,10}$/.test(value)) {
+                  setFormData((prev) => ({
+                    ...prev,
+                    [fieldKey]: value,
+                  }));
+                  setContactNumberError(value.length > 0 && value.length !== 10);
+                }
+              } else {
+                handleChange(fieldKey)(e);
+              }
+            }}
+          />
+        ) : (
+          <Stack spacing={0.5}>
+            <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>
+              {fieldInfo.label}
+            </Typography>
+            <Typography variant="body2" sx={{ fontWeight: 600 }}>
+              {formatDisplayValue(fieldKey, value)}
+            </Typography>
+          </Stack>
+        )}
+      </Box>
+    );
+  };
+
+  if (loading) {
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 300 }}>
+        <CircularProgress />
+      </Box>
+    );
+  }
+
   if (!formData) {
-    return <Typography>Loading agency details...</Typography>;
+    return (
+      <Box sx={{ display: "flex", justifyContent: "center", alignItems: "center", minHeight: 300 }}>
+        <Typography>Loading agency details...</Typography>
+      </Box>
+    );
   }
 
   const allCompaniesMap = {};
   unhandledCompanies.forEach((c) => (allCompaniesMap[c.userId] = c));
   formData.handledCompanies.forEach((c) => (allCompaniesMap[c.userId] = c));
 
+  const filteredCompanies = formData.handledCompanies.filter((company) =>
+    company.companyName?.toLowerCase().includes(searchQuery.toLowerCase())
+  );
+
   return (
-    <Box sx={{ maxWidth: 800, margin: "30px auto", padding: "20px" }}>
-      <Card elevation={3} sx={{ padding: "20px", position: "relative" }}>
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <Typography variant="h5" sx={{ fontWeight: "bold" }}>
-            Agency Overview
-          </Typography>
+    <Box className="mt-20" sx={{ maxWidth: 900, mx: 'auto' }}>
+      {/* Compact Header */}
+      <Paper
+        elevation={0}
+        sx={{
+          p: 2,
+          mb: 2,
+          background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
+          borderRadius: 2,
+          color: 'white',
+        }}
+      >
+        <Stack direction="row" justifyContent="space-between" alignItems="center">
+          <Stack direction="row" spacing={2} alignItems="center">
+            <Avatar sx={{ width: 40, height: 40, bgcolor: alpha(theme.palette.common.white, 0.2) }}>
+              <ApartmentIcon />
+            </Avatar>
+            <Box>
+              <Typography variant="h6" sx={{ fontWeight: 600 }}>
+                Agency Overview
+              </Typography>
+              <Typography variant="caption" sx={{ opacity: 0.9 }}>
+                Manage agency details and company assignments
+              </Typography>
+            </Box>
+          </Stack>
+          
           {!editMode ? (
-            <Box sx={{ display: "flex", gap: 2 }}>
+            <Stack direction="row" spacing={1}>
               <Button
                 variant="contained"
-                color="primary"
+                startIcon={<EditIcon />}
                 onClick={handleEditToggle}
-                style={{
-                  backgroundColor: "#002D72",
-                  color: "#fff",
-                  borderRadius: "6px",
-                  padding: "10px 20px",
-                  fontWeight: "bold",
-                  textTransform: "none",
-                  boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+                sx={{
+                  bgcolor: 'white',
+                  color: 'primary.main',
+                  '&:hover': { bgcolor: alpha(theme.palette.common.white, 0.9) }
                 }}
               >
                 Edit
               </Button>
-              <Button variant="outlined" color="error" onClick={handleDeleteClick}>
-                Delete
-              </Button>
-            </Box>
+              <Tooltip title="Delete Agency">
+                <IconButton
+                  onClick={handleDeleteClick}
+                  sx={{
+                    color: 'white',
+                    bgcolor: alpha(theme.palette.error.main, 0.2),
+                    '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.3) }
+                  }}
+                >
+                  <DeleteIcon />
+                </IconButton>
+              </Tooltip>
+            </Stack>
           ) : (
-            <>
-              <Button variant="contained" color="success" onClick={handleSave} sx={{ marginRight: 2 }}>
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="contained"
+                startIcon={<SaveIcon />}
+                onClick={handleSave}
+                sx={{
+                  bgcolor: 'success.main',
+                  '&:hover': { bgcolor: 'success.dark' }
+                }}
+              >
                 Save
               </Button>
-              <Button variant="outlined" color="error" onClick={handleCancel}>
+              <Button
+                variant="outlined"
+                startIcon={<CancelIcon />}
+                onClick={handleCancel}
+                sx={{
+                  borderColor: 'white',
+                  color: 'white',
+                  '&:hover': { bgcolor: alpha(theme.palette.common.white, 0.1) }
+                }}
+              >
                 Cancel
               </Button>
-            </>
+            </Stack>
           )}
-        </Box>
+        </Stack>
+      </Paper>
 
-        <Divider sx={{ marginBottom: 2, marginTop: 2 }} />
+      {/* Content Grid */}
+      <Grid container spacing={2}>
+        {/* Agency Information Column */}
+        <Grid item xs={12} md={6}>
+          <Stack spacing={2}>
+            {/* Basic Information */}
+            <Card sx={{ borderRadius: 2 }}>
+              <Box sx={{ p: 1.5, borderBottom: 1, borderColor: 'divider', bgcolor: alpha(fieldConfig.basic.color, 0.05) }}>
+                <Typography variant="subtitle2" fontWeight={600} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {fieldConfig.basic.icon}
+                  {fieldConfig.basic.title}
+                </Typography>
+              </Box>
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                {Object.entries(fieldConfig.basic.fields).map(([fieldKey, fieldInfo]) =>
+                  renderField(fieldKey, fieldInfo, formData[fieldKey])
+                )}
+              </CardContent>
+            </Card>
 
-        <Box sx={{ marginBottom: 2 }}>
-          {editMode ? (
-            <>
-              <TextField
-                fullWidth
-                label="Agency Name"
-                value={formData.agencyName}
-                onChange={handleChange("agencyName")}
-                sx={{ marginBottom: 2 }}
-              />
-              <TextField
-                fullWidth
-                label="Email"
-                value={formData.agencyEmail}
-                onChange={handleChange("agencyEmail")}
-                sx={{ marginBottom: 2 }}
-              />
-              
-              <TextField
-                fullWidth
-                label="Contact Number"
-                value={formData.agencyContactNumber}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  if (/^\d{0,10}$/.test(value)) {
-                    setFormData((prev) => ({
-                      ...prev,
-                      agencyContactNumber: value,
-                    }));
-                    setContactNumberError(value.length > 0 && value.length !== 10);
-                  }
-                }}
-                error={contactNumberError}
-                helperText={
-                  contactNumberError
-                    ? "Contact number must be exactly 10 digits."
-                    : " "
-                }
-                inputProps={{
-                  maxLength: 10,
-                  inputMode: "numeric",
-                  pattern: "[0-9]*",
-                }}
-                sx={{ marginBottom: 2 }}
-              />
-            </>
-          ) : (
-            <>
-              <Typography sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                <ApartmentIcon sx={{ mr: 1 }} />
-                <strong>Name:</strong>&nbsp;{formData.agencyName}
+            {/* Contact Details */}
+            <Card sx={{ borderRadius: 2 }}>
+              <Box sx={{ p: 1.5, borderBottom: 1, borderColor: 'divider', bgcolor: alpha(fieldConfig.contact.color, 0.05) }}>
+                <Typography variant="subtitle2" fontWeight={600} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  {fieldConfig.contact.icon}
+                  {fieldConfig.contact.title}
+                </Typography>
+              </Box>
+              <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+                {Object.entries(fieldConfig.contact.fields).map(([fieldKey, fieldInfo]) =>
+                  renderField(fieldKey, fieldInfo, formData[fieldKey])
+                )}
+              </CardContent>
+            </Card>
+          </Stack>
+        </Grid>
+
+        {/* Handled Companies Column */}
+        <Grid item xs={12} md={6}>
+          <Card sx={{ borderRadius: 2, height: '100%' }}>
+            <Box sx={{ p: 1.5, borderBottom: 1, borderColor: 'divider', bgcolor: alpha('#ed6c02', 0.05) }}>
+              <Typography variant="subtitle2" fontWeight={600} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <BusinessIcon />
+                Handled Companies ({formData.handledCompanies.length})
               </Typography>
-              <Typography sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-                <EmailIcon sx={{ mr: 1 }} />
-                <strong>Email:</strong>&nbsp;{formData.agencyEmail}
-              </Typography>
-              <Typography sx={{ display: "flex", alignItems: "center" }}>
-                <PhoneIcon sx={{ mr: 1 }} />
-                <strong>Contact:</strong>&nbsp;{normalizePhoneNumber(formData.agencyContactNumber)}
-              </Typography>
-              <Typography sx={{ display: "flex", alignItems: "center" }}>
-                <Code sx={{ mr: 1 }} />
-                <strong>Agency Code:</strong>&nbsp;{formData.agencyCode || "N/A"}
-              </Typography>
-            </>
-          )}
-        </Box>
+            </Box>
+            <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+              {/* Search Field - Only in view mode */}
+              {!editMode && formData.handledCompanies.length > 0 && (
+                <TextField
+                  fullWidth
+                  size="small"
+                  placeholder="Search companies..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  InputProps={{
+                    startAdornment: (
+                      <InputAdornment position="start">
+                        <SearchIcon />
+                      </InputAdornment>
+                    ),
+                  }}
+                  sx={{ mb: 2 }}
+                />
+              )}
 
-        <Typography variant="h6" sx={{ fontWeight: "bold", mb: 1 }}>
-          Handled Companies ({formData.handledCompanies.length})
-        </Typography>
-        <Divider sx={{ marginBottom: 2 }} />
-
-        {!editMode && formData.handledCompanies.length > 0 && (
-          <TextField
-            label="Search Company"
-            variant="outlined"
-            fullWidth
-            sx={{ mb: 2 }}
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        )}
-
-        <List>
-          {formData.handledCompanies
-            .filter((company) =>
-              company.companyName?.toLowerCase().includes(searchQuery.toLowerCase())
-            )
-            .map((company, index) => (
-              <ListItem key={index} disablePadding>
-                <ListItemIcon>
-                  <BusinessIcon />
-                </ListItemIcon>
-                <ListItemText primary={company.companyName || "Unnamed Company"} />
-              </ListItem>
-            ))}
-        </List>
-
-        {editMode && (
-          <FormControl fullWidth sx={{ mt: 3 }}>
-            <InputLabel>Add More Companies</InputLabel>
-            <Select
-              multiple
-              value={formData.handledCompanies.map((c) => c.userId)}
-              onChange={handleHandledCompaniesChange}
-              input={<OutlinedInput label="Add More Companies" />}
-              renderValue={(selected) => (
-                <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
-                  {selected.map((id) => (
-                    <Chip key={id} label={allCompaniesMap[id]?.companyName || id} />
+              {/* Companies List */}
+              {formData.handledCompanies.length === 0 ? (
+                <Box sx={{ textAlign: 'center', py: 3 }}>
+                  <BusinessIcon sx={{ fontSize: 48, color: 'text.disabled', mb: 1 }} />
+                  <Typography color="text.secondary">
+                    No companies assigned yet
+                  </Typography>
+                </Box>
+              ) : (
+                <List sx={{ maxHeight: 300, overflow: 'auto' }}>
+                  {filteredCompanies.map((company, index) => (
+                    <ListItem key={index} disablePadding sx={{ mb: 0.5 }}>
+                      <Paper sx={{ width: '100%', p: 1, bgcolor: 'grey.50' }}>
+                        <Stack direction="row" alignItems="center" spacing={1}>
+                          <BusinessIcon sx={{ color: 'primary.main' }} />
+                          <Typography variant="body2" sx={{ fontWeight: 500 }}>
+                            {company.companyName || "Unnamed Company"}
+                          </Typography>
+                        </Stack>
+                      </Paper>
+                    </ListItem>
                   ))}
+                </List>
+              )}
+
+              {/* Add Companies - Only in edit mode */}
+              {editMode && (
+                <Box sx={{ mt: 2 }}>
+                  <FormControl fullWidth>
+                    <InputLabel>Add More Companies</InputLabel>
+                    <Select
+                      multiple
+                      value={formData.handledCompanies.map((c) => c.userId)}
+                      onChange={handleHandledCompaniesChange}
+                      input={<OutlinedInput label="Add More Companies" />}
+                      renderValue={(selected) => (
+                        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 0.5 }}>
+                          {selected.map((id) => (
+                            <Chip 
+                              key={id} 
+                              label={allCompaniesMap[id]?.companyName || id}
+                              size="small"
+                            />
+                          ))}
+                        </Box>
+                      )}
+                    >
+                      {unhandledCompanies.map((company) => (
+                        <MenuItem key={company.userId} value={company.userId}>
+                          {company.companyName}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
                 </Box>
               )}
-            >
-              {unhandledCompanies.map((company) => (
-                <MenuItem key={company.userId} value={company.userId}>
-                  {company.companyName}
-                </MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-        )}
+            </CardContent>
+          </Card>
+        </Grid>
+      </Grid>
 
-        <Dialog open={openDeleteDialog} onClose={handleCancelDelete}>
-          <DialogTitle>Confirm Delete</DialogTitle>
-          <DialogContent>
-            <DialogContentText>
-              Are you sure you want to delete this agency? This action cannot be undone.
-            </DialogContentText>
-          </DialogContent>
-          <DialogActions>
-            <Button onClick={handleCancelDelete} color="primary">
-              Cancel
-            </Button>
-            <Button onClick={handleConfirmDelete} color="error" variant="contained">
-              Delete
-            </Button>
-          </DialogActions>
-        </Dialog>
-      </Card>
+      {/* Delete Confirmation Dialog */}
+      <Dialog 
+        open={openDeleteDialog} 
+        onClose={handleCancelDelete}
+        PaperProps={{ sx: { borderRadius: 3 } }}
+      >
+        <DialogTitle sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <WarningIcon color="error" />
+          Confirm Delete
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            Are you sure you want to delete this agency? This action cannot be undone.
+          </DialogContentText>
+        </DialogContent>
+        <DialogActions sx={{ p: 2 }}>
+          <Button onClick={handleCancelDelete} variant="outlined">
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleConfirmDelete} 
+            color="error" 
+            variant="contained"
+            startIcon={<DeleteIcon />}
+          >
+            Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Snackbar */}
+      <Snackbar
+        open={snackbar.open}
+        autoHideDuration={3000}
+        onClose={() => setSnackbar({ ...snackbar, open: false })}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+      >
+        <Alert
+          onClose={() => setSnackbar({ ...snackbar, open: false })}
+          severity={snackbar.severity}
+          sx={{ width: '100%' }}
+          icon={<CheckCircleIcon />}
+        >
+          {snackbar.message}
+        </Alert>
+      </Snackbar>
     </Box>
   );
 };

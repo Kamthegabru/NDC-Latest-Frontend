@@ -1,56 +1,110 @@
 /* styles/BackgroundImage.css */
+
+/* Base styling for the hero background */
 .bg-custom {
-  background-image:
-    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-    url('../../../public/Images/Mack-Anthem.jpg');
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
   background-blend-mode: darken;
+  position: relative;
+  overflow: hidden;
 }
 
-/* styles/BackgroundImage.css */
-/* Keep your existing .bg-custom as is, just add this below */
-
-.bg-custom {
-  animation: bgSlide 18s infinite ease-in-out;
-   transition: background-image 2s ease-in-out, background-size 6s ease-in-out;
+/* Desktop carousel animation */
+@media (min-width: 769px) {
+  .bg-custom {
+    animation: bgSlideDesktop 18s infinite ease-in-out;
+    transition: background-image 2s ease-in-out;
+  }
+  
+  @keyframes bgSlideDesktop {
+    0%, 100% {
+      background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+        url('../../../public/Images/Mack-Anthem.jpg');
+      background-size: 110%;
+    }
+    30% {
+      background-size: 100%;
+    }
+    33% {
+      background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+        url('../../../public/Images/mack-anthem1.jpg');
+      background-size: 110%;
+    }
+    63% {
+      background-size: 100%;
+    }
+    66% {
+      background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+        url('../../../public/Images/mack-anthem4.jpg');
+      background-size: 110%;
+    }
+    96% {
+      background-size: 100%;
+    }
+  }
 }
 
-/* Keyframes for background image loop with zoom effect */
-@keyframes bgSlide {
-  0% {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../../../public/Images/Mack-Anthem.jpg');
-    background-size: 110%;
-  }
-  30% {
-    background-size: 100%;
-  }
-  33% {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../../../public/Images/mack-anthem1.jpg');
-    background-size: 110%;
-  }
-  63% {
-    background-size: 100%;
-  }
-  66% {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../../../public/Images/mack-anthem4.jpg');
-    background-size: 110%;
-  }
-  96% {
-    background-size: 100%;
-  }
-  100% {
-    background-image: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../../../public/Images/mack-anthem3.jpg');
-    background-size: 110%;
-  }
-}
-
-
+/* Mobile carousel animation - optimized for small screens */
 @media (max-width: 768px) {
   .bg-custom {
-    background-size: cover; /* or 100% if fixed width needed */
-    background-position: center;
+    animation: bgSlideMobile 18s infinite ease-in-out;
+    transition: background-image 2s ease-in-out;
+    background-size: cover !important;
+    background-position: center center !important;
+  }
+  
+  @keyframes bgSlideMobile {
+    0%, 100% {
+      background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+        url('../../../public/Images/Mack-Anthem.jpg');
+    }
+    25% {
+      background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+        url('../../../public/Images/Mack-Anthem.jpg');
+    }
+    33% {
+      background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+        url('../../../public/Images/mack-anthem1.jpg');
+    }
+    58% {
+      background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+        url('../../../public/Images/mack-anthem1.jpg');
+    }
+    66% {
+      background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+        url('../../../public/Images/mack-anthem4.jpg');
+    }
+    91% {
+      background-image: 
+        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+        url('../../../public/Images/mack-anthem4.jpg');
+    }
+  }
+}
+
+/* Extra small devices (phones in portrait) */
+@media (max-width: 480px) {
+  .bg-custom {
+    background-size: cover !important;
+    background-position: center center !important;
+    min-height: 100%;
+  }
+}
+
+/* Ensure images are fully visible on very small screens */
+@media (max-width: 375px) {
+  .bg-custom {
+    background-size: cover !important;
+    background-position: 50% 50% !important;
   }
 }
 
@@ -62,7 +116,6 @@
   left: 0;
   height: 100vh;
   width: 100vw;
-  /* background-color: rgba(255, 255, 255, 0.8);  */
   display: flex;
   align-items: center;
   justify-content: center;
@@ -84,8 +137,7 @@
   }
 }
 
-
-
+/* Scale wrapper for responsive content */
 .scale-wrapper {
   width: 100%;
   overflow-x: auto;
@@ -93,11 +145,25 @@
 
 @media (max-width: 768px) {
   .scale-wrapper {
-    transform: scale(0.55);              /* Shrink to fit mobile */
-    transform-origin: top left;          /* Anchor from top left */
-    width: 180vw;                        /* Prevent horizontal cutoff */
+    transform: scale(0.55);
+    transform-origin: top left;
+    width: 180vw;
     height: auto;
     overflow-x: hidden;
   }
 }
 
+/* Preload images for smoother transitions */
+.bg-custom::before {
+  content: "";
+  position: absolute;
+  width: 0;
+  height: 0;
+  overflow: hidden;
+  z-index: -1;
+  background-image: 
+    url('../../../public/Images/Mack-Anthem.jpg'),
+    url('../../../public/Images/mack-anthem1.jpg'),
+    url('../../../public/Images/mack-anthem4.jpg'),
+    url('../../../public/Images/mack-anthem3.jpg');
+}

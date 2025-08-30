@@ -24,7 +24,7 @@ import Process from "./Process";
 import ServiceCards from "./ServiceCards";
 import HeroComponent from "./HeroSection";
 import Header from "./Header";
-// import ScrollObserver from "./ScrollObserver";
+import ScrollObserver from "./ScrollObserver";
 
 
 const pageVariants = {
@@ -67,11 +67,12 @@ function Home() {
     <div  className="overflow-hidden">
     
               {/* <Navbar /> */}
+              
                <div id="main-header" className='sticky top-0 z-50 bg-[#565858] border-b border-white transition-all duration-300'>
             <Header/>
             </div>
-     {/* <ScrollObserver/> */}
       
+     {/* <ScrollObserver/> */}
       {/* Page Routes with Animation */}
       <AnimatePresence mode="wait">
         <Routes location={location} key={location.pathname}>
@@ -86,7 +87,7 @@ function Home() {
       </div>
        
       
-      <div id="how" className="     md:pt-[420px] pt-[750px]">
+      <div id="how" className="     md:pt-[20px] pt-[0px]">
     <ServiceCards/>
       </div>
 

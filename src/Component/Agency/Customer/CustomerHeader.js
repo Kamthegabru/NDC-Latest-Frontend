@@ -1,81 +1,306 @@
-import React, { useState, useContext } from "react";
-import { Tabs, Tab, Box } from "@mui/material";
-import BusinessIcon from "@mui/icons-material/Business";
+import React, { useState, useContext, useEffect, useRef } from "react";
+import {
+  Box,
+  Card,
+  CardContent,
+  CardHeader,
+  Container,
+  Divider,
+  Tab,
+  Tabs,
+  Typography,
+  useTheme,
+  Fade,
+  Paper,
+} from "@mui/material";
+import { alpha } from "@mui/material/styles";
+
+// Enhanced modern icons
+import DomainIcon from "@mui/icons-material/Domain"; // Better for Company
 import DirectionsCarIcon from "@mui/icons-material/DirectionsCar";
 import CardMembershipIcon from "@mui/icons-material/CardMembership";
-import WorkspacePremiumIcon from "@mui/icons-material/WorkspacePremium";
-import ReceiptIcon from "@mui/icons-material/Receipt";
-import AssessmentIcon from "@mui/icons-material/Assessment";
-import PaymentIcon from "@mui/icons-material/Payment";
-import { Shuffle } from "@mui/icons-material";
+import VerifiedIcon from "@mui/icons-material/Verified"; // Better for Certificate
+import DescriptionIcon from "@mui/icons-material/Description"; // Better for Invoice
+import InsightsIcon from "@mui/icons-material/Insights"; // Better for Result
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet"; // Better for Payment
+import ShuffleIcon from "@mui/icons-material/Shuffle";
 
+// Your existing imports
 import CompanyDetails from "./CompanyInfo";
 import PaymentInformation from "./Payment";
-import Driver from "./Drivers/Driver"
+import Driver from "./Drivers/Driver";
 import Certificate from "./Certificate/Certificate";
 import Result from "./Result/Result";
 import Invoice from "./Invoice/Invoice";
-import Membership from "./Membership"
-import RandomDriver from "./Random/RandomDriver"
+import Membership from "./Membership";
+import RandomDriver from "./Random/RandomDriver";
 
 import DriverState from "../../../Context/Agency/Customer/Driver/DriverState";
 import CustomerContext from "../../../Context/Agency/Customer/CustomerContext";
 
 const tabData = [
-  { label: "Company Info", icon: <BusinessIcon />, component: <CompanyDetails /> },
+  { label: "Company Info", icon: <DomainIcon />, component: <CompanyDetails /> },
   { label: "Driver", icon: <DirectionsCarIcon />, component: <DriverState><Driver /></DriverState> },
   { label: "Membership", icon: <CardMembershipIcon />, component: <Membership /> },
-  { label: "Certificate", icon: <WorkspacePremiumIcon />, component: <Certificate />},
-  { label: "Invoice", icon: <ReceiptIcon />, component: <Invoice />  },
-  { label: "Result", icon: <AssessmentIcon />, component: <Result /> },
-  { label: "Payment Info", icon: <PaymentIcon />, component: <PaymentInformation /> },
-  { label: "Random Driver", icon: <Shuffle />, component: <RandomDriver /> },
+  { label: "Certificate", icon: <VerifiedIcon />, component: <Certificate /> },
+  { label: "Invoice", icon: <DescriptionIcon />, component: <Invoice /> },
+  { label: "Result", icon: <InsightsIcon />, component: <Result /> },
+  { label: "Payment Info", icon: <AccountBalanceWalletIcon />, component: <PaymentInformation /> },
+  { label: "Random Driver", icon: <ShuffleIcon />, component: <RandomDriver /> },
 ];
 
 function CustomerHeader() {
+  const theme = useTheme();
   const [activeTab, setActiveTab] = useState(0);
-  const { currentCompany } = useContext(CustomerContext)
+  const { currentCompany } = useContext(CustomerContext);
+  const tabsRef = useRef(null);
+
+  // Add drag functionality
+  useEffect(() => {
+    const tabsScroller = document.querySelector('.MuiTabs-scroller');
+    if (!tabsScroller) return;
+
+    let isDown = false;
+    let startX;
+    let scrollLeft;
+
+    const handleMouseDown = (e) => {
+      isDown = true;
+      startX = e.pageX - tabsScroller.offsetLeft;
+      scrollLeft = tabsScroller.scrollLeft;
+    };
+
+    const handleMouseLeave = () => {
+      isDown = false;
+    };
+
+    const handleMouseUp = () => {
+      isDown = false;
+    };
+
+    const handleMouseMove = (e) => {
+      if (!isDown) return;
+      e.preventDefault();
+      const x = e.pageX - tabsScroller.offsetLeft;
+      const walk = (x - startX) * 2;
+      tabsScroller.scrollLeft = scrollLeft - walk;
+    };
+
+    tabsScroller.addEventListener('mousedown', handleMouseDown);
+    tabsScroller.addEventListener('mouseleave', handleMouseLeave);
+    tabsScroller.addEventListener('mouseup', handleMouseUp);
+    tabsScroller.addEventListener('mousemove', handleMouseMove);
+
+    return () => {
+      tabsScroller.removeEventListener('mousedown', handleMouseDown);
+      tabsScroller.removeEventListener('mouseleave', handleMouseLeave);
+      tabsScroller.removeEventListener('mouseup', handleMouseUp);
+      tabsScroller.removeEventListener('mousemove', handleMouseMove);
+    };
+  }, []);
+
+  const handleTabChange = (event, newValue) => {
+    setActiveTab(newValue);
+  };
 
   return (
-    <Box>
-      {/* Navbar */}
-      <Tabs
-        value={activeTab}
-        onChange={(event, newValue) => setActiveTab(newValue)} // <-- This updates the active tab
-        variant="scrollable"
-        scrollButtons="auto"
-        sx={{ backgroundColor: "#0a0a42", color: "white" }}
+    <Container maxWidth="lg" sx={{ py: 4 }}>
+      {/* Company Name Banner */}
+      <Paper
+        elevation={3}
+        sx={{
+          mb: 3,
+          background: 'linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%)',
+          borderRadius: 2,
+          overflow: 'hidden',
+          position: 'relative',
+          '&::before': {
+            content: '""',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            right: 0,
+            height: '4px',
+            background: 'linear-gradient(90deg, #28a745 0%, #20c997 100%)',
+          }
+        }}
       >
-        {tabData.map((tab, index) => (
-          <Tab
-            key={index}
-            label={tab.label}
-            icon={tab.icon}
-            iconPosition="top"
-            sx={{ color: "white" }}
-          />
-        ))}
-      </Tabs>
-      <div className="text-center">
-        <div
-          style={{
-            width: ' 100%',
-            backgroundColor: "#d4edda", // light green
-            color: "#155724",           // dark green text
-            border: "2px solid #28a745",
-            padding: "10px 20px",
-            fontWeight: "bold",
-            fontSize: "24px"
+        <Box
+          sx={{
+            p: 2.5,
+            textAlign: 'center',
           }}
         >
-          {currentCompany}
-        </div>
-      </div>
-      {/* Render Active Component */}
-      <Box sx={{ p: 2 }}>
-        {tabData[activeTab].component}
-      </Box>
-    </Box>
+          <Typography
+            variant="h4"
+            sx={{
+              color: '#155724',
+              fontWeight: 700,
+              letterSpacing: 0.5,
+            }}
+          >
+            {currentCompany}
+          </Typography>
+        </Box>
+      </Paper>
+
+      {/* Main Card with Tabs */}
+      <Card
+        sx={{
+          borderRadius: 3,
+          boxShadow: theme.shadows[8],
+          overflow: "hidden",
+          border: 1,
+          borderColor: 'divider',
+        }}
+      >
+        <CardHeader
+          title="Agency Customer Information"
+          subheader="Navigate through agency customer data sections"
+          sx={{
+            background: `linear-gradient(135deg, ${theme.palette.primary.main}, ${theme.palette.secondary.main})`,
+            color: "white",
+            py: 3,
+          }}
+          subheaderTypographyProps={{
+            sx: { color: "rgba(255,255,255,0.9)", pb: 0.5, fontSize: '0.9rem' }
+          }}
+          titleTypographyProps={{
+            sx: { fontWeight: 700, fontSize: '1.4rem' }
+          }}
+        />
+
+        <Divider />
+
+        {/* Tabs with individual underlines */}
+        <Box 
+          sx={{ 
+            bgcolor: 'background.paper',
+            position: 'relative',
+          }}
+        >
+          <Tabs
+            value={activeTab}
+            onChange={handleTabChange}
+            variant="scrollable"
+            scrollButtons={false}
+            aria-label="scrollable agency customer tabs"
+            TabIndicatorProps={{
+              style: { display: 'none' } // Hide default indicator
+            }}
+            sx={{
+              px: 2,
+              "& .MuiTabs-scroller": {
+                overflowX: 'auto',
+                '&::-webkit-scrollbar': {
+                  height: 0,
+                  display: 'none',
+                },
+                cursor: 'grab',
+                '&:active': {
+                  cursor: 'grabbing',
+                },
+              },
+              "& .MuiTab-root": {
+                minWidth: 'auto',
+                fontWeight: 600,
+                mx: 0,
+                textTransform: "capitalize",
+                py: 2,
+                px: 2,
+                borderRadius: 2,
+                margin: 0.5,
+                color: theme.palette.text.secondary,
+                transition: 'all 0.2s ease',
+                position: 'relative',
+                "&::after": {
+                  content: '""',
+                  position: 'absolute',
+                  bottom: 0,
+                  left: '50%',
+                  transform: 'translateX(-50%)',
+                  width: 0,
+                  height: 3,
+                  backgroundColor: theme.palette.primary.main,
+                  borderRadius: 2,
+                  transition: 'width 0.3s ease',
+                },
+                "&:hover": {
+                  bgcolor: alpha(theme.palette.primary.main, 0.08),
+                  color: theme.palette.primary.main,
+                  transform: 'translateY(-1px)',
+                  "&::after": {
+                    width: '80%',
+                    opacity: 0.5,
+                  }
+                },
+                "&.Mui-selected": {
+                  color: theme.palette.primary.main,
+                  bgcolor: alpha(theme.palette.primary.main, 0.12),
+                  "&::after": {
+                    width: '100%',
+                    opacity: 1,
+                  }
+                },
+                "& .MuiTab-iconWrapper": {
+                  marginRight: theme.spacing(0.75),
+                  fontSize: '1.2rem',
+                },
+              },
+              "& .MuiTabs-flexContainer": {
+                gap: 1,
+              },
+            }}
+          >
+            {tabData.map((tab, index) => (
+              <Tab
+                key={index}
+                icon={tab.icon}
+                iconPosition="start"
+                label={tab.label}
+              />
+            ))}
+          </Tabs>
+        </Box>
+      </Card>
+
+      {/* Tab Content Area */}
+      <Card
+        sx={{
+          borderRadius: 3,
+          boxShadow: theme.shadows[8],
+          overflow: "hidden",
+          bgcolor: "background.paper",
+          border: 1,
+          borderColor: 'divider',
+          mt: 3,
+        }}
+      >
+        <CardContent sx={{ p: 3 }}>
+          {tabData.map((tab, index) => (
+            <Fade
+              key={index}
+              in={activeTab === index}
+              timeout={500}
+              unmountOnExit
+            >
+              <Box
+                sx={{
+                  display: activeTab === index ? 'block' : 'none',
+                  animation: activeTab === index ? 'fadeIn 0.5s ease' : 'none',
+                  '@keyframes fadeIn': {
+                    from: { opacity: 0, transform: 'translateY(10px)' },
+                    to: { opacity: 1, transform: 'translateY(0)' },
+                  },
+                }}
+              >
+                {tab.component}
+              </Box>
+            </Fade>
+          ))}
+        </CardContent>
+      </Card>
+    </Container>
   );
 }
 

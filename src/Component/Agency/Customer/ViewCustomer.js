@@ -125,11 +125,21 @@ function ViewCustomer() {
         // eslint-disable-next-line
     }, [adminContext, customerContext]);
 
+    // Debug: Log the data structure
+    useEffect(() => {
+        if (AllUserData && AllUserData.length > 0) {
+            console.log('AllUserData sample:', AllUserData[0]);
+            console.log('Available keys:', Object.keys(AllUserData[0]));
+            console.log('createdAt value:', AllUserData[0].createdAt);
+            console.log('Full user object:', JSON.stringify(AllUserData[0], null, 2));
+        }
+    }, [AllUserData]);
+
     const handleViewDetails = (user) => {
         if (setUserDetails && setLoading && getSingleUserData && setCurrentActiveButton) {
             setUserDetails(null);
             setLoading(true);
-            getSingleUserData(user.id);
+            getSingleUserData(user.id || user._id);
             setCurrentActiveButton(5);
         }
     };
@@ -175,11 +185,15 @@ function ViewCustomer() {
     const filteredAndSortedUsers = useMemo(() => {
         if (!AllUserData) return [];
 
-        let filtered = AllUserData.filter((user) =>
-            user.companyName?.toLowerCase().includes(searchTerm.toLowerCase()) &&
-            user.companyUSDOTNumber?.toLowerCase().includes(searchTermByUSDOT.toLowerCase()) &&
-            (statusFilter === "All" || user.status === statusFilter)
-        );
+        let filtered = AllUserData.filter((user) => {
+            // Access company name from nested object structure
+            const companyName = user.companyInfoData?.companyName || user.companyName || '';
+            const usdotNumber = user.companyInfoData?.usdot || user.companyUSDOTNumber || '';
+            
+            return companyName.toLowerCase().includes(searchTerm.toLowerCase()) &&
+                   usdotNumber.toLowerCase().includes(searchTermByUSDOT.toLowerCase()) &&
+                   (statusFilter === "All" || user.status === statusFilter);
+        });
 
         // Date range filter using react-day-picker
         if (range.from && range.to) {
@@ -191,8 +205,8 @@ function ViewCustomer() {
         }
 
         filtered.sort((a, b) => {
-            const nameA = a.companyName?.toLowerCase() || '';
-            const nameB = b.companyName?.toLowerCase() || '';
+            const nameA = (a.companyInfoData?.companyName || a.companyName || '').toLowerCase();
+            const nameB = (b.companyInfoData?.companyName || b.companyName || '').toLowerCase();
             if (nameA < nameB) return sortOrder === "asc" ? -1 : 1;
             if (nameA > nameB) return sortOrder === "asc" ? 1 : -1;
             return 0;
@@ -203,20 +217,29 @@ function ViewCustomer() {
 
     const topCompanyIds = useMemo(() => {
         if (!filteredAndSortedUsers.length) return [];
-        const sorted = [...filteredAndSortedUsers].sort((a, b) => (b.activeDriversCount || 0) - (a.activeDriversCount || 0));
-        return sorted.slice(0, 3).map(u => u.id);
+        const sorted = [...filteredAndSortedUsers].sort((a, b) => 
+            (parseInt(b.companyInfoData?.employees) || parseInt(b.companyInfoData?.driverCount) || 0) - 
+            (parseInt(a.companyInfoData?.employees) || parseInt(a.companyInfoData?.driverCount) || 0)
+        );
+        return sorted.slice(0, 3).map(u => u.id || u._id);
     }, [filteredAndSortedUsers]);
 
-    // Pagination
     const paginatedUsers = useMemo(() => {
         const start = (page - 1) * PAGE_SIZE;
         return filteredAndSortedUsers.slice(start, start + PAGE_SIZE);
     }, [filteredAndSortedUsers, page]);
 
-    // Format date for display
     const formatDate = (dateStr) => {
+        console.log('formatDate called with:', dateStr, typeof dateStr);
         if (!dateStr) return "-";
-        return dayjs(dateStr).format("DD MMM YYYY, hh:mm A");
+        try {
+            const formatted = dayjs(dateStr).format("DD MMM YYYY, hh:mm A");
+            console.log('Formatted date:', formatted);
+            return formatted;
+        } catch (error) {
+            console.error('Date formatting error:', error);
+            return dateStr; // Return original if formatting fails
+        }
     };
 
     // Selection logic
@@ -280,7 +303,7 @@ function ViewCustomer() {
                     }}
                 >
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                        <Typography variant="h5" sx={{
+                        <Typography variant="h6" className="max-w-[250px] max-h-[50px] " sx={{
                             fontWeight: "bold",
                             color: "#003366",
                             letterSpacing: 1,
@@ -410,11 +433,11 @@ function ViewCustomer() {
                                 <TableRow sx={{ backgroundColor: "#003366" }}>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>
                                         <Checkbox
-                                            checked={paginatedUsers.length > 0 && paginatedUsers.every(u => selectedIds.includes(u.id))}
+                                            checked={paginatedUsers.length > 0 && paginatedUsers.every(u => selectedIds.includes(u.id || u._id))}
                                             indeterminate={selectedIds.length > 0 && selectedIds.length < paginatedUsers.length}
                                             onChange={(e) => {
                                                 if (e.target.checked) {
-                                                    setSelectedIds(paginatedUsers.map(u => u.id));
+                                                    setSelectedIds(paginatedUsers.map(u => u.id || u._id));
                                                 } else {
                                                     setSelectedIds([]);
                                                 }
@@ -445,7 +468,7 @@ function ViewCustomer() {
                                     </TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Contact No</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Email</TableCell>
-                                    <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Date</TableCell>
+                                    <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Date Created</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Active Employees</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Status</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>USDOT</TableCell>
@@ -462,11 +485,11 @@ function ViewCustomer() {
                                     </TableRow>
                                 ) : (
                                     paginatedUsers.map((user, index) => (
-                                        <TableRow key={index} hover>
+                                        <TableRow key={user._id || user.id || index} hover>
                                             <TableCell align="center">
                                                 <Checkbox
-                                                    checked={selectedIds.includes(user.id)}
-                                                    onChange={() => handleSelect(user.id)}
+                                                    checked={selectedIds.includes(user.id || user._id)}
+                                                    onChange={() => handleSelect(user.id || user._id)}
                                                     color="primary"
                                                 />
                                             </TableCell>
@@ -475,8 +498,10 @@ function ViewCustomer() {
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
-                                                    <Typography fontWeight="bold">{user.companyName || 'N/A'}</Typography>
-                                                    {topCompanyIds.includes(user.id) && (
+                                                    <Typography fontWeight="bold">
+                                                        {user.companyInfoData?.companyName || user.companyName || 'N/A'}
+                                                    </Typography>
+                                                    {topCompanyIds.includes(user.id || user._id) && (
                                                         <Tooltip title="Top Company">
                                                             <StarIcon sx={{ color: "#FFD700" }} />
                                                         </Tooltip>
@@ -485,45 +510,84 @@ function ViewCustomer() {
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Chip
-                                                    label={normalizePhoneNumber(user.companyContactNumber) || 'N/A'}
+                                                    label={normalizePhoneNumber(
+                                                        user.companyInfoData?.contactNumber || 
+                                                        user.contactInfoData?.phone || 
+                                                        user.companyContactNumber
+                                                    ) || 'N/A'}
                                                     color="primary"
                                                     variant="outlined"
                                                 />
                                             </TableCell>
                                             <TableCell align="center">
-                                                <Tooltip title={user.companyEmail || 'No email'}>
-                                                    <Typography noWrap maxWidth={120}>{user.companyEmail || 'N/A'}</Typography>
+                                                <Tooltip title={
+                                                    user.companyInfoData?.companyEmail || 
+                                                    user.contactInfoData?.email || 
+                                                    user.companyEmail || 
+                                                    'No email'
+                                                }>
+                                                    <Typography noWrap maxWidth={120}>
+                                                        {user.companyInfoData?.companyEmail || 
+                                                         user.contactInfoData?.email || 
+                                                         user.companyEmail || 'N/A'}
+                                                    </Typography>
                                                 </Tooltip>
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Chip
-                                                    label={formatDate(user.createdAt)}
+                                                    label={(() => {
+                                                        const dateValue = user.createdAt || user.timestamp || user.createdDate;
+                                                        console.log(`User ${index} date value:`, dateValue);
+                                                        console.log(`User ${index} available date fields:`, {
+                                                            createdAt: user.createdAt,
+                                                            timestamp: user.timestamp,
+                                                            updatedAt: user.updatedAt,
+                                                            createdDate: user.createdDate
+                                                        });
+                                                        return formatDate(dateValue);
+                                                    })()}
                                                     color="secondary"
                                                     variant="outlined"
-                                                    sx={{ fontWeight: "bold", fontSize: 15 }}
+                                                    sx={{ fontWeight: "bold", fontSize: 12 }}
                                                 />
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Chip
-                                                    label={user.activeDriversCount || 0}
+                                                    label={
+                                                        user.companyInfoData?.employees || 
+                                                        user.companyInfoData?.driverCount || 
+                                                        user.activeDriversCount || 0
+                                                    }
                                                     color="info"
                                                     variant="filled"
                                                 />
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Chip
-                                                    label={user.status || "Active"}
-                                                    color={(user.status || "Active") === "Active" ? "success" : "error"}
+                                                    label={
+                                                        user.Membership?.planStatus || 
+                                                        user.status || 
+                                                        "Pending"
+                                                    }
+                                                    color={
+                                                        (user.Membership?.planStatus || user.status || "Pending") === "Active" 
+                                                            ? "success" 
+                                                            : (user.Membership?.planStatus || user.status) === "Inactive" 
+                                                                ? "error" 
+                                                                : "warning"
+                                                    }
                                                     variant="filled"
                                                 />
                                             </TableCell>
                                             <TableCell align="center">
-                                                <Typography fontWeight="medium">{user.companyUSDOTNumber || 'N/A'}</Typography>
+                                                <Typography fontWeight="medium">
+                                                    {user.companyInfoData?.usdot || user.companyUSDOTNumber || 'N/A'}
+                                                </Typography>
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Avatar
                                                     src={user.logoUrl || ""}
-                                                    alt={user.companyName || 'Company'}
+                                                    alt={user.companyInfoData?.companyName || user.companyName || 'Company'}
                                                     sx={{ width: 32, height: 32, bgcolor: "#e0e0e0", mx: "auto" }}
                                                 >
                                                     <BusinessIcon />

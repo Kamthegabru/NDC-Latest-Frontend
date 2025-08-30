@@ -192,7 +192,7 @@ function ViewCustomer() {
                         mb: 2,
                     }}
                 >
-                    <Typography variant="h5" sx={{
+                    <Typography variant="h6" className="text-[10px] max-w-[250px] max-h-[60px]" sx={{
                         fontWeight: "bold",
                         color: "#003366",
                         letterSpacing: 1,
@@ -293,10 +293,10 @@ function ViewCustomer() {
                                 <RefreshIcon />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title="Export Driver Data">
+                        <Tooltip className="max-w-[200px] max-h-[60px]" title="Export Driver Data">
                             <span><ExportDriver /></span>
                         </Tooltip>
-                        <Tooltip title="Export Company Data">
+                        <Tooltip className="max-w-[200px] max-h-[60px]" title="Export Company Data">
                             <span><ExportCompany /></span>
                         </Tooltip>
                     </Box>
