@@ -1,3 +1,6 @@
+// "new latest"
+
+
 import React, { useState, useContext, useEffect, useRef } from "react";
 import {
   Box,
@@ -15,16 +18,18 @@ import {
 } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 
-
-import DomainIcon from "@mui/icons-material/Domain"; 
-import GroupsIcon from "@mui/icons-material/Groups"; 
+// Enhanced modern icons
+import DomainIcon from "@mui/icons-material/Domain"; // Better for Company
+import GroupsIcon from "@mui/icons-material/Groups"; // Better for Employees
 import CardMembershipIcon from "@mui/icons-material/CardMembership";
-import VerifiedIcon from "@mui/icons-material/Verified"; 
-import DescriptionIcon from "@mui/icons-material/Description"; 
-import InsightsIcon from "@mui/icons-material/Insights"; 
-import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet"; 
-import CloudUploadIcon from "@mui/icons-material/CloudUpload"; 
-import StickyNote2Icon from "@mui/icons-material/StickyNote2"; 
+import VerifiedIcon from "@mui/icons-material/Verified"; // Better for Certificate
+import DescriptionIcon from "@mui/icons-material/Description"; // Better for Invoice
+import InsightsIcon from "@mui/icons-material/Insights"; // Better for Result
+import AccountBalanceWalletIcon from "@mui/icons-material/AccountBalanceWallet"; // Better for Payment
+import CloudUploadIcon from "@mui/icons-material/CloudUpload"; // Better for Upload
+import StickyNote2Icon from "@mui/icons-material/StickyNote2"; // Better for Notes
+
+// Your existing imports
 import CompanyDetails from "./CompanyInfo";
 import PaymentInformation from "./Payment";
 import Driver from "./Drivers/Driver";
@@ -61,6 +66,8 @@ function CustomerHeader() {
   const [activeTab, setActiveTab] = useState(0);
   const { currentCompany } = useContext(CustomerContext);
   const tabsRef = useRef(null);
+
+  // Add drag functionality
   useEffect(() => {
     const tabsScroller = document.querySelector('.MuiTabs-scroller');
     if (!tabsScroller) return;
@@ -110,7 +117,7 @@ function CustomerHeader() {
 
   return (
     <Container maxWidth="lg" sx={{ py: 4 }}>
-  
+      {/* Company Name Banner */}
       <Paper
         elevation={3}
         sx={{
@@ -149,6 +156,7 @@ function CustomerHeader() {
         </Box>
       </Paper>
 
+      {/* Main Card with Tabs */}
       <Card
         sx={{
           borderRadius: 3,
@@ -175,6 +183,8 @@ function CustomerHeader() {
         />
 
         <Divider />
+
+        {/* Tabs with individual underlines */}
         <Box 
           sx={{ 
             bgcolor: 'background.paper',
@@ -188,7 +198,7 @@ function CustomerHeader() {
             scrollButtons={false}
             aria-label="scrollable customer tabs"
             TabIndicatorProps={{
-              style: { display: 'none' }
+              style: { display: 'none' } // Hide default indicator
             }}
             sx={{
               px: 2,
@@ -265,6 +275,8 @@ function CustomerHeader() {
           </Tabs>
         </Box>
       </Card>
+
+      {/* Tab Content Area */}
       <Card
         sx={{
           borderRadius: 3,

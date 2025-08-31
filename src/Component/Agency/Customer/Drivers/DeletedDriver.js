@@ -1,120 +1,489 @@
 import React, { useState, useEffect, useContext } from "react";
 import {
-    Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton,
-    Menu, MenuItem, Paper, Dialog, DialogTitle, DialogContent, DialogActions,
-    Button, Typography, Box, useMediaQuery
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow, IconButton,
+  Menu, MenuItem, Paper, Dialog, DialogTitle, DialogContent, DialogActions,
+  Button, Typography, Box, useMediaQuery, Card, CardContent, Avatar,
+  Chip, Stack, Grid, ListItemIcon, ListItemText, Tooltip, Zoom, Divider
 } from "@mui/material";
+import { useTheme, alpha } from "@mui/material/styles";
+
+// Icons
 import MoreVertIcon from "@mui/icons-material/MoreVert";
+import VisibilityIcon from "@mui/icons-material/Visibility";
+import PersonOffIcon from "@mui/icons-material/PersonOff";
+import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
+import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import CloseIcon from "@mui/icons-material/Close";
+import EmailIcon from "@mui/icons-material/Email";
+import PhoneIcon from "@mui/icons-material/Phone";
+import BadgeIcon from "@mui/icons-material/Badge";
+import CakeIcon from "@mui/icons-material/Cake";
+import PersonIcon from "@mui/icons-material/Person";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
+
 import CustomerContext from "../../../../Context/Agency/Customer/CustomerContext";
-const normalizePhoneNumber = require("../../../Utils/normalizePhone")
+const normalizePhoneNumber = require("../../../Utils/normalizePhone");
 
 function DeletedDriver() {
-    const { userDetails } = useContext(CustomerContext);
-    const [drivers, setDrivers] = useState([]);
-    const [menuAnchor, setMenuAnchor] = useState(null);
-    const [selectedDriver, setSelectedDriver] = useState(null);
-    const [viewOpen, setViewOpen] = useState(false);
-    const isTablet = useMediaQuery("(max-width:1200px)");
-    const isMobile = useMediaQuery("(max-width:500px)");
+  const { userDetails } = useContext(CustomerContext);
+  const [drivers, setDrivers] = useState([]);
+  const [menuAnchor, setMenuAnchor] = useState(null);
+  const [selectedDriver, setSelectedDriver] = useState(null);
+  const [viewOpen, setViewOpen] = useState(false);
+  
+  const theme = useTheme();
+  const isTablet = useMediaQuery("(max-width:1200px)");
+  const isMobile = useMediaQuery("(max-width:600px)");
 
-    useEffect(() => {
-        if (userDetails?.drivers) {
-            const activeDrivers = userDetails.drivers.filter(driver => driver.isDeleted);
-            setDrivers(activeDrivers);
-        }
-    }, [userDetails]);
+  useEffect(() => {
+    if (userDetails?.drivers) {
+      const deletedDrivers = userDetails.drivers.filter(driver => driver.isDeleted);
+      setDrivers(deletedDrivers);
+    }
+  }, [userDetails]);
 
-    const handleMenuOpen = (event, driver) => {
-        setMenuAnchor(event.currentTarget);
-        setSelectedDriver(driver);
-    };
+  const handleMenuOpen = (event, driver) => {
+    setMenuAnchor(event.currentTarget);
+    setSelectedDriver(driver);
+  };
 
-    const handleMenuClose = () => {
-        setMenuAnchor(null);
-    };
+  const handleMenuClose = () => {
+    setMenuAnchor(null);
+  };
 
-    const handleViewOpen = () => {
-        setViewOpen(true);
-        handleMenuClose();
-    };
+  const handleViewOpen = () => {
+    setViewOpen(true);
+    handleMenuClose();
+  };
 
-    const formatDate = (dateString) => {
-        if (!dateString) return "N/A";
-        const date = new Date(dateString);
-        return date.toLocaleDateString("en-US", {
-            year: "numeric",
-            month: "2-digit",
-            day: "2-digit"
-        });
-    };
+  const formatDate = (dateString) => {
+    if (!dateString) return "—";
+    const date = new Date(dateString);
+    return date.toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit"
+    });
+  };
 
+  const getInitials = (firstName, lastName) => {
+    return `${firstName?.charAt(0) || ''}${lastName?.charAt(0) || ''}`.toUpperCase();
+  };
+
+  const getDaysSinceDeletion = (deletionDate) => {
+    if (!deletionDate) return null;
+    const today = new Date();
+    const deleted = new Date(deletionDate);
+    const diffTime = Math.abs(today - deleted);
+    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+    return diffDays;
+  };
+
+  const getTimeAgoText = (deletionDate) => {
+    const days = getDaysSinceDeletion(deletionDate);
+    if (days === null) return "";
+    if (days === 0) return "Today";
+    if (days === 1) return "Yesterday";
+    if (days < 30) return `${days} days ago`;
+    if (days < 365) return `${Math.floor(days / 30)} months ago`;
+    return `${Math.floor(days / 365)} years ago`;
+  };
+
+  if (drivers.length === 0) {
     return (
-        <TableContainer component={Paper} sx={{ mt: 3, p: 2, borderRadius: 2, boxShadow: 3, overflowX: "auto" }}>
-            <Table>
-                <TableHead>
-                    <TableRow sx={{ backgroundColor: "grey" }}>
-                        <TableCell sx={{ color: "white", fontWeight: "bold" }}>Sr</TableCell>
-                        <TableCell sx={{ color: "white", fontWeight: "bold" }}>Name</TableCell>
-                        {!isMobile && <TableCell sx={{ color: "white", fontWeight: "bold" }}>Email</TableCell>}
-                        {!isTablet && <TableCell sx={{ color: "white", fontWeight: "bold" }}>License #</TableCell>}
-                        {!isTablet && <TableCell sx={{ color: "white", fontWeight: "bold" }}>DOB</TableCell>}
-                        {!isTablet && <TableCell sx={{ color: "white", fontWeight: "bold" }}>Phone No</TableCell>}
-                        {!isMobile && <TableCell sx={{ color: "white", fontWeight: "bold" }}>Deletion Date</TableCell>}
-                        <TableCell sx={{ color: "white", fontWeight: "bold" }}>Actions</TableCell>
-                    </TableRow>
-                </TableHead>
-                <TableBody>
-                    {drivers.length > 0 ? (
-                        drivers.map((driver, index) => (
-                            <TableRow key={index} hover>
-                                <TableCell>{index + 1}</TableCell>
-                                <TableCell>{driver.first_name} {driver.last_name}</TableCell>
-                                {!isMobile && <TableCell>{driver.email}</TableCell>}
-                                {!isTablet && <TableCell>{driver?.government_id}</TableCell>}
-                                {!isTablet && <TableCell>{formatDate(driver.dob)}</TableCell>}
-                                {!isTablet && <TableCell>{normalizePhoneNumber(driver.phone)}</TableCell>}
-                                {!isMobile && <TableCell>{formatDate(driver.deletionDate)}</TableCell>}
-                                <TableCell>
-                                    <IconButton onClick={(event) => handleMenuOpen(event, driver)}>
-                                        <MoreVertIcon />
-                                    </IconButton>
-                                    <Menu anchorEl={menuAnchor} open={Boolean(menuAnchor)} onClose={handleMenuClose}>
-                                        <MenuItem onClick={handleViewOpen}>View More Details</MenuItem>
-                                    </Menu>
-                                </TableCell>
-                            </TableRow>
-                        ))
-                    ) : (
-                        <TableRow>
-                            <TableCell colSpan={7} align="center">
-                                <b>No Deleted Employees to display</b>
-                            </TableCell>
-                        </TableRow>
-                    )}
-                </TableBody>
-            </Table>
-
-            {/* View More Details Modal */}
-            <Dialog open={viewOpen} onClose={() => setViewOpen(false)}>
-                <DialogTitle>Employees Details</DialogTitle>
-                <DialogContent>
-                    <Box sx={{ p: 2, borderRadius: 2, boxShadow: 1, bgcolor: "#f9f9f9" }}>
-                        <Typography variant="h6" gutterBottom>{selectedDriver?.first_name} {selectedDriver?.last_name}</Typography>
-                        <Typography variant="body1"><strong>Email:</strong> {selectedDriver?.email}</Typography>
-                        <Typography variant="body1"><strong>License #:</strong> {selectedDriver?.government_id}</Typography>
-                        <Typography variant="body1"><strong>DOB:</strong> {formatDate(selectedDriver?.dob)}</Typography>
-                        <Typography variant="body1"><strong>Phone No:</strong> {normalizePhoneNumber(selectedDriver?.phone)}</Typography>
-                        <Typography variant="body1"><strong>Creation Date:</strong> {formatDate(selectedDriver?.creationDate)}</Typography>
-                        <Typography variant="body1"><strong>Created By:</strong> {selectedDriver?.createdBy}</Typography>
-                        <Typography variant="body1"><strong>Deletion Date:</strong> {formatDate(selectedDriver?.deletionDate)}</Typography>
-                    </Box>
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={() => setViewOpen(false)} color="secondary">Close</Button>
-                </DialogActions>
-            </Dialog>
-        </TableContainer>
+      <Card sx={{ borderRadius: 3, border: '1px dashed', borderColor: 'divider' }}>
+        <CardContent sx={{ textAlign: 'center', py: 6 }}>
+          <Avatar sx={{ width: 64, height: 64, mx: 'auto', mb: 2, bgcolor: alpha(theme.palette.error.main, 0.1) }}>
+            <PersonOffIcon sx={{ fontSize: 32, color: 'error.main' }} />
+          </Avatar>
+          <Typography variant="h6" color="text.secondary" gutterBottom>
+            No Deleted Employees
+          </Typography>
+          <Typography variant="body2" color="text.secondary">
+            Deleted employees will appear here
+          </Typography>
+        </CardContent>
+      </Card>
     );
+  }
+
+  return (
+    <>
+      <TableContainer component={Paper} sx={{ borderRadius: 3, border: 1, borderColor: 'divider' }}>
+        <Table>
+          <TableHead>
+            <TableRow sx={{ bgcolor: alpha(theme.palette.error.main, 0.1) }}>
+              <TableCell sx={{ color: 'error.main', fontWeight: 700, fontSize: '0.875rem' }}>#</TableCell>
+              <TableCell sx={{ color: 'error.main', fontWeight: 700, fontSize: '0.875rem' }}>Employee</TableCell>
+              {!isMobile && <TableCell sx={{ color: 'error.main', fontWeight: 700, fontSize: '0.875rem' }}>Email</TableCell>}
+              {!isTablet && <TableCell sx={{ color: 'error.main', fontWeight: 700, fontSize: '0.875rem' }}>License #</TableCell>}
+              {!isTablet && <TableCell sx={{ color: 'error.main', fontWeight: 700, fontSize: '0.875rem' }}>DOB</TableCell>}
+              {!isTablet && <TableCell sx={{ color: 'error.main', fontWeight: 700, fontSize: '0.875rem' }}>Phone</TableCell>}
+              {!isMobile && <TableCell sx={{ color: 'error.main', fontWeight: 700, fontSize: '0.875rem' }}>Deleted</TableCell>}
+              <TableCell sx={{ color: 'error.main', fontWeight: 700, fontSize: '0.875rem', textAlign: 'center' }}>Actions</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {drivers.map((driver, index) => {
+              const daysSinceDeletion = getDaysSinceDeletion(driver.deletionDate);
+              
+              return (
+                <TableRow 
+                  key={index} 
+                  hover 
+                  sx={{ 
+                    '&:hover': { 
+                      bgcolor: alpha(theme.palette.error.main, 0.04) 
+                    },
+                    opacity: 0.8
+                  }}
+                >
+                  <TableCell>
+                    <Typography variant="body2" sx={{ fontWeight: 600, color: 'text.secondary' }}>
+                      {index + 1}
+                    </Typography>
+                  </TableCell>
+                  <TableCell>
+                    <Stack direction="row" spacing={2} alignItems="center">
+                      <Avatar 
+                        sx={{ 
+                          width: 40, 
+                          height: 40, 
+                          bgcolor: theme.palette.error.main,
+                          fontSize: '0.875rem',
+                          fontWeight: 600
+                        }}
+                      >
+                        {getInitials(driver.first_name, driver.last_name)}
+                      </Avatar>
+                      <Box>
+                        <Typography 
+                          variant="subtitle2" 
+                          sx={{ 
+                            fontWeight: 600, 
+                            lineHeight: 1.2,
+                            textDecoration: 'line-through',
+                            color: 'text.secondary'
+                          }}
+                        >
+                          {driver.first_name} {driver.last_name}
+                        </Typography>
+                        <Chip
+                          size="small"
+                          label="Deleted"
+                          color="error"
+                          sx={{ height: 20, fontSize: '0.75rem', mt: 0.5 }}
+                          icon={<DeleteForeverIcon sx={{ fontSize: '0.75rem !important' }} />}
+                        />
+                      </Box>
+                    </Stack>
+                  </TableCell>
+                  {!isMobile && (
+                    <TableCell>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        {driver.email}
+                      </Typography>
+                    </TableCell>
+                  )}
+                  {!isTablet && (
+                    <TableCell>
+                      <Typography variant="body2" sx={{ fontFamily: 'monospace', color: 'text.secondary' }}>
+                        {driver?.government_id}
+                      </Typography>
+                    </TableCell>
+                  )}
+                  {!isTablet && (
+                    <TableCell>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        {formatDate(driver.dob)}
+                      </Typography>
+                    </TableCell>
+                  )}
+                  {!isTablet && (
+                    <TableCell>
+                      <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                        {normalizePhoneNumber(driver.phone)}
+                      </Typography>
+                    </TableCell>
+                  )}
+                  {!isMobile && (
+                    <TableCell>
+                      <Stack spacing={0.5}>
+                        <Typography variant="body2" sx={{ color: 'text.secondary' }}>
+                          {formatDate(driver.deletionDate)}
+                        </Typography>
+                        {daysSinceDeletion !== null && (
+                          <Typography variant="caption" sx={{ color: 'error.main', fontWeight: 500 }}>
+                            {getTimeAgoText(driver.deletionDate)}
+                          </Typography>
+                        )}
+                      </Stack>
+                    </TableCell>
+                  )}
+                  <TableCell align="center">
+                    <Tooltip title="Actions" TransitionComponent={Zoom}>
+                      <IconButton 
+                        onClick={(event) => handleMenuOpen(event, driver)}
+                        sx={{ 
+                          bgcolor: alpha(theme.palette.error.main, 0.1),
+                          '&:hover': { bgcolor: alpha(theme.palette.error.main, 0.2) }
+                        }}
+                      >
+                        <MoreVertIcon />
+                      </IconButton>
+                    </Tooltip>
+                    <Menu 
+                      anchorEl={menuAnchor} 
+                      open={Boolean(menuAnchor)} 
+                      onClose={handleMenuClose}
+                      PaperProps={{
+                        sx: {
+                          borderRadius: 2,
+                          mt: 1,
+                          minWidth: 180
+                        }
+                      }}
+                    >
+                      <MenuItem onClick={handleViewOpen} sx={{ py: 1.5 }}>
+                        <ListItemIcon><VisibilityIcon color="info" /></ListItemIcon>
+                        <ListItemText primary="View Details" />
+                      </MenuItem>
+                    </Menu>
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+
+      {/* View More Details Modal */}
+      <Dialog 
+        open={viewOpen} 
+        onClose={() => setViewOpen(false)}
+        maxWidth="md"
+        fullWidth
+        PaperProps={{ sx: { borderRadius: 3 } }}
+      >
+        <DialogTitle
+          sx={{
+            p: 0,
+            background: `linear-gradient(135deg, ${theme.palette.error.main} 0%, ${theme.palette.error.dark} 100%)`,
+            color: 'white',
+            position: 'relative'
+          }}
+        >
+          <Box sx={{ p: 3, pr: 6 }}>
+            <Typography variant="h6" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+              <PersonOffIcon />
+              Deleted Employee Details
+            </Typography>
+            <Typography variant="body2" sx={{ opacity: 0.9, mt: 0.5 }}>
+              Complete information for deleted employee
+            </Typography>
+          </Box>
+          <IconButton
+            onClick={() => setViewOpen(false)}
+            sx={{
+              position: 'absolute',
+              right: 8,
+              top: 8,
+              color: 'white',
+              '&:hover': { bgcolor: alpha(theme.palette.common.white, 0.1) }
+            }}
+          >
+            <CloseIcon />
+          </IconButton>
+        </DialogTitle>
+
+        <DialogContent sx={{ p: 0 }}>
+          <Card elevation={0}>
+            <CardContent sx={{ p: 3 }}>
+              <Stack spacing={3}>
+                {/* Employee Header */}
+                <Stack direction="row" spacing={3} alignItems="center">
+                  <Avatar 
+                    sx={{ 
+                      width: 80, 
+                      height: 80, 
+                      bgcolor: theme.palette.error.main,
+                      fontSize: '1.75rem',
+                      fontWeight: 600,
+                      border: `3px solid ${alpha(theme.palette.error.main, 0.1)}`
+                    }}
+                  >
+                    {getInitials(selectedDriver?.first_name, selectedDriver?.last_name)}
+                  </Avatar>
+                  <Box sx={{ flex: 1 }}>
+                    <Typography 
+                      variant="h4" 
+                      sx={{ 
+                        fontWeight: 700, 
+                        mb: 1,
+                        textDecoration: 'line-through',
+                        color: 'text.secondary'
+                      }}
+                    >
+                      {selectedDriver?.first_name} {selectedDriver?.last_name}
+                    </Typography>
+                    <Stack direction="row" spacing={1} flexWrap="wrap">
+                      <Chip
+                        label="Deleted Employee"
+                        color="error"
+                        icon={<DeleteForeverIcon />}
+                        sx={{ fontWeight: 600, fontSize: '0.875rem' }}
+                      />
+                      <Chip
+                        label={getTimeAgoText(selectedDriver?.deletionDate)}
+                        variant="outlined"
+                        color="error"
+                        icon={<AccessTimeIcon />}
+                        sx={{ fontWeight: 500, fontSize: '0.875rem' }}
+                      />
+                    </Stack>
+                  </Box>
+                </Stack>
+
+                <Divider />
+
+                {/* Personal Information Section */}
+                <Box>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <PersonIcon />
+                    Personal Information
+                  </Typography>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} sm={6}>
+                      <Stack spacing={1}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <EmailIcon sx={{ fontSize: '1rem' }} />
+                          Email Address
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                          {selectedDriver?.email || "—"}
+                        </Typography>
+                      </Stack>
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6}>
+                      <Stack spacing={1}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <PhoneIcon sx={{ fontSize: '1rem' }} />
+                          Phone Number
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                          {normalizePhoneNumber(selectedDriver?.phone) || "—"}
+                        </Typography>
+                      </Stack>
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6}>
+                      <Stack spacing={1}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <BadgeIcon sx={{ fontSize: '1rem' }} />
+                          License Number
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600, fontFamily: 'monospace', color: 'text.primary' }}>
+                          {selectedDriver?.government_id || "—"}
+                        </Typography>
+                      </Stack>
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6}>
+                      <Stack spacing={1}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5, display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                          <CakeIcon sx={{ fontSize: '1rem' }} />
+                          Date of Birth
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                          {formatDate(selectedDriver?.dob)}
+                        </Typography>
+                      </Stack>
+                    </Grid>
+                  </Grid>
+                </Box>
+
+                <Divider />
+
+                {/* Employment History Section */}
+                <Box>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'primary.main', display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <CalendarTodayIcon />
+                    Employment History
+                  </Typography>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} sm={6}>
+                      <Stack spacing={1}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          Creation Date
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                          {formatDate(selectedDriver?.creationDate)}
+                        </Typography>
+                      </Stack>
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6}>
+                      <Stack spacing={1}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          Created By
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                          {selectedDriver?.createdBy || "—"}
+                        </Typography>
+                      </Stack>
+                    </Grid>
+                  </Grid>
+                </Box>
+
+                {/* Deletion Information Section */}
+                <Box sx={{ bgcolor: alpha(theme.palette.error.main, 0.05), p: 3, borderRadius: 2, border: `1px solid ${alpha(theme.palette.error.main, 0.2)}` }}>
+                  <Typography variant="h6" sx={{ mb: 2, fontWeight: 600, color: 'error.main', display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <DeleteForeverIcon />
+                    Deletion Information
+                  </Typography>
+                  <Grid container spacing={3}>
+                    <Grid item xs={12} sm={6}>
+                      <Stack spacing={1}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          Deletion Date
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'text.primary' }}>
+                          {formatDate(selectedDriver?.deletionDate)}
+                        </Typography>
+                      </Stack>
+                    </Grid>
+                    
+                    <Grid item xs={12} sm={6}>
+                      <Stack spacing={1}>
+                        <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 500, textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                          Time Since Deletion
+                        </Typography>
+                        <Typography variant="body1" sx={{ fontWeight: 600, color: 'error.main' }}>
+                          {getTimeAgoText(selectedDriver?.deletionDate)} ({getDaysSinceDeletion(selectedDriver?.deletionDate) || 0} days)
+                        </Typography>
+                      </Stack>
+                    </Grid>
+                  </Grid>
+                </Box>
+              </Stack>
+            </CardContent>
+          </Card>
+        </DialogContent>
+
+        <DialogActions sx={{ p: 3, pt: 0 }}>
+          <Button
+            onClick={() => setViewOpen(false)}
+            variant="contained"
+            fullWidth
+            sx={{ borderRadius: 2, py: 1.5, textTransform: 'none', fontWeight: 600 }}
+          >
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+    </>
+  );
 }
 
-export default DeletedDriver;
+export default DeletedDriver;   

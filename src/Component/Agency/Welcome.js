@@ -2,31 +2,193 @@ import React, { useEffect, useState } from "react";
 import {
   Box,
   Typography,
-  Card,
-  CardContent,
   Grid,
-  Avatar,
+  Card,
+  alpha,
 } from "@mui/material";
-import { styled } from "@mui/material/styles";
+import { useTheme } from '@mui/material/styles';
 import GroupIcon from "@mui/icons-material/Group";
 import StoreIcon from "@mui/icons-material/Store";
 import FolderOpenIcon from "@mui/icons-material/FolderOpen";
+import TrendingUpIcon from "@mui/icons-material/TrendingUp";
+import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import axios from "axios";
 import Cookies from "js-cookie";
-import Result from "./Result/Result"
+import Result from "./Result/Result";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
-const GradientCard = styled(Card)(({ theme }) => ({
-  background: theme.palette.background.paper,
-  borderRadius: 20,
-  boxShadow: "0 6px 20px rgba(0,0,0,0.1)",
-  transition: "transform 0.3s ease",
-  "&:hover": {
-    transform: "translateY(-5px)",
-  },
-}));
+// Utility functions
+const fNumber = (number) => {
+  return new Intl.NumberFormat().format(number);
+};
 
+const fPercent = (number) => {
+  return `${number}%`;
+};
+
+const fShortenNumber = (number) => {
+  if (number >= 1000000) {
+    return `${(number / 1000000).toFixed(1)}M`;
+  }
+  if (number >= 1000) {
+    return `${(number / 1000).toFixed(1)}K`;
+  }
+  return fNumber(number);
+};
+
+// Simple line chart component using CSS
+const MiniChart = ({ data, color }) => {
+  const max = Math.max(...data);
+  const min = Math.min(...data);
+  const range = max - min;
+  
+  const points = data.map((value, index) => {
+    const x = (index / (data.length - 1)) * 84;
+    const y = range === 0 ? 28 : 56 - ((value - min) / range) * 56;
+    return `${x},${y}`;
+  }).join(' ');
+
+  return (
+    <Box sx={{ width: 84, height: 56, position: 'relative' }}>
+      <svg width="84" height="56" style={{ display: 'block' }}>
+        <polyline
+          fill="none"
+          stroke={color}
+          strokeWidth="2"
+          points={points}
+          style={{
+            filter: 'drop-shadow(0px 2px 4px rgba(0,0,0,0.1))'
+          }}
+        />
+        {data.map((value, index) => {
+          const x = (index / (data.length - 1)) * 84;
+          const y = range === 0 ? 28 : 56 - ((value - min) / range) * 56;
+          return (
+            <circle
+              key={index}
+              cx={x}
+              cy={y}
+              r="2"
+              fill={color}
+            />
+          );
+        })}
+      </svg>
+    </Box>
+  );
+};
+
+// New DashboardCard component based on reference design
+function DashboardCard({
+  icon,
+  title,
+  total,
+  chart,
+  percent,
+  color = 'primary',
+  ...other
+}) {
+  const theme = useTheme();
+
+  const renderTrending = () => (
+    <Box
+      sx={{
+        top: 16,
+        gap: 0.5,
+        right: 16,
+        display: 'flex',
+        position: 'absolute',
+        alignItems: 'center',
+        color: percent >= 0 ? 'success.main' : 'error.main',
+      }}
+    >
+      {percent < 0 ? (
+        <TrendingDownIcon sx={{ width: 20, height: 20 }} />
+      ) : (
+        <TrendingUpIcon sx={{ width: 20, height: 20 }} />
+      )}
+      <Box component="span" sx={{ typography: 'subtitle2', fontWeight: 600 }}>
+        {percent > 0 && '+'}
+        {fPercent(percent)}
+      </Box>
+    </Box>
+  );
+
+  return (
+    <Card
+      sx={{
+        p: 3,
+        boxShadow: 'none',
+        position: 'relative',
+        color: `${color}.darker`,
+        backgroundColor: 'common.white',
+        backgroundImage: `linear-gradient(135deg, ${alpha(theme.palette[color].light, 0.48)}, ${alpha(theme.palette[color].main, 0.48)})`,
+        border: `1px solid ${alpha(theme.palette[color].main, 0.12)}`,
+        transition: 'all 0.3s ease',
+        '&:hover': {
+          transform: 'translateY(-4px)',
+          boxShadow: `0 12px 24px ${alpha(theme.palette[color].main, 0.15)}`,
+        },
+        ...other.sx,
+      }}
+      {...other}
+    >
+      <Box sx={{ width: 48, height: 48, mb: 3, color: `${color}.main` }}>
+        {icon}
+      </Box>
+
+      {renderTrending()}
+
+      <Box
+        sx={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'flex-end',
+          justifyContent: 'flex-end',
+        }}
+      >
+        <Box sx={{ flexGrow: 1, minWidth: 112 }}>
+          <Box sx={{ 
+            mb: 1, 
+            typography: 'subtitle2',
+            color: 'text.secondary',
+            fontWeight: 500,
+          }}>
+            {title}
+          </Box>
+
+          <Box sx={{ 
+            typography: 'h4',
+            fontWeight: 700,
+            color: 'text.primary',
+          }}>
+            {fShortenNumber(total)}
+          </Box>
+        </Box>
+
+        <MiniChart 
+          data={chart.series} 
+          color={theme.palette[color].main}
+        />
+      </Box>
+
+      {/* Background decoration */}
+      <Box
+        sx={{
+          top: 0,
+          left: -20,
+          width: 240,
+          zIndex: -1,
+          height: 240,
+          opacity: 0.1,
+          position: 'absolute',
+          background: `radial-gradient(circle, ${theme.palette[color].main} 0%, transparent 70%)`,
+        }}
+      />
+    </Card>
+  );
+}
 
 const Welcome = () => {
   const [counts, setCounts] = useState({
@@ -36,12 +198,20 @@ const Welcome = () => {
     totalAgencies: 0,
   });
 
+  // Debug: Log the current counts state
+  console.log("Current counts state:", counts);
+
   useEffect(() => {
     const fetchCounts = async () => {
       try {
         const token = Cookies.get("token");
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         const res = await axios.get(`${API_URL}/agency/getCustomerAndAgencyCount`);
+        
+        // Debug: Log the API response to see what fields are actually returned
+        console.log("API Response:", res.data);
+        console.log("Available keys:", Object.keys(res.data));
+        
         setCounts(res.data);
       } catch (err) {
         console.error("Failed to fetch dashboard counts:", err);
@@ -51,21 +221,42 @@ const Welcome = () => {
     fetchCounts();
   }, []);
 
+  // Sample chart data - you can replace this with real data
+  const generateChartData = () => [10, 15, 12, 18, 20, 25, 22, 30];
+
   const metrics = [
     {
-      icon: <FolderOpenIcon />,
+      icon: <FolderOpenIcon sx={{ fontSize: 28, color: 'inherit' }} />,
       title: "Total companies",
-      value: counts.totalCustomers,
+      total: counts.totalCustomers,
+      color: 'primary',
+      percent: 15.2,
+      chart: {
+        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+        series: generateChartData(),
+      },
     },
     {
-      icon: <GroupIcon />,
+      icon: <GroupIcon sx={{ fontSize: 28, color: 'inherit' }} />,
       title: "Total Test scheduled",
-      value: counts.activeCustomers,
+      total: counts.activeCustomers,
+      color: 'success',
+      percent: 8.7,
+      chart: {
+        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+        series: generateChartData(),
+      },
     },
     {
-      icon: <StoreIcon />,
+      icon: <StoreIcon sx={{ fontSize: 28, color: 'inherit' }} />,
       title: "Total Drivers",
-      value: counts.totalDrivers,
+      total: counts.totalDrivers || counts.driverCount || counts.driversCount || 0, // Try multiple possible field names
+      color: 'warning',
+      percent: -2.5,
+      chart: {
+        categories: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug'],
+        series: generateChartData(),
+      },
     },
   ];
 
@@ -88,24 +279,17 @@ const Welcome = () => {
       </Typography>
 
       <Box sx={{ display: "flex", justifyContent: "center" }}>
-        <Grid container spacing={4} justifyContent="center" maxWidth="md">
+        <Grid container spacing={4} justifyContent="center" maxWidth="lg">
           {metrics.map((metric, idx) => (
             <Grid item xs={12} sm={6} md={4} key={idx}>
-              <GradientCard>
-                <CardContent>
-                  <Box display="flex" alignItems="center" gap={2}>
-                    <Avatar sx={{ bgcolor: "#000000" }}>{metric.icon}</Avatar>
-                    <Box>
-                      <Typography color="text.secondary" variant="subtitle2">
-                        {metric.title}
-                      </Typography>
-                      <Typography variant="h5" sx={{ fontWeight: 600 }}>
-                        {metric.value}
-                      </Typography>
-                    </Box>
-                  </Box>
-                </CardContent>
-              </GradientCard>
+              <DashboardCard
+                icon={metric.icon}
+                title={metric.title}
+                total={metric.total}
+                percent={metric.percent}
+                color={metric.color}
+                chart={metric.chart}
+              />
             </Grid>
           ))}
         </Grid>

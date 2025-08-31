@@ -20,6 +20,8 @@ import {
   Divider,
 } from "@mui/material";
 import { useTheme, alpha } from "@mui/material/styles";
+
+// Icons
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CancelIcon from "@mui/icons-material/Cancel";
@@ -37,6 +39,8 @@ import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import CustomerContext from "../../../Context/Admin/Customer/CustomerContext";
 
 const normalizePhoneNumber = require("../../Utils/normalizePhone");
+
+// Field configurations
 const fieldConfig = {
   basic: {
     title: "Basic Information",
@@ -71,6 +75,7 @@ const fieldConfig = {
   }
 };
 
+// US States
 const states = [
   "Alabama", "Alaska", "Arizona", "Arkansas", "California", "Colorado",
   "Connecticut", "Delaware", "Florida", "Georgia", "Hawaii", "Idaho",
@@ -216,6 +221,7 @@ const CompanyDetails = () => {
 
   return (
     <Box sx={{ maxWidth: 900, mx: 'auto' }}>
+      {/* Compact Header */}
       <Paper
         elevation={0}
         sx={{
@@ -281,9 +287,13 @@ const CompanyDetails = () => {
           )}
         </Stack>
       </Paper>
+
+      {/* Content Grid */}
       <Grid container spacing={2}>
+        {/* Basic & Contact Column */}
         <Grid item xs={12} md={6}>
           <Stack spacing={2}>
+            {/* Basic Information */}
             <Card sx={{ borderRadius: 2 }}>
               <Box sx={{ p: 1.5, borderBottom: 1, borderColor: 'divider', bgcolor: alpha(fieldConfig.basic.color, 0.05) }}>
                 <Typography variant="subtitle2" fontWeight={600} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -297,6 +307,8 @@ const CompanyDetails = () => {
                 )}
               </CardContent>
             </Card>
+
+            {/* Contact Details */}
             <Card sx={{ borderRadius: 2 }}>
               <Box sx={{ p: 1.5, borderBottom: 1, borderColor: 'divider', bgcolor: alpha(fieldConfig.contact.color, 0.05) }}>
                 <Typography variant="subtitle2" fontWeight={600} sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -312,6 +324,8 @@ const CompanyDetails = () => {
             </Card>
           </Stack>
         </Grid>
+
+        {/* Address Column */}
         <Grid item xs={12} md={6}>
           <Card sx={{ borderRadius: 2, height: '100%' }}>
             <Box sx={{ p: 1.5, borderBottom: 1, borderColor: 'divider', bgcolor: alpha(fieldConfig.address.color, 0.05) }}>
@@ -328,6 +342,8 @@ const CompanyDetails = () => {
           </Card>
         </Grid>
       </Grid>
+
+      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}

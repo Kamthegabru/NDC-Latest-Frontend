@@ -258,7 +258,7 @@ function ViewAgency() {
                     }}
                 >
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-                        <Typography variant="h5" sx={{
+                        <Typography variant="h7" className="max-w-[250px] " sx={{
                             fontWeight: "bold",
                             color: "#003366",
                             letterSpacing: 1,
@@ -374,8 +374,12 @@ function ViewAgency() {
                                 <RefreshIcon />
                             </IconButton>
                         </Tooltip>
+
+
                         <CreateNewAgency />
-                        <Tooltip title="Export Agency Data">
+
+
+                        <Tooltip className="max-w-[200px] "  title="Export Agency Data">
                             <span><ExportAgency /></span>
                         </Tooltip>
                     </Box>

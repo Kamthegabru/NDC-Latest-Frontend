@@ -7,12 +7,16 @@ import DeletedDriver from "./DeletedDriver";
 function Driver() {
     return (
         <>
-            <div className="container" style={{ marginTop: '40px' }}>
+            <div className="container" style={{ marginTop: '15px' }}>
+
+<div className="flex flex-row justify-between align-middle mb-4">
                 <h2 style={{color:"#003366"}}>Employees Information</h2>
                 <AddDriver/>
-                <p style={{fontSize:'28px', fontWeight:500,marginBottom:'0px'}}>Active Employees</p>
+</div>
+
+                <p style={{fontSize:'28px', fontWeight:500,marginBottom:'7px'}}>Active Employees</p>
                 <ActiveDriver/>
-                <p style={{fontSize:'28px', fontWeight:500,marginBottom:'0px', marginTop:'30px'}}>Deleted Employees</p>
+                <p style={{fontSize:'28px', fontWeight:500,marginBottom:'7px', marginTop:'30px'}}>Deleted Employees</p>
                 <DeletedDriver/>
             </div>
         </>
