@@ -1,93 +1,136 @@
 /* styles/BackgroundImage.css */
 
-/* Base styling for the hero background */
+/* Professional slider base with triple-layer system */
 .bg-custom {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-blend-mode: darken;
   position: relative;
   overflow: hidden;
 }
 
-/* Desktop carousel animation */
+/* Triple-layer crossfade system - eliminates blink effect completely */
+.bg-custom,
+.bg-custom::before,
+.bg-custom::after {
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+.bg-custom::before,
+.bg-custom::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  pointer-events: none;
+  transition: opacity 2s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Layer system: Base layer (always visible) */
+.bg-custom {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+    url('../../../public/Images/Mack-Anthem.jpg');
+}
+
+/* Middle layer */
+.bg-custom::before {
+  z-index: 1;
+  opacity: 0;
+}
+
+/* Top layer */
+.bg-custom::after {
+  z-index: 2;
+  opacity: 0;
+}
+
+/* Slide 1 - Base layer visible, others fade out */
+.bg-custom.slide-1 {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+    url('../../../public/Images/Mack-Anthem.jpg');
+}
+
+.bg-custom.slide-1::before {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+    url('../../../public/Images/mack-anthem1.jpg');
+  opacity: 0;
+}
+
+.bg-custom.slide-1::after {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+    url('../../../public/Images/mack-anthem4.jpg');
+  opacity: 0;
+}
+
+/* Slide 2 - Middle layer visible */
+.bg-custom.slide-2 {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+    url('../../../public/Images/Mack-Anthem.jpg');
+}
+
+.bg-custom.slide-2::before {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+    url('../../../public/Images/mack-anthem1.jpg');
+  opacity: 1;
+}
+
+.bg-custom.slide-2::after {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+    url('../../../public/Images/mack-anthem4.jpg');
+  opacity: 0;
+}
+
+/* Slide 3 - Top layer visible */
+.bg-custom.slide-3 {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+    url('../../../public/Images/Mack-Anthem.jpg');
+}
+
+.bg-custom.slide-3::before {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+    url('../../../public/Images/mack-anthem1.jpg');
+  opacity: 0;
+}
+
+.bg-custom.slide-3::after {
+  background-image: 
+    linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
+    url('../../../public/Images/mack-anthem4.jpg');
+  opacity: 1;
+}
+
+/* Professional static positioning for all devices */
 @media (min-width: 769px) {
-  .bg-custom {
-    animation: bgSlideDesktop 18s infinite ease-in-out;
-    transition: background-image 2s ease-in-out;
-  }
-  
-  @keyframes bgSlideDesktop {
-    0%, 100% {
-      background-image: 
-        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-        url('../../../public/Images/Mack-Anthem.jpg');
-      background-size: 110%;
-    }
-    30% {
-      background-size: 100%;
-    }
-    33% {
-      background-image: 
-        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-        url('../../../public/Images/mack-anthem1.jpg');
-      background-size: 110%;
-    }
-    63% {
-      background-size: 100%;
-    }
-    66% {
-      background-image: 
-        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-        url('../../../public/Images/mack-anthem4.jpg');
-      background-size: 110%;
-    }
-    96% {
-      background-size: 100%;
-    }
+  .bg-custom,
+  .bg-custom::before,
+  .bg-custom::after {
+    transform: none;
+    animation: none;
   }
 }
 
-/* Mobile carousel animation - optimized for small screens */
+/* Mobile optimizations */
 @media (max-width: 768px) {
-  .bg-custom {
-    animation: bgSlideMobile 18s infinite ease-in-out;
-    transition: background-image 2s ease-in-out;
+  .bg-custom,
+  .bg-custom::before,
+  .bg-custom::after {
     background-size: cover !important;
     background-position: center center !important;
-  }
-  
-  @keyframes bgSlideMobile {
-    0%, 100% {
-      background-image: 
-        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-        url('../../../public/Images/Mack-Anthem.jpg');
-    }
-    25% {
-      background-image: 
-        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-        url('../../../public/Images/Mack-Anthem.jpg');
-    }
-    33% {
-      background-image: 
-        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-        url('../../../public/Images/mack-anthem1.jpg');
-    }
-    58% {
-      background-image: 
-        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-        url('../../../public/Images/mack-anthem1.jpg');
-    }
-    66% {
-      background-image: 
-        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-        url('../../../public/Images/mack-anthem4.jpg');
-    }
-    91% {
-      background-image: 
-        linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-        url('../../../public/Images/mack-anthem4.jpg');
-    }
+    transform: none;
+    animation: none;
   }
 }
 
@@ -102,7 +145,9 @@
 
 /* Ensure images are fully visible on very small screens */
 @media (max-width: 375px) {
-  .bg-custom {
+  .bg-custom,
+  .bg-custom::before,
+  .bg-custom::after {
     background-size: cover !important;
     background-position: 50% 50% !important;
   }
@@ -154,8 +199,7 @@
 }
 
 /* Preload images for smoother transitions */
-.bg-custom::before {
-  content: "";
+.bg-custom-preload {
   position: absolute;
   width: 0;
   height: 0;
@@ -164,6 +208,5 @@
   background-image: 
     url('../../../public/Images/Mack-Anthem.jpg'),
     url('../../../public/Images/mack-anthem1.jpg'),
-    url('../../../public/Images/mack-anthem4.jpg'),
-    url('../../../public/Images/mack-anthem3.jpg');
+    url('../../../public/Images/mack-anthem4.jpg');
 }

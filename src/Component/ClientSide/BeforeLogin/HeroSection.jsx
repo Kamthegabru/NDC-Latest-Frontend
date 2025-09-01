@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router-dom";
 import "../../styles/BackgroundImage.css";
@@ -18,6 +18,32 @@ export default function HeroComponent() {
   const [errorMsg, setErrorMsg] = useState("");
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  
+  // Professional slider state
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [nextCycle, setNextCycle] = useState(false);
+  
+  const slides = [
+    'slide-1',
+    'slide-2', 
+    'slide-3'
+  ];
+  
+  // Ultra-smooth no-blink infinite slider
+  useEffect(() => {
+    const slideInterval = setInterval(() => {
+      setCurrentSlide((prev) => {
+        const next = (prev + 1) % slides.length;
+        // Update base layer during transition for seamless loop
+        if (next === 0) {
+          setTimeout(() => setNextCycle(c => !c), 1000);
+        }
+        return next;
+      });
+    }, 6000);
+    
+    return () => clearInterval(slideInterval);
+  }, [slides.length]);
 
   return (
     <>
@@ -29,14 +55,18 @@ export default function HeroComponent() {
 
       <section
         id="hero-section"
-        className="w-full bg-custom h-[60vh] md:h-[100vh] text-white pt-24 px-2 sm:px-6 text-center"
+        className={`w-full bg-custom ${slides[currentSlide]} ${nextCycle ? 'next-cycle' : ''} active h-[60vh] md:h-[100vh] text-white pt-24 px-2 sm:px-6 text-center`}
       >
+        {/* Preload div for better performance */}
+        <div className="bg-custom-preload" />
+        
         <motion.div
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true }}
           variants={fadeUp}
           className="relative max-w-5xl mx-auto"
+          style={{ zIndex: 10 }}
         >
           {/* Badge */}
           <div className="inline-flex items-center pr-3 pl-2 py-1 mb-4 sm:mb-6 border border-[#1b3f3d] rounded-full bg-[#062222] text-white/80 text-xs sm:text-sm font-medium shadow-lg">

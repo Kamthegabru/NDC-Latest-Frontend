@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useContext, useMemo } from "react";
 import {
   Box,
   Typography,
@@ -15,6 +15,7 @@ import TrendingDownIcon from "@mui/icons-material/TrendingDown";
 import axios from "axios";
 import Cookies from "js-cookie";
 import Result from "./Result/Result";
+import AdminContext from "../../Context/Agency/AgencyContext";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -191,6 +192,9 @@ function DashboardCard({
 }
 
 const Welcome = () => {
+  const adminContext = useContext(AdminContext);
+  const { AllUserData, getAllUserData } = adminContext || {};
+
   const [counts, setCounts] = useState({
     totalCustomers: 0,
     activeCustomers: 0,
@@ -198,28 +202,61 @@ const Welcome = () => {
     totalAgencies: 0,
   });
 
-  // Debug: Log the current counts state
+  // Calculate total drivers from customer data
+  const totalDriversFromCustomers = useMemo(() => {
+    if (!AllUserData || !Array.isArray(AllUserData)) return 0;
+    
+    return AllUserData.reduce((total, user) => {
+      const driverCount = 
+        parseInt(user.companyInfoData?.employees) || 
+        parseInt(user.companyInfoData?.driverCount) || 
+        parseInt(user.activeDriversCount) || 0;
+      
+      return total + driverCount;
+    }, 0);
+  }, [AllUserData]);
+
+  // Debug: Log the current counts state and customer data
   console.log("Current counts state:", counts);
+  console.log("AllUserData:", AllUserData);
+  console.log("Calculated total drivers:", totalDriversFromCustomers);
 
   useEffect(() => {
-    const fetchCounts = async () => {
+    const fetchData = async () => {
       try {
         const token = Cookies.get("token");
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        const res = await axios.get(`${API_URL}/agency/getCustomerAndAgencyCount`);
         
-        // Debug: Log the API response to see what fields are actually returned
+        // Fetch dashboard counts from API
+        const res = await axios.get(`${API_URL}/agency/getCustomerAndAgencyCount`);
         console.log("API Response:", res.data);
         console.log("Available keys:", Object.keys(res.data));
         
         setCounts(res.data);
+        
+        // Also fetch all user data for driver count calculation
+        if (getAllUserData && adminContext) {
+          await getAllUserData();
+        }
       } catch (err) {
-        console.error("Failed to fetch dashboard counts:", err);
+        console.error("Failed to fetch dashboard data:", err);
       }
     };
 
-    fetchCounts();
-  }, []);
+    if (adminContext) {
+      fetchData();
+    }
+  }, [adminContext, getAllUserData]);
+
+  // Update counts when AllUserData changes
+  useEffect(() => {
+    if (AllUserData && Array.isArray(AllUserData)) {
+      setCounts(prevCounts => ({
+        ...prevCounts,
+        totalDrivers: totalDriversFromCustomers
+      }));
+    }
+  }, [AllUserData, totalDriversFromCustomers]);
 
   // Sample chart data - you can replace this with real data
   const generateChartData = () => [10, 15, 12, 18, 20, 25, 22, 30];
@@ -250,7 +287,7 @@ const Welcome = () => {
     {
       icon: <StoreIcon sx={{ fontSize: 28, color: 'inherit' }} />,
       title: "Total Drivers",
-      total: counts.totalDrivers || counts.driverCount || counts.driversCount || 0, // Try multiple possible field names
+      total: totalDriversFromCustomers, // Use calculated total from customers
       color: 'warning',
       percent: -2.5,
       chart: {
