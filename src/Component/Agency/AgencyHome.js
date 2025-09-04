@@ -5,7 +5,6 @@ import axios from "axios";
 import Cookies from "js-cookie"
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-
 import Navbar from "./Navbar";
 import Welcome from "./Welcome";
 import ViewCustomer from "./Customer/ViewCustomer";
@@ -13,7 +12,6 @@ import ViewCustomerDetails from "./Customer/ViewUserDetails";
 import CreateNewOrder from "./CreateNewOrder/CreateNewOrder";
 import Result from "./Result/Result"
 import Random from "./Random/Random"
-
 import AdminContext from "../../Context/Agency/AgencyContext";
 import CustomerState from "../../Context/Agency/Customer/CustomerState"
 import CreateNewOrderState from "../../Context/Agency/CreateNewOrder/CreateNewOrderState";

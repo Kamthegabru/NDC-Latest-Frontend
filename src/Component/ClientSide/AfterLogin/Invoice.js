@@ -8,8 +8,6 @@ import {
   Paper, Box, useMediaQuery
 } from "@mui/material";
 import { useTheme, alpha } from "@mui/material/styles";
-
-// Icons
 import VisibilityIcon from "@mui/icons-material/Visibility";
 import DownloadIcon from "@mui/icons-material/Download";
 import ReceiptIcon from "@mui/icons-material/Receipt";
@@ -19,7 +17,6 @@ import ImageIcon from "@mui/icons-material/Image";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import PendingIcon from "@mui/icons-material/Pending";
-
 import HomeContext from "../../../Context/ClientSide/AfterLogin/Home/HomeContext";
 
 function Invoice() {

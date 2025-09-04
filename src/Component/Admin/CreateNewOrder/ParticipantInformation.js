@@ -60,10 +60,35 @@ function ParticipantInformation() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    
+    // Handle SSN state change - combine with SSN value
+    if (name === "ssnState") {
+      const ssnValue = formData.ssn?.replace(/^[A-Z]{2}/, '') || ''; // Remove any existing state prefix
+      const combinedSSN = value ? `${value}${ssnValue}` : ssnValue;
+      setFormData((prev) => ({
+        ...prev,
+        ssnState: value,
+        ssn: combinedSSN,
+      }));
+    }
+    // Handle SSN field change - preserve state prefix if it exists
+    else if (name === "ssn") {
+      const statePrefix = formData.ssnState || '';
+      // Remove any state code from the beginning of the input
+      const cleanedValue = value.replace(/^[A-Z]{2}/, '');
+      const combinedSSN = statePrefix ? `${statePrefix}${cleanedValue}` : cleanedValue;
+      setFormData((prev) => ({
+        ...prev,
+        ssn: combinedSSN,
+      }));
+    }
+    // Handle all other fields normally
+    else {
+      setFormData((prev) => ({
+        ...prev,
+        [name]: type === "checkbox" ? checked : value,
+      }));
+    }
   };
 
   const handlePrevious = () => {
@@ -82,7 +107,15 @@ function ParticipantInformation() {
     getSiteInformation();
   };
 
-  // Validate required fields
+  // Helper function to display SSN without state prefix in the input field
+  const getDisplaySSN = () => {
+    if (formData.ssn && formData.ssnState) {
+      // Remove the state prefix for display
+      return formData.ssn.replace(new RegExp(`^${formData.ssnState}`), '');
+    }
+    return formData.ssn || '';
+  };
+
   const validateRequiredFields = () => {
     const required = [
       formData.firstName,
@@ -186,7 +219,7 @@ function ParticipantInformation() {
               required
               label="SSN/EID"
               name="ssn"
-              value={formData.ssn}
+              value={getDisplaySSN()}
               onChange={handleChange}
               sx={{
                 '& .MuiOutlinedInput-root': {
