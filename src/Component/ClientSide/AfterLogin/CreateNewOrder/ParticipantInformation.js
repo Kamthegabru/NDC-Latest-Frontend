@@ -71,18 +71,7 @@ function ParticipantInformation() {
         ssn: combinedSSN,
       }));
     }
-    // Handle SSN field change - preserve state prefix if it exists
-    else if (name === "ssn") {
-      const statePrefix = formData.ssnState || '';
-      // Remove any state code from the beginning of the input
-      const cleanedValue = value.replace(/^[A-Z]{2}/, '');
-      const combinedSSN = statePrefix ? `${statePrefix}${cleanedValue}` : cleanedValue;
-      setFormData((prev) => ({
-        ...prev,
-        ssn: combinedSSN,
-      }));
-    }
-    // Handle all other fields normally
+   
     else {
       setFormData((prev) => ({
         ...prev,

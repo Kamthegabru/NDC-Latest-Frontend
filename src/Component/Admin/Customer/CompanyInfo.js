@@ -234,17 +234,15 @@ const CompanyDetails = () => {
       >
         <Stack direction="row" justifyContent="space-between" alignItems="center">
           <Stack direction="row" spacing={2} alignItems="center">
-            <Avatar sx={{ width: 40, height: 40, bgcolor: alpha(theme.palette.common.white, 0.2) }}>
+             <Avatar sx={{ width: 40, height: 40, bgcolor: alpha(theme.palette.common.white, 0.2) }}>
               <BusinessIcon />
             </Avatar>
             <Box>
-            
               <Typography variant="caption" sx={{ opacity: 0.9 }}>
                 Manage your company details
               </Typography>
             </Box>
           </Stack>
-          
           {!isEditMode ? (
             <Button
               variant="contained"
@@ -287,7 +285,6 @@ const CompanyDetails = () => {
           )}
         </Stack>
       </Paper>
-
       {/* Content Grid */}
       <Grid container spacing={2}>
         {/* Basic & Contact Column */}
@@ -342,8 +339,6 @@ const CompanyDetails = () => {
           </Card>
         </Grid>
       </Grid>
-
-      {/* Snackbar */}
       <Snackbar
         open={snackbar.open}
         autoHideDuration={3000}
