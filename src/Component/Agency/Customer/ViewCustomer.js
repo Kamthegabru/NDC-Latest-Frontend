@@ -44,6 +44,7 @@ import dayjs from "dayjs";
 const normalizePhoneNumber = require('../../Utils/normalizePhone');
 
 const STATUS_OPTIONS = ["All", "Active", "Inactive"];
+const SORT_OPTIONS = ["Alphabetical (A-Z)", "Alphabetical (Z-A)", "Newest First", "Oldest First"];
 const PAGE_SIZE = 10;
 
 // Cache implementation for agency customer data
@@ -76,7 +77,7 @@ function ViewCustomer() {
 
     const [searchTerm, setSearchTerm] = useState("");
     const [searchTermByUSDOT, setSearchTermByUSDOT] = useState("");
-    const [sortOrder, setSortOrder] = useState("asc");
+    const [sortOption, setSortOption] = useState("Alphabetical (A-Z)");
     const [statusFilter, setStatusFilter] = useState("All");
     const [loading, setLocalLoading] = useState(false);
     const [page, setPage] = useState(1);
@@ -144,8 +145,9 @@ function ViewCustomer() {
         }
     };
 
-    const handleSort = () => {
-        setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    const handleSortOptionChange = (event) => {
+        setSortOption(event.target.value);
+        setPage(1);
     };
 
     const handleStatusFilter = (event) => {
@@ -158,6 +160,7 @@ function ViewCustomer() {
         setSearchTerm("");
         setSearchTermByUSDOT("");
         setStatusFilter("All");
+        setSortOption("Alphabetical (A-Z)");
         setRange({ from: undefined, to: undefined });
         setPage(1);
         setSelectedIds([]);
@@ -181,7 +184,7 @@ function ViewCustomer() {
         }
     };
 
-    // Highlight top companies by activeDriversCount
+    // Enhanced filtering and sorting with alphabetical and date options
     const filteredAndSortedUsers = useMemo(() => {
         if (!AllUserData) return [];
 
@@ -204,16 +207,39 @@ function ViewCustomer() {
             });
         }
 
+        // Enhanced sorting with multiple options
         filtered.sort((a, b) => {
             const nameA = (a.companyInfoData?.companyName || a.companyName || '').toLowerCase();
             const nameB = (b.companyInfoData?.companyName || b.companyName || '').toLowerCase();
-            if (nameA < nameB) return sortOrder === "asc" ? -1 : 1;
-            if (nameA > nameB) return sortOrder === "asc" ? 1 : -1;
-            return 0;
+            
+            switch (sortOption) {
+                case "Alphabetical (A-Z)":
+                    if (nameA < nameB) return -1;
+                    if (nameA > nameB) return 1;
+                    return 0;
+                
+                case "Alphabetical (Z-A)":
+                    if (nameA > nameB) return -1;
+                    if (nameA < nameB) return 1;
+                    return 0;
+                
+                case "Newest First":
+                    const dateA = dayjs(a.createdAt || a.timestamp || a.createdDate);
+                    const dateB = dayjs(b.createdAt || b.timestamp || b.createdDate);
+                    return dateB.diff(dateA); // Newer dates first
+                
+                case "Oldest First":
+                    const dateA2 = dayjs(a.createdAt || a.timestamp || a.createdDate);
+                    const dateB2 = dayjs(b.createdAt || b.timestamp || b.createdDate);
+                    return dateA2.diff(dateB2); // Older dates first
+                
+                default:
+                    return 0;
+            }
         });
 
         return filtered;
-    }, [AllUserData, searchTerm, searchTermByUSDOT, sortOrder, statusFilter, range]);
+    }, [AllUserData, searchTerm, searchTermByUSDOT, sortOption, statusFilter, range]);
 
     const topCompanyIds = useMemo(() => {
         if (!filteredAndSortedUsers.length) return [];
@@ -300,6 +326,8 @@ function ViewCustomer() {
                         justifyContent: "space-between",
                         alignItems: "center",
                         mb: 2,
+                        flexWrap: "wrap",
+                        gap: 2
                     }}
                 >
                     <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
@@ -326,7 +354,16 @@ function ViewCustomer() {
                             />
                         )}
                     </Box>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    
+                    {/* Filters Row */}
+                    <Box sx={{ 
+                        display: "flex", 
+                        alignItems: "center", 
+                        gap: 2, 
+                        flexWrap: "wrap",
+                        width: "100%",
+                        justifyContent: "flex-end"
+                    }}>
                         <TextField
                             size="small"
                             label="Company Name"
@@ -353,11 +390,26 @@ function ViewCustomer() {
                                 ))}
                             </Select>
                         </FormControl>
+                        
+                        {/* New Sort Options */}
+                        <FormControl size="small" sx={{ minWidth: 180 }}>
+                            <InputLabel>Sort By</InputLabel>
+                            <Select
+                                value={sortOption}
+                                label="Sort By"
+                                onChange={handleSortOptionChange}
+                            >
+                                {SORT_OPTIONS.map((option) => (
+                                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                             <Typography variant="body2" sx={{ fontWeight: "bold", color: "#003366" }}>
                                 Date Range:
                             </Typography>
-                            <Box>
+                            <Box sx={{ position: "relative" }}>
                                 <Chip
                                     label={
                                         range.from && range.to
@@ -377,7 +429,8 @@ function ViewCustomer() {
                                         background: "#fff",
                                         boxShadow: 6,
                                         borderRadius: 2,
-                                        p: 2
+                                        p: 2,
+                                        right: 0
                                     }}>
                                         <DayPicker
                                             mode="range"
@@ -411,6 +464,15 @@ function ViewCustomer() {
                                 <RefreshIcon />
                             </IconButton>
                         </Tooltip>
+                        
+                        {/* Remove Selected Button */}
+                        {selectedIds.length > 0 && (
+                            <Tooltip title={`Remove ${selectedIds.length} selected`}>
+                                <IconButton onClick={handleRemoveSelected} color="error">
+                                    <DeleteIcon />
+                                </IconButton>
+                            </Tooltip>
+                        )}
                     </Box>
                 </Box>
 
@@ -428,6 +490,20 @@ function ViewCustomer() {
                     </Box>
                 ) : (
                     <>
+                        {/* Selected count indicator */}
+                        {selectedIds.length > 0 && (
+                            <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <Chip
+                                    label={`${selectedIds.length} customer${selectedIds.length > 1 ? 's' : ''} selected`}
+                                    color="primary"
+                                    variant="outlined"
+                                />
+                                <Typography variant="body2" color="text.secondary">
+                                    Current sort: {sortOption}
+                                </Typography>
+                            </Box>
+                        )}
+                        
                         <Table stickyHeader>
                             <TableHead>
                                 <TableRow sx={{ backgroundColor: "#003366" }}>
@@ -449,26 +525,23 @@ function ViewCustomer() {
                                         Sr
                                     </TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>
-                                        <TableSortLabel
-                                            active={true}
-                                            direction={sortOrder}
-                                            onClick={handleSort}
-                                            sx={{
-                                                color: "#003366",
-                                                '&.Mui-active': {
-                                                    color: "#003366",
-                                                },
-                                                '& .MuiTableSortLabel-icon': {
-                                                    color: "#003366 !important",
-                                                },
-                                            }}
-                                        >
-                                            Company Name
-                                        </TableSortLabel>
+                                        Company Name
+                                        {(sortOption.includes("Alphabetical") || sortOption.includes("Newest") || sortOption.includes("Oldest")) && (
+                                            <Box component="span" sx={{ ml: 1, fontSize: 12, opacity: 0.7 }}>
+                                                ({sortOption})
+                                            </Box>
+                                        )}
                                     </TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Contact No</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Email</TableCell>
-                                    <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Date Created</TableCell>
+                                    <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>
+                                        Date Created
+                                        {(sortOption === "Newest First" || sortOption === "Oldest First") && (
+                                            <Box component="span" sx={{ ml: 1, fontSize: 12, opacity: 0.7 }}>
+                                                ({sortOption})
+                                            </Box>
+                                        )}
+                                    </TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Active Employees</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Status</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>USDOT</TableCell>
@@ -609,6 +682,7 @@ function ViewCustomer() {
                             <Typography variant="body2" color="text.secondary">
                                 Showing {Math.min((page - 1) * PAGE_SIZE + 1, filteredAndSortedUsers.length)} - {Math.min(page * PAGE_SIZE, filteredAndSortedUsers.length)} of {filteredAndSortedUsers.length} customers
                                 {isFromCache && " (from cache)"}
+                                {selectedIds.length > 0 && ` | ${selectedIds.length} selected`}
                             </Typography>
                             <Pagination
                                 count={Math.ceil(filteredAndSortedUsers.length / PAGE_SIZE)}
