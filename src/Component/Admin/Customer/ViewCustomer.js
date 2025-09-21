@@ -34,6 +34,7 @@ import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import StarIcon from "@mui/icons-material/Star";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import DeleteIcon from "@mui/icons-material/Delete";
+import BusinessIcon from "@mui/icons-material/Business";
 import AdminContext from "../../../Context/Admin/AdminContext";
 import CustomerContext from "../../../Context/Admin/Customer/CustomerContext";
 import ExportDriver from "./ExportDriver";
@@ -45,6 +46,7 @@ import dayjs from "dayjs";
 const normalizePhoneNumber = require('../../Utils/normalizePhone');
 
 const STATUS_OPTIONS = ["All", "Active", "Inactive"];
+const SORT_OPTIONS = ["Alphabetical (A-Z)", "Alphabetical (Z-A)", "Newest First", "Oldest First"];
 const PAGE_SIZE = 10;
 
 function ViewCustomer() {
@@ -53,7 +55,7 @@ function ViewCustomer() {
 
     const [searchTerm, setSearchTerm] = useState("");
     const [searchTermByUSDOT, setSearchTermByUSDOT] = useState("");
-    const [sortOrder, setSortOrder] = useState("asc");
+    const [sortOption, setSortOption] = useState("Alphabetical (A-Z)");
     const [statusFilter, setStatusFilter] = useState("All");
     const [loading, setLocalLoading] = useState(false);
     const [page, setPage] = useState(1);
@@ -79,8 +81,9 @@ function ViewCustomer() {
         setCurrentActiveButton(5);
     };
 
-    const handleSort = () => {
-        setSortOrder((prev) => (prev === "asc" ? "desc" : "asc"));
+    const handleSortOptionChange = (event) => {
+        setSortOption(event.target.value);
+        setPage(1);
     };
 
     const handleStatusFilter = (event) => {
@@ -93,13 +96,28 @@ function ViewCustomer() {
         setSearchTerm("");
         setSearchTermByUSDOT("");
         setStatusFilter("All");
+        setSortOption("Alphabetical (A-Z)");
         setRange({ from: undefined, to: undefined });
         setPage(1);
         setSelectedIds([]);
     };
 
-    // Highlight top companies by activeDriversCount
+    // Refresh data
+    const handleRefreshData = async () => {
+        setLocalLoading(true);
+        try {
+            await getAllAdminData();
+        } catch (error) {
+            console.error('Error refreshing customer data:', error);
+        } finally {
+            setLocalLoading(false);
+        }
+    };
+
+    // Enhanced filtering and sorting with alphabetical and date options
     const filteredAndSortedUsers = useMemo(() => {
+        if (!AllUserData || AllUserData.length === 0) return [];
+
         let filtered = AllUserData.filter((user) =>
             user.companyName.toLowerCase().includes(searchTerm.toLowerCase()) &&
             user.companyUSDOTNumber.toLowerCase().includes(searchTermByUSDOT.toLowerCase()) &&
@@ -115,16 +133,39 @@ function ViewCustomer() {
             });
         }
 
+        // Enhanced sorting with multiple options
         filtered.sort((a, b) => {
             const nameA = a.companyName.toLowerCase();
             const nameB = b.companyName.toLowerCase();
-            if (nameA < nameB) return sortOrder === "asc" ? -1 : 1;
-            if (nameA > nameB) return sortOrder === "asc" ? 1 : -1;
-            return 0;
+            
+            switch (sortOption) {
+                case "Alphabetical (A-Z)":
+                    if (nameA < nameB) return -1;
+                    if (nameA > nameB) return 1;
+                    return 0;
+                
+                case "Alphabetical (Z-A)":
+                    if (nameA > nameB) return -1;
+                    if (nameA < nameB) return 1;
+                    return 0;
+                
+                case "Newest First":
+                    const dateA = dayjs(a.createdAt);
+                    const dateB = dayjs(b.createdAt);
+                    return dateB.diff(dateA); // Newer dates first
+                
+                case "Oldest First":
+                    const dateA2 = dayjs(a.createdAt);
+                    const dateB2 = dayjs(b.createdAt);
+                    return dateA2.diff(dateB2); // Older dates first
+                
+                default:
+                    return 0;
+            }
         });
 
         return filtered;
-    }, [AllUserData, searchTerm, searchTermByUSDOT, sortOrder, statusFilter, range]);
+    }, [AllUserData, searchTerm, searchTermByUSDOT, sortOption, statusFilter, range]);
 
     const topCompanyIds = useMemo(() => {
         if (!filteredAndSortedUsers.length) return [];
@@ -141,7 +182,12 @@ function ViewCustomer() {
     // Format date for display
     const formatDate = (dateStr) => {
         if (!dateStr) return "-";
-        return dayjs(dateStr).format("DD MMM YYYY, hh:mm A");
+        try {
+            return dayjs(dateStr).format("DD MMM YYYY, hh:mm A");
+        } catch (error) {
+            console.error('Date formatting error:', error);
+            return dateStr;
+        }
     };
 
     // Selection logic
@@ -180,6 +226,7 @@ function ViewCustomer() {
                     </Button>
                 </DialogActions>
             </Dialog>
+            
             <TableContainer component={Paper} sx={{
                 mt: 3, p: 2, borderRadius: 3, boxShadow: 6,
                 background: "linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 100%)"
@@ -190,6 +237,8 @@ function ViewCustomer() {
                         justifyContent: "space-between",
                         alignItems: "center",
                         mb: 2,
+                        flexWrap: "wrap",
+                        gap: 2
                     }}
                 >
                     <Typography variant="h6" className="text-[10px] max-w-[250px] max-h-[60px]" sx={{
@@ -205,7 +254,16 @@ function ViewCustomer() {
                     }}>
                         Customer List
                     </Typography>
-                    <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+                    
+                    {/* Filters Row */}
+                    <Box sx={{ 
+                        display: "flex", 
+                        alignItems: "center", 
+                        gap: 2, 
+                        flexWrap: "wrap",
+                        width: "100%",
+                        justifyContent: "flex-end"
+                    }}>
                         <TextField
                             size="small"
                             label="Company Name"
@@ -232,11 +290,26 @@ function ViewCustomer() {
                                 ))}
                             </Select>
                         </FormControl>
+                        
+                        {/* New Sort Options */}
+                        <FormControl size="small" sx={{ minWidth: 180 }}>
+                            <InputLabel>Sort By</InputLabel>
+                            <Select
+                                value={sortOption}
+                                label="Sort By"
+                                onChange={handleSortOptionChange}
+                            >
+                                {SORT_OPTIONS.map((option) => (
+                                    <MenuItem key={option} value={option}>{option}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
+                        
                         <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
                             <Typography variant="body2" sx={{ fontWeight: "bold", color: "#003366" }}>
                                 Date Range:
                             </Typography>
-                            <Box>
+                            <Box sx={{ position: "relative" }}>
                                 <Chip
                                     label={
                                         range.from && range.to
@@ -256,7 +329,8 @@ function ViewCustomer() {
                                         background: "#fff",
                                         boxShadow: 6,
                                         borderRadius: 2,
-                                        p: 2
+                                        p: 2,
+                                        right: 0
                                     }}>
                                         <DayPicker
                                             mode="range"
@@ -279,6 +353,7 @@ function ViewCustomer() {
                                 )}
                             </Box>
                         </Box>
+                        
                         <Button
                             variant="contained"
                             color="error"
@@ -288,11 +363,19 @@ function ViewCustomer() {
                         >
                             Remove
                         </Button>
-                        <Tooltip title="Reset Filters">
-                            <IconButton onClick={handleResetFilters} color="info">
+                        
+                        <Tooltip title="Refresh Data">
+                            <IconButton onClick={handleRefreshData} color="info">
                                 <RefreshIcon />
                             </IconButton>
                         </Tooltip>
+                        
+                        <Tooltip title="Reset Filters">
+                            <IconButton onClick={handleResetFilters} color="secondary">
+                                <RefreshIcon />
+                            </IconButton>
+                        </Tooltip>
+                        
                         <Tooltip className="max-w-[200px] max-h-[60px]" title="Export Driver Data">
                             <span><ExportDriver /></span>
                         </Tooltip>
@@ -301,13 +384,35 @@ function ViewCustomer() {
                         </Tooltip>
                     </Box>
                 </Box>
+                
                 {initialLoading ? (
                     <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 300 }}>
                         <CircularProgress color="primary" size={60} />
                         <Typography sx={{ mt: 2, fontWeight: "bold", color: "#1976d2" }}>Loading Customers...</Typography>
                     </Box>
+                ) : !AllUserData || AllUserData.length === 0 ? (
+                    <Box sx={{ display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", minHeight: 200 }}>
+                        <BusinessIcon sx={{ fontSize: 60, color: "#bbb", mb: 2 }} />
+                        <Typography variant="h6" align="center" color="text.secondary">
+                            No customers found.
+                        </Typography>
+                    </Box>
                 ) : (
                     <>
+                        {/* Selected count indicator */}
+                        {selectedIds.length > 0 && (
+                            <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                                <Chip
+                                    label={`${selectedIds.length} customer${selectedIds.length > 1 ? 's' : ''} selected`}
+                                    color="primary"
+                                    variant="outlined"
+                                />
+                                <Typography variant="body2" color="text.secondary">
+                                    Current sort: {sortOption}
+                                </Typography>
+                            </Box>
+                        )}
+                        
                         <Table stickyHeader>
                             <TableHead>
                                 <TableRow sx={{ backgroundColor: "#003366" }}>
@@ -329,26 +434,23 @@ function ViewCustomer() {
                                         Sr
                                     </TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>
-                                        <TableSortLabel
-                                            active={true}
-                                            direction={sortOrder}
-                                            onClick={handleSort}
-                                            sx={{
-                                                color: "#003366",
-                                                '&.Mui-active': {
-                                                    color: "#003366",
-                                                },
-                                                '& .MuiTableSortLabel-icon': {
-                                                    color: "#003366 !important",
-                                                },
-                                            }}
-                                        >
-                                            Company Name
-                                        </TableSortLabel>
+                                        Company Name
+                                        {(sortOption.includes("Alphabetical") || sortOption.includes("Newest") || sortOption.includes("Oldest")) && (
+                                            <Box component="span" sx={{ ml: 1, fontSize: 12, opacity: 0.7 }}>
+                                                ({sortOption})
+                                            </Box>
+                                        )}
                                     </TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Contact No</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Email</TableCell>
-                                    <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Date</TableCell>
+                                    <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>
+                                        Date Created
+                                        {(sortOption === "Newest First" || sortOption === "Oldest First") && (
+                                            <Box component="span" sx={{ ml: 1, fontSize: 12, opacity: 0.7 }}>
+                                                ({sortOption})
+                                            </Box>
+                                        )}
+                                    </TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Active Employees</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Status</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>USDOT</TableCell>
@@ -360,12 +462,12 @@ function ViewCustomer() {
                                 {paginatedUsers.length === 0 ? (
                                     <TableRow>
                                         <TableCell colSpan={11} align="center">
-                                            <Typography color="text.secondary">No customers found.</Typography>
+                                            <Typography color="text.secondary">No customers found matching your criteria.</Typography>
                                         </TableCell>
                                     </TableRow>
                                 ) : (
                                     paginatedUsers.map((user, index) => (
-                                        <TableRow key={index} hover>
+                                        <TableRow key={user.id || index} hover>
                                             <TableCell align="center">
                                                 <Checkbox
                                                     checked={selectedIds.includes(user.id)}
@@ -403,7 +505,7 @@ function ViewCustomer() {
                                                     label={formatDate(user.createdAt)}
                                                     color="secondary"
                                                     variant="outlined"
-                                                    sx={{ fontWeight: "bold", fontSize: 15 }}
+                                                    sx={{ fontWeight: "bold", fontSize: 12 }}
                                                 />
                                             </TableCell>
                                             <TableCell align="center">
@@ -416,7 +518,7 @@ function ViewCustomer() {
                                             <TableCell align="center">
                                                 <Chip
                                                     label={user.status}
-                                                    color={user.status === "Active" ? "success" : "error"}
+                                                    color={user.status === "Active" ? "success" : user.status === "Inactive" ? "error" : "warning"}
                                                     variant="filled"
                                                 />
                                             </TableCell>
@@ -428,7 +530,9 @@ function ViewCustomer() {
                                                     src={user.logoUrl || ""}
                                                     alt={user.companyName}
                                                     sx={{ width: 32, height: 32, bgcolor: "#e0e0e0", mx: "auto" }}
-                                                />
+                                                >
+                                                    <BusinessIcon />
+                                                </Avatar>
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Tooltip title="View Details">
@@ -442,7 +546,12 @@ function ViewCustomer() {
                                 )}
                             </TableBody>
                         </Table>
-                        <Stack direction="row" justifyContent="center" alignItems="center" sx={{ mt: 2 }}>
+                        
+                        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
+                            <Typography variant="body2" color="text.secondary">
+                                Showing {Math.min((page - 1) * PAGE_SIZE + 1, filteredAndSortedUsers.length)} - {Math.min(page * PAGE_SIZE, filteredAndSortedUsers.length)} of {filteredAndSortedUsers.length} customers
+                                {selectedIds.length > 0 && ` | ${selectedIds.length} selected`}
+                            </Typography>
                             <Pagination
                                 count={Math.ceil(filteredAndSortedUsers.length / PAGE_SIZE)}
                                 page={page}
