@@ -35,6 +35,7 @@ import HomeWorkIcon from "@mui/icons-material/HomeWork";
 import MapIcon from "@mui/icons-material/Map";
 import MarkunreadMailboxIcon from "@mui/icons-material/MarkunreadMailbox";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
+import PersonIcon from "@mui/icons-material/Person"; // ✅ NEW
 
 import CustomerContext from "../../../Context/Agency/Customer/CustomerContext";
 
@@ -86,6 +87,8 @@ const fieldConfig = {
     icon: <PhoneIcon />,
     color: "#2e7d32",
     fields: {
+      firstName: { label: "First Name", icon: <PersonIcon /> },   // ✅ NEW
+      lastName: { label: "Last Name", icon: <PersonIcon /> },     // ✅ NEW
       contactNumber: { label: "Phone", icon: <PhoneIcon />, type: "tel" },
       email: { label: "Email", icon: <EmailIcon />, type: "email" },
     }
@@ -124,9 +127,19 @@ const CompanyDetails = () => {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
-    if (userDetails?.companyInfoData) {
-      setCompanyInfoData(userDetails.companyInfoData);
-      setTempData(userDetails.companyInfoData);
+    if (userDetails) {
+      // ✅ Merge company info + contactInfoData from API
+      const company = userDetails.companyInfoData || {};
+      const contact = userDetails.contactInfoData || {};
+      const merged = {
+        ...company,
+        firstName: contact.firstName ?? company.firstName ?? "",
+        lastName: contact.lastName ?? company.lastName ?? "",
+        email: contact.email ?? company.email ?? "",
+        contactNumber: contact.phone ?? company.contactNumber ?? "",
+      };
+      setCompanyInfoData(merged);
+      setTempData(merged);
       setLoading(false);
     }
   }, [userDetails]);
@@ -160,7 +173,7 @@ const CompanyDetails = () => {
     // Validation for numeric fields
     const numericFields = ["zip", "usdot", "suite", "employees"];
     const isContactField = field === "contactNumber";
-    
+
     if ((numericFields.includes(field) || isContactField) && !/^\d*$/.test(value)) return;
     if (isContactField && value.length > 10) return;
 
@@ -194,19 +207,9 @@ const CompanyDetails = () => {
               variant="outlined"
               SelectProps={{
                 MenuProps: {
-                  anchorOrigin: {
-                    vertical: 'bottom',
-                    horizontal: 'left',
-                  },
-                  transformOrigin: {
-                    vertical: 'top',
-                    horizontal: 'left',
-                  },
-                  PaperProps: {
-                    style: {
-                      maxHeight: 250,
-                    },
-                  },
+                  anchorOrigin: { vertical: 'bottom', horizontal: 'left' },
+                  transformOrigin: { vertical: 'top', horizontal: 'left' },
+                  PaperProps: { style: { maxHeight: 250 } },
                 },
               }}
               InputProps={{
@@ -322,13 +325,12 @@ const CompanyDetails = () => {
               <BusinessIcon />
             </Avatar>
             <Box>
-              
               <Typography variant="caption" sx={{ opacity: 0.9 }}>
                 Manage your company details
               </Typography>
             </Box>
           </Stack>
-          
+
           {!isEditMode ? (
             <Button
               variant="contained"
