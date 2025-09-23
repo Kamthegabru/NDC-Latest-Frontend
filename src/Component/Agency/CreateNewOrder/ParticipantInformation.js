@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   TextField,
   FormControl,
@@ -12,11 +12,64 @@ import {
   Button,
   Typography,
   Box,
-  InputAdornment,
 } from "@mui/material";
 import { Row, Col } from "react-bootstrap";
+import Cookies from "js-cookie";
 import CreateNewOrderContext from "../../../Context/Agency/CreateNewOrder/CreateNewOrderContext";
 import DonarPass from "./DonarPass";
+
+/* ----------------- robust current-user email resolver ----------------- */
+function base64UrlToJson(str) {
+  try {
+    const pad = "=".repeat((4 - (str.length % 4)) % 4);
+    const b64 = (str + pad).replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(atob(b64));
+  } catch {
+    return {};
+  }
+}
+async function fetchEmailFromVerify(token) {
+  const API_URL = process.env.REACT_APP_API_URL;
+  if (!API_URL || !token) return "";
+  try {
+    const res = await fetch(`${API_URL}/admin/verify`, {
+      headers: { Authorization: `Bearer ${token}` },
+      credentials: "include",
+    });
+    if (!res.ok) return "";
+    const data = await res.json();
+    return (
+      data?.email || data?.user?.email || data?.admin?.email || data?.data?.email || ""
+    );
+  } catch {
+    return "";
+  }
+}
+async function resolveCurrentEmail() {
+  const token = Cookies.get("token") || "";
+  try {
+    const [, payload] = token.split(".");
+    if (payload) {
+      const decoded = base64UrlToJson(payload);
+      const jwtEmail =
+        decoded?.email ||
+        decoded?.user?.email ||
+        decoded?.data?.email ||
+        decoded?.preferred_username ||
+        decoded?.sub ||
+        "";
+      if (jwtEmail && jwtEmail.includes("@")) return jwtEmail;
+    }
+  } catch {}
+  try {
+    const lsEmail = localStorage.getItem("email") || localStorage.getItem("userEmail") || "";
+    if (lsEmail && lsEmail.includes("@")) return lsEmail;
+  } catch {}
+  const apiEmail = await fetchEmailFromVerify(token);
+  if (apiEmail && apiEmail.includes("@")) return apiEmail;
+  return "";
+}
+/* --------------------------------------------------------------------- */
 
 function ParticipantInformation() {
   const {
@@ -29,20 +82,48 @@ function ParticipantInformation() {
     getSiteInformation,
   } = useContext(CreateNewOrderContext);
 
-  // 👉 Set default order expiry = today + 10 days
+  const [currentEmail, setCurrentEmail] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const email = await resolveCurrentEmail();
+      if (mounted) setCurrentEmail(email);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  // Default order expiry = today + 10 days
   useEffect(() => {
     if (!formData.orderExpires) {
       const now = new Date();
       now.setDate(now.getDate() + 10);
-      const formatted = now.toISOString().slice(0, 16); // yyyy-MM-ddTHH:mm
-      setFormData((prev) => ({
-        ...prev,
-        orderExpires: formatted,
-      }));
+      const formatted = now.toISOString().slice(0, 16);
+      setFormData((prev) => ({ ...prev, orderExpires: formatted }));
     }
   }, [formData.orderExpires, setFormData]);
 
-  // 👉 Reorder US_STATES so the selected state appears at the top
+  // Toggle source: support sendDonorPass or sendLink
+  const donorPassOn = Boolean(
+    typeof formData.sendDonorPass !== "undefined" ? formData.sendDonorPass : formData.donorPass
+  ) || false;
+
+  // Keep donorEmail synced when donor pass is ON
+  useEffect(() => {
+    if (donorPassOn && currentEmail && formData.donorEmail !== currentEmail) {
+      setFormData((prev) => ({ ...prev, donorEmail: currentEmail }));
+    }
+  }, [donorPassOn, currentEmail, formData.donorEmail, setFormData]);
+
+  // Prefill scheduling email when sendLink is ON and field empty
+  useEffect(() => {
+    if (formData.sendLink && currentEmail && !formData.email) {
+      setFormData((prev) => ({ ...prev, email: currentEmail }));
+    }
+  }, [formData.sendLink, currentEmail, formData.email, setFormData]);
+
   const reorderedStates = useMemo(() => {
     if (!formData.state) return US_STATES;
     const selected = US_STATES.find((s) => s.value === formData.state);
@@ -50,7 +131,6 @@ function ParticipantInformation() {
     return selected ? [selected, ...rest] : US_STATES;
   }, [formData.state]);
 
-  // 👉 Reorder US_STATES for SSN dropdown so the selected state appears at the top
   const reorderedSSNStates = useMemo(() => {
     if (!formData.ssnState) return US_STATES;
     const selected = US_STATES.find((s) => s.value === formData.ssnState);
@@ -60,34 +140,20 @@ function ParticipantInformation() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
-    // Handle SSN state change - combine with SSN value
+
     if (name === "ssnState") {
-      const ssnValue = formData.ssn?.replace(/^[A-Z]{2}/, '') || ''; // Remove any existing state prefix
+      const ssnValue = formData.ssn?.replace(/^[A-Z]{2}/, "") || "";
       const combinedSSN = value ? `${value}${ssnValue}` : ssnValue;
-      setFormData((prev) => ({
-        ...prev,
-        ssnState: value,
-        ssn: combinedSSN,
-      }));
-    }
-   
-    else {
-      setFormData((prev) => ({
-        ...prev,
-        [name]: type === "checkbox" ? checked : value,
-      }));
+      setFormData((prev) => ({ ...prev, ssnState: value, ssn: combinedSSN }));
+    } else {
+      setFormData((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
     }
   };
 
-  const handlePrevious = () => {
-    setCurrentPosition(currentPosition - 1);
-  };
+  const handlePrevious = () => setCurrentPosition(currentPosition - 1);
 
   const handleContinue = () => {
-    if (currentPosition === maxPosition) {
-      setMaxPosition(maxPosition + 1);
-    }
+    if (currentPosition === maxPosition) setMaxPosition(maxPosition + 1);
     setCurrentPosition(currentPosition + 1);
     getSiteInformation();
   };
@@ -96,16 +162,13 @@ function ParticipantInformation() {
     getSiteInformation();
   };
 
-  // Helper function to display SSN without state prefix in the input field
   const getDisplaySSN = () => {
     if (formData.ssn && formData.ssnState) {
-      // Remove the state prefix for display
-      return formData.ssn.replace(new RegExp(`^${formData.ssnState}`), '');
+      return formData.ssn.replace(new RegExp(`^${formData.ssnState}`), "");
     }
-    return formData.ssn || '';
+    return formData.ssn || "";
   };
 
-  // Validate required fields
   const validateRequiredFields = () => {
     const required = [
       formData.firstName,
@@ -134,40 +197,20 @@ function ParticipantInformation() {
       {/* Name Fields */}
       <Row className="mb-3">
         <Col md={4}>
-          <TextField
-            fullWidth
-            required
-            label="First Name"
-            name="firstName"
-            value={formData.firstName}
-            onChange={handleChange}
-          />
+          <TextField fullWidth required label="First Name" name="firstName" value={formData.firstName} onChange={handleChange} />
         </Col>
         <Col md={4}>
-          <TextField
-            fullWidth
-            label="Middle Name"
-            name="middleName"
-            value={formData.middleName}
-            onChange={handleChange}
-          />
+          <TextField fullWidth label="Middle Name" name="middleName" value={formData.middleName} onChange={handleChange} />
         </Col>
         <Col md={4}>
-          <TextField
-            fullWidth
-            required
-            label="Last Name"
-            name="lastName"
-            value={formData.lastName}
-            onChange={handleChange}
-          />
+          <TextField fullWidth required label="Last Name" name="lastName" value={formData.lastName} onChange={handleChange} />
         </Col>
       </Row>
 
       {/* Personal Details */}
       <Row className="mb-3">
         <Col md={4}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ display: "flex", gap: 1 }}>
             <FormControl sx={{ minWidth: 80 }}>
               <InputLabel id="ssn-state-label">State</InputLabel>
               <Select
@@ -180,10 +223,10 @@ function ParticipantInformation() {
                 sx={{
                   backgroundColor: "#fff",
                   borderRadius: 1,
-                  '& .MuiOutlinedInput-root': {
+                  "& .MuiOutlinedInput-root": {
                     borderTopRightRadius: 0,
                     borderBottomRightRadius: 0,
-                  }
+                  },
                 }}
               >
                 <MenuItem value="">
@@ -212,60 +255,29 @@ function ParticipantInformation() {
               value={getDisplaySSN()}
               onChange={handleChange}
               sx={{
-                '& .MuiOutlinedInput-root': {
+                "& .MuiOutlinedInput-root": {
                   borderTopLeftRadius: 0,
                   borderBottomLeftRadius: 0,
-                }
+                },
               }}
             />
           </Box>
         </Col>
         <Col md={4}>
-          <TextField
-            fullWidth
-            required
-            type="date"
-            InputLabelProps={{ shrink: true }}
-            label="DOB"
-            name="dob"
-            value={formData.dob}
-            onChange={handleChange}
-          />
+          <TextField fullWidth required type="date" InputLabelProps={{ shrink: true }} label="DOB" name="dob" value={formData.dob} onChange={handleChange} />
         </Col>
         <Col md={4}>
-          <TextField
-            fullWidth
-            required
-            label="Phone 1"
-            name="phone1"
-            value={formData.phone1}
-            onChange={handleChange}
-          />
+          <TextField fullWidth required label="Phone 1" name="phone1" value={formData.phone1} onChange={handleChange} />
         </Col>
       </Row>
 
       {/* Extra Contact Info */}
       <Row className="mb-3">
         <Col md={6}>
-          <TextField
-            fullWidth
-            label="Phone 2"
-            name="phone2"
-            value={formData.phone2}
-            onChange={handleChange}
-          />
+          <TextField fullWidth label="Phone 2" name="phone2" value={formData.phone2} onChange={handleChange} />
         </Col>
-
         <Col md={6}>
-          <TextField
-            fullWidth
-            label="Order Expires"
-            type="datetime-local"
-            InputLabelProps={{ shrink: true }}
-            name="orderExpires"
-            value={formData.orderExpires || ""}
-            onChange={handleChange}
-          />
+          <TextField fullWidth label="Order Expires" type="datetime-local" InputLabelProps={{ shrink: true }} name="orderExpires" value={formData.orderExpires || ""} onChange={handleChange} />
         </Col>
       </Row>
 
@@ -274,12 +286,7 @@ function ParticipantInformation() {
         <Col md={4}>
           <FormControl>
             <FormLabel>Observed Collection?</FormLabel>
-            <RadioGroup
-              row
-              name="observed"
-              value={formData.observed}
-              onChange={handleChange}
-            >
+            <RadioGroup row name="observed" value={formData.observed} onChange={handleChange}>
               <FormControlLabel value="0" control={<Radio />} label="No" />
               <FormControlLabel value="1" control={<Radio />} label="Yes" />
             </RadioGroup>
@@ -298,36 +305,16 @@ function ParticipantInformation() {
 
       <Row className="mb-3">
         <Col md={6}>
-          <TextField
-            fullWidth
-            required
-            label="Address"
-            name="address"
-            value={formData.address}
-            onChange={handleChange}
-          />
+          <TextField fullWidth required label="Address" name="address" value={formData.address} onChange={handleChange} />
         </Col>
         <Col md={6}>
-          <TextField
-            fullWidth
-            label="Address 2"
-            name="address2"
-            value={formData.address2}
-            onChange={handleChange}
-          />
+          <TextField fullWidth label="Address 2" name="address2" value={formData.address2} onChange={handleChange} />
         </Col>
       </Row>
 
       <Row className="mb-4">
         <Col md={4}>
-          <TextField
-            fullWidth
-            required
-            label="City"
-            name="city"
-            value={formData.city}
-            onChange={handleChange}
-          />
+          <TextField fullWidth required label="City" name="city" value={formData.city} onChange={handleChange} />
         </Col>
         <Col md={4}>
           <FormControl fullWidth required>
@@ -339,10 +326,7 @@ function ParticipantInformation() {
               onChange={handleChange}
               label="State"
               MenuProps={menuProps}
-              sx={{
-                backgroundColor: "#fff",
-                borderRadius: 2,
-              }}
+              sx={{ backgroundColor: "#fff", borderRadius: 2 }}
             >
               <MenuItem value="">
                 <em>Select state</em>
@@ -364,19 +348,12 @@ function ParticipantInformation() {
           </FormControl>
         </Col>
         <Col md={4}>
-          <TextField
-            fullWidth
-            required
-            label="Zip Code"
-            name="zip"
-            value={formData.zip}
-            onChange={handleChange}
-          />
+          <TextField fullWidth required label="Zip Code" name="zip" value={formData.zip} onChange={handleChange} />
         </Col>
       </Row>
 
-      {/* Donar Pass */}
-      <DonarPass />
+      {/* Donor Pass */}
+      <DonarPass currentEmail={currentEmail} />
 
       {/* Actions */}
       <Box display="flex" justifyContent="space-between">
@@ -385,19 +362,11 @@ function ParticipantInformation() {
         </Button>
         <Box>
           {formData.sendLink ? (
-            <Button
-              variant="contained"
-              onClick={handSubmitLink}
-              disabled={!validateRequiredFields()}
-            >
+            <Button variant="contained" onClick={handSubmitLink} disabled={!validateRequiredFields()}>
               Submit
             </Button>
           ) : (
-            <Button
-              variant="contained"
-              onClick={handleContinue}
-              disabled={!validateRequiredFields()}
-            >
+            <Button variant="contained" onClick={handleContinue} disabled={!validateRequiredFields()}>
               Continue
             </Button>
           )}
@@ -409,7 +378,7 @@ function ParticipantInformation() {
 
 export default ParticipantInformation;
 
-// State list remains inline
+/* ---------- constants ---------- */
 const US_STATES = [
   { label: "Alabama", value: "AL" }, { label: "Alaska", value: "AK" },
   { label: "Arizona", value: "AZ" }, { label: "Arkansas", value: "AR" },
@@ -438,7 +407,6 @@ const US_STATES = [
   { label: "Wisconsin", value: "WI" }, { label: "Wyoming", value: "WY" },
 ];
 
-// Menu props styling remains inline
 const menuProps = {
   PaperProps: {
     style: {
@@ -450,9 +418,5 @@ const menuProps = {
       padding: 0,
     },
   },
-  MenuListProps: {
-    style: {
-      padding: 0,
-    },
-  },
+  MenuListProps: { style: { padding: 0 } },
 };

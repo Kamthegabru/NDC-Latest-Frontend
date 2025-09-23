@@ -1,49 +1,67 @@
-import React, {  useContext} from "react";
+import React, { useContext, useEffect } from "react";
 import {
   Box,
   Typography,
   ToggleButton,
   ToggleButtonGroup,
   TextField,
+  InputAdornment,
 } from "@mui/material";
-import CreateNewOrderContext from "../../../../Context/ClientSide/AfterLogin/CreateNewOrder/CreateNewOrderContext";;
+import EmailIcon from "@mui/icons-material/Email";
+import CreateNewOrderContext from "../../../../Context/ClientSide/AfterLogin/CreateNewOrder/CreateNewOrderContext";
 
-function DonarPass() {
+function DonarPass({ currentEmail = "" }) {
   const { formData, setFormData } = useContext(CreateNewOrderContext);
 
-  // If sendLink = true, always show email input, hide donor pass.
-  // If sendLink = false, show donor pass toggle. If donorPass is true, show ccEmail input.
+  const donorPassOn =
+    typeof formData.sendDonorPass !== "undefined" ? formData.sendDonorPass : formData.donorPass;
 
-  // Email field state for "Send Scheduling Link"
+  // Prefill scheduling email when Send Link is ON
+  useEffect(() => {
+    if (formData.sendLink && currentEmail && !formData.email) {
+      setFormData((prev) => ({ ...prev, email: currentEmail }));
+    }
+  }, [formData.sendLink, currentEmail, formData.email, setFormData]);
+
+  // Sync donorEmail when Donor Pass is ON
+  useEffect(() => {
+    if (donorPassOn && currentEmail && formData.donorEmail !== currentEmail) {
+      setFormData((prev) => ({ ...prev, donorEmail: currentEmail }));
+    }
+  }, [donorPassOn, currentEmail, formData.donorEmail, setFormData]);
+
+  /* ---------------- handlers ---------------- */
   const handleEmailChange = (event) => {
     setFormData({ ...formData, email: event.target.value });
   };
 
-  // For send scheduling link
   const handleSendLinkChange = (_, value) => {
-    if (value !== null) {
-      setFormData({
-        ...formData,
-        sendLink: value === "yes",
-        donorPass: value === "yes" ? false : formData.donorPass,
-        email: "",
-        ccEmail: ""
-      });
-    }
+    if (value === null) return;
+    const on = value === "yes";
+    setFormData((prev) => ({
+      ...prev,
+      sendLink: on,
+      donorPass: on ? false : prev.donorPass,
+      sendDonorPass: typeof prev.sendDonorPass !== "undefined" ? (on ? false : prev.sendDonorPass) : prev.sendDonorPass,
+      email: on ? (prev.email || currentEmail || "") : "",
+      ccEmail: on ? "" : prev.ccEmail || "",
+      donorEmail: on ? "" : prev.donorEmail || "",
+    }));
   };
 
-  // For donor pass toggle
   const handleDonorPassChange = (_, value) => {
-    if (value !== null) {
-      setFormData({
-        ...formData,
-        donorPass: value === "yes",
-        ccEmail: value === "yes" ? formData.ccEmail : ""
-      });
-    }
+    if (value === null) return;
+    const on = value === "yes";
+    setFormData((prev) => ({
+      ...prev,
+      donorPass: on,
+      sendDonorPass: on,
+      donorEmail: on ? (currentEmail || prev.donorEmail || "") : "",
+      ccEmail: on ? prev.ccEmail || "" : "",
+      sendLink: on ? false : prev.sendLink,
+    }));
   };
 
-  // For ccEmail field (Donor Pass)
   const handleCCEmailChange = (event) => {
     setFormData({ ...formData, ccEmail: event.target.value });
   };
@@ -66,25 +84,32 @@ function DonarPass() {
         </ToggleButtonGroup>
       </Box>
 
-      {/* If Send Scheduling Link is Yes, show email input and hide Donor Pass */}
+      {/* If Send Scheduling Link is Yes -> email input (prefilled, editable) */}
       {formData.sendLink ? (
         <TextField
           label="Enter Email (for scheduling link)"
           variant="outlined"
           fullWidth
           required
-          value={formData.email}
+          value={formData.email ?? currentEmail ?? ""}
           onChange={handleEmailChange}
           sx={{ mt: 2 }}
+          InputProps={{
+            startAdornment: (
+              <InputAdornment position="start">
+                <EmailIcon />
+              </InputAdornment>
+            ),
+          }}
         />
       ) : (
-        // Otherwise, show donor pass toggle and ccEmail field if enabled
+        // Otherwise, show Donor Pass block
         <Box>
           <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
             Send Donor Pass
           </Typography>
           <ToggleButtonGroup
-            value={formData.donorPass ? "yes" : "no"}
+            value={donorPassOn ? "yes" : "no"}
             exclusive
             onChange={handleDonorPassChange}
             size="small"
@@ -93,15 +118,35 @@ function DonarPass() {
             <ToggleButton value="no">No</ToggleButton>
           </ToggleButtonGroup>
 
-          {formData.donorPass && (
-            <TextField
-              label="Enter CC Email(s) separated by semicolons"
-              variant="outlined"
-              fullWidth
-              value={formData.ccEmail}
-              onChange={handleCCEmailChange}
-              sx={{ mt: 2 }}
-            />
+          {donorPassOn && (
+            <Box sx={{ mt: 2, display: "grid", gap: 2 }}>
+              <TextField
+                label="Recipient Email (auto)"
+                variant="outlined"
+                fullWidth
+                value={currentEmail || formData.donorEmail || ""}
+                InputProps={{
+                  readOnly: true,
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <EmailIcon />
+                    </InputAdornment>
+                  ),
+                }}
+                helperText={
+                  currentEmail
+                    ? "The donor pass will be sent to this email."
+                    : "No email found for the current user."
+                }
+              />
+              <TextField
+                label="Enter CC Email(s) separated by semicolons"
+                variant="outlined"
+                fullWidth
+                value={formData.ccEmail || ""}
+                onChange={handleCCEmailChange}
+              />
+            </Box>
           )}
         </Box>
       )}

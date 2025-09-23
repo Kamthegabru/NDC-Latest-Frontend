@@ -37,6 +37,7 @@ const API_URL = process.env.REACT_APP_API_URL;
 const PAGE_SIZE = 10;
 const STATUS_OPTIONS = ["All", "Positive", "Negative", "Pending"];
 const ORDER_STATUS_OPTIONS = ["All", "Pending", "Completed"];
+const SORT_OPTIONS = ["Alphabetical (A-Z)", "Alphabetical (Z-A)", "Newest First", "Oldest First"];
 
 let cachedResults = null;
 
@@ -47,6 +48,7 @@ function DisplayResult() {
   const [searchTerm, setSearchTerm] = useState("");
   const [resultStatus, setResultStatus] = useState("All");
   const [orderStatus, setOrderStatus] = useState("All");
+  const [sortOption, setSortOption] = useState("Newest First"); // Default to Newest First
   const [page, setPage] = useState(1);
 
   const [range, setRange] = useState({ from: undefined, to: undefined });
@@ -91,23 +93,31 @@ function DisplayResult() {
     return () => { isMounted = false; };
   }, []);
 
-  // Filtering and sorting
-  const filteredResults = useMemo(() => {
+  const handleSortOptionChange = (event) => {
+    setSortOption(event.target.value);
+    setPage(1);
+  };
+
+  // Enhanced filtering and sorting with alphabetical and date options
+  const filteredAndSortedResults = useMemo(() => {
     let filtered = results.filter(
       (r) =>
         r.driverName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
         r.companyName?.toLowerCase().includes(searchTerm.toLowerCase())
     );
+    
     if (resultStatus !== "All") {
       filtered = filtered.filter(
         (r) => r.resultStatus?.toLowerCase() === resultStatus.toLowerCase()
       );
     }
+    
     if (orderStatus !== "All") {
       filtered = filtered.filter(
         (r) => r.orderStatus?.toLowerCase() === orderStatus.toLowerCase()
       );
     }
+    
     // Date range filter
     if (range.from && range.to) {
       filtered = filtered.filter((r) => {
@@ -116,14 +126,47 @@ function DisplayResult() {
           testDate.isBefore(dayjs(range.to).add(1, 'day'));
       });
     }
+
+    // Enhanced sorting with multiple options
+    filtered.sort((a, b) => {
+      switch (sortOption) {
+        case "Alphabetical (A-Z)":
+          const companyA = (a.companyName || '').toLowerCase();
+          const companyB = (b.companyName || '').toLowerCase();
+          if (companyA < companyB) return -1;
+          if (companyA > companyB) return 1;
+          return 0;
+        
+        case "Alphabetical (Z-A)":
+          const companyA2 = (a.companyName || '').toLowerCase();
+          const companyB2 = (b.companyName || '').toLowerCase();
+          if (companyA2 > companyB2) return -1;
+          if (companyA2 < companyB2) return 1;
+          return 0;
+        
+        case "Newest First":
+          const dateA = dayjs(a.testDate);
+          const dateB = dayjs(b.testDate);
+          return dateB.diff(dateA); // Newer dates first
+        
+        case "Oldest First":
+          const dateA2 = dayjs(a.testDate);
+          const dateB2 = dayjs(b.testDate);
+          return dateA2.diff(dateB2); // Older dates first
+        
+        default:
+          return 0;
+      }
+    });
+
     return filtered;
-  }, [results, searchTerm, resultStatus, orderStatus, range]);
+  }, [results, searchTerm, resultStatus, orderStatus, range, sortOption]);
 
   // Pagination
   const paginatedResults = useMemo(() => {
     const start = (page - 1) * PAGE_SIZE;
-    return filteredResults.slice(start, start + PAGE_SIZE);
-  }, [filteredResults, page]);
+    return filteredAndSortedResults.slice(start, start + PAGE_SIZE);
+  }, [filteredAndSortedResults, page]);
 
   // Selection logic using caseNumber
   const handleSelect = (caseNumber) => {
@@ -196,6 +239,7 @@ function DisplayResult() {
     setSearchTerm("");
     setResultStatus("All");
     setOrderStatus("All");
+    setSortOption("Newest First");
     setRange({ from: undefined, to: undefined });
     setPage(1);
     setSelectedIds([]);
@@ -228,7 +272,14 @@ function DisplayResult() {
           </Button>
         </DialogActions>
       </Dialog>
-      <TableContainer component={Paper} sx={{ mt: 3, p: 2, borderRadius: 2, boxShadow: 3 }}>
+      
+      <TableContainer component={Paper} sx={{ 
+        mt: 3, 
+        p: 2, 
+        borderRadius: 3, 
+        boxShadow: 6,
+        background: "linear-gradient(135deg, #e3f2fd 0%, #f5f5f5 100%)"
+      }}>
         <Box
           sx={{
             mb: 2,
@@ -236,6 +287,7 @@ function DisplayResult() {
             justifyContent: "space-between",
             alignItems: "center",
             flexWrap: "wrap",
+            gap: 2
           }}
         >
           <Typography variant="h6" sx={{
@@ -251,7 +303,16 @@ function DisplayResult() {
           }}>
             Result List
           </Typography>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
+          
+          {/* Filters Row */}
+          <Box sx={{ 
+            display: "flex", 
+            alignItems: "center", 
+            gap: 2, 
+            flexWrap: "wrap",
+            width: "100%",
+            justifyContent: "flex-end"
+          }}>
             <TextField
               size="small"
               label="Search Name/Company"
@@ -259,11 +320,52 @@ function DisplayResult() {
               onChange={(e) => setSearchTerm(e.target.value)}
               sx={{ minWidth: 180 }}
             />
-              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+            
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel>Result Status</InputLabel>
+              <Select
+                value={resultStatus}
+                label="Result Status"
+                onChange={(e) => { setResultStatus(e.target.value); setPage(1); }}
+              >
+                {STATUS_OPTIONS.map((status) => (
+                  <MenuItem key={status} value={status}>{status}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            
+            <FormControl size="small" sx={{ minWidth: 120 }}>
+              <InputLabel>Order Status</InputLabel>
+              <Select
+                value={orderStatus}
+                label="Order Status"
+                onChange={(e) => { setOrderStatus(e.target.value); setPage(1); }}
+              >
+                {ORDER_STATUS_OPTIONS.map((status) => (
+                  <MenuItem key={status} value={status}>{status}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            
+            {/* New Sort Options */}
+            <FormControl size="small" sx={{ minWidth: 180 }}>
+              <InputLabel>Sort By</InputLabel>
+              <Select
+                value={sortOption}
+                label="Sort By"
+                onChange={handleSortOptionChange}
+              >
+                {SORT_OPTIONS.map((option) => (
+                  <MenuItem key={option} value={option}>{option}</MenuItem>
+                ))}
+              </Select>
+            </FormControl>
+            
+            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
               <Typography variant="body2" sx={{ fontWeight: "bold", color: "#003366" }}>
                 Date Range:
               </Typography>
-              <Box>
+              <Box sx={{ position: "relative" }}>
                 <Chip
                   label={
                     range.from && range.to
@@ -283,7 +385,8 @@ function DisplayResult() {
                     background: "#fff",
                     boxShadow: 6,
                     borderRadius: 2,
-                    p: 2
+                    p: 2,
+                    right: 0
                   }}>
                     <DayPicker
                       mode="range"
@@ -306,31 +409,7 @@ function DisplayResult() {
                 )}
               </Box>
             </Box>
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Result Status</InputLabel>
-              <Select
-                value={resultStatus}
-                label="Result Status"
-                onChange={(e) => { setResultStatus(e.target.value); setPage(1); }}
-              >
-                {STATUS_OPTIONS.map((status) => (
-                  <MenuItem key={status} value={status}>{status}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Order Status</InputLabel>
-              <Select
-                value={orderStatus}
-                label="Order Status"
-                onChange={(e) => { setOrderStatus(e.target.value); setPage(1); }}
-              >
-                {ORDER_STATUS_OPTIONS.map((status) => (
-                  <MenuItem key={status} value={status}>{status}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-          
+            
             <Button
               variant="contained"
               color="error"
@@ -340,6 +419,7 @@ function DisplayResult() {
             >
               Remove
             </Button>
+            
             <Tooltip title="Reset Filters">
               <IconButton onClick={handleResetFilters} color="info">
                 <Refresh />
@@ -347,10 +427,25 @@ function DisplayResult() {
             </Tooltip>
           </Box>
         </Box>
-        <Table>
+
+        {/* Selected count indicator */}
+        {selectedIds.length > 0 && (
+          <Box sx={{ mb: 2, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <Chip
+              label={`${selectedIds.length} result${selectedIds.length > 1 ? 's' : ''} selected`}
+              color="primary"
+              variant="outlined"
+            />
+            <Typography variant="body2" color="text.secondary">
+              Current sort: {sortOption}
+            </Typography>
+          </Box>
+        )}
+        
+        <Table stickyHeader>
           <TableHead>
             <TableRow sx={{ backgroundColor: "#003366" }}>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>
                 <Checkbox
                   checked={
                     paginatedResults.length > 0 &&
@@ -364,25 +459,37 @@ function DisplayResult() {
                   color="primary"
                 />
               </TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Sr</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Company Name</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Name</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>License #</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Test Date</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Test Type</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Result Status</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Order Status</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }}>Case Number</TableCell>
-              <TableCell sx={{ color: "white", fontWeight: "bold" }} align="right">
-                Actions
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Sr</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>
+                Company Name
+                {(sortOption.includes("Alphabetical")) && (
+                  <Box component="span" sx={{ ml: 1, fontSize: 12, opacity: 0.7 }}>
+                    ({sortOption})
+                  </Box>
+                )}
               </TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Name</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>License #</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>
+                Test Date
+                {(sortOption === "Newest First" || sortOption === "Oldest First") && (
+                  <Box component="span" sx={{ ml: 1, fontSize: 12, opacity: 0.7 }}>
+                    ({sortOption})
+                  </Box>
+                )}
+              </TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Test Type</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Result Status</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Order Status</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Case Number</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Actions</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             {paginatedResults.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={11} align="center">
-                  <Typography color="text.secondary">No results found.</Typography>
+                  <Typography color="text.secondary">No results found matching your criteria.</Typography>
                 </TableCell>
               </TableRow>
             ) : (
@@ -398,19 +505,21 @@ function DisplayResult() {
                   <TableCell align="center">
                     {(page - 1) * PAGE_SIZE + index + 1}
                   </TableCell>
-                  <TableCell>{result.companyName}</TableCell>
-                  <TableCell>{result.driverName}</TableCell>
-                  <TableCell>{result.licenseNumber}</TableCell>
-                  <TableCell>
+                  <TableCell align="center">{result.companyName}</TableCell>
+                  <TableCell align="center">
+                    <Typography fontWeight="bold">{result.driverName}</Typography>
+                  </TableCell>
+                  <TableCell align="center">{result.licenseNumber}</TableCell>
+                  <TableCell align="center">
                     <Chip
                       label={result.testDate ? dayjs(result.testDate).format("DD MMM YYYY") : "-"}
                       color="secondary"
                       variant="outlined"
-                      sx={{ fontWeight: "bold", fontSize: 15 }}
+                      sx={{ fontWeight: "bold", fontSize: 12 }}
                     />
                   </TableCell>
-                  <TableCell>{result.testType}</TableCell>
-                  <TableCell>
+                  <TableCell align="center">{result.testType}</TableCell>
+                  <TableCell align="center">
                     <Chip
                       label={result.resultStatus}
                       color={
@@ -424,7 +533,7 @@ function DisplayResult() {
                       sx={{ fontWeight: "bold" }}
                     />
                   </TableCell>
-                  <TableCell>
+                  <TableCell align="center">
                     <Chip
                       label={result.orderStatus}
                       color={
@@ -438,23 +547,34 @@ function DisplayResult() {
                       sx={{ fontWeight: "bold" }}
                     />
                   </TableCell>
-                  <TableCell>{result.caseNumber}</TableCell>
-                  <TableCell align="right">
-                    <IconButton onClick={() => handleView(result)}>
-                      <Visibility />
-                    </IconButton>
-                    <IconButton onClick={() => handleOpenDownload(result)}>
-                      <Download />
-                    </IconButton>
+                  <TableCell align="center">
+                    <Typography fontWeight="medium">{result.caseNumber}</Typography>
+                  </TableCell>
+                  <TableCell align="center">
+                    <Tooltip title="View Details">
+                      <IconButton onClick={() => handleView(result)} color="primary">
+                        <Visibility />
+                      </IconButton>
+                    </Tooltip>
+                    <Tooltip title="Download">
+                      <IconButton onClick={() => handleOpenDownload(result)} color="secondary">
+                        <Download />
+                      </IconButton>
+                    </Tooltip>
                   </TableCell>
                 </TableRow>
               ))
             )}
           </TableBody>
         </Table>
-        <Stack direction="row" justifyContent="center" alignItems="center" sx={{ mt: 2 }}>
+        
+        <Stack direction="row" justifyContent="space-between" alignItems="center" sx={{ mt: 2 }}>
+          <Typography variant="body2" color="text.secondary">
+            Showing {Math.min((page - 1) * PAGE_SIZE + 1, filteredAndSortedResults.length)} - {Math.min(page * PAGE_SIZE, filteredAndSortedResults.length)} of {filteredAndSortedResults.length} results
+            {selectedIds.length > 0 && ` | ${selectedIds.length} selected`}
+          </Typography>
           <Pagination
-            count={Math.ceil(filteredResults.length / PAGE_SIZE)}
+            count={Math.ceil(filteredAndSortedResults.length / PAGE_SIZE)}
             page={page}
             onChange={(_, value) => setPage(value)}
             color="primary"

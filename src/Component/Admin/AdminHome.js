@@ -79,7 +79,7 @@ function AdminHome() {
                 return <RandomState><Random /></RandomState>
             case 9:
                 return <CreateNewAdmin><CreateNewOrder /></CreateNewAdmin>;
-            case 10:
+            case 10:    
                 return <Result/>
             case 11:
                 return <SettingState><Setting/></SettingState>

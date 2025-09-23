@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo } from "react";
+import React, { useContext, useEffect, useMemo, useState } from "react";
 import {
   TextField,
   FormControl,
@@ -12,11 +12,69 @@ import {
   Button,
   Typography,
   Box,
-  InputAdornment,
 } from "@mui/material";
 import { Row, Col } from "react-bootstrap";
+import Cookies from "js-cookie";
 import CreateNewOrderContext from "../../../../Context/ClientSide/AfterLogin/CreateNewOrder/CreateNewOrderContext";
 import DonarPass from "./DonarPass";
+
+/* ----------------- robust current-user email resolver ----------------- */
+function base64UrlToJson(str) {
+  try {
+    const pad = "=".repeat((4 - (str.length % 4)) % 4);
+    const b64 = (str + pad).replace(/-/g, "+").replace(/_/g, "/");
+    return JSON.parse(atob(b64));
+  } catch {
+    return {};
+  }
+}
+async function fetchEmailFromVerify(token) {
+  const API_URL = process.env.REACT_APP_API_URL;
+  if (!API_URL || !token) return "";
+  try {
+    const res = await fetch(`${API_URL}/admin/verify`, {
+      headers: { Authorization: `Bearer ${token}` },
+      credentials: "include",
+    });
+    if (!res.ok) return "";
+    const data = await res.json();
+    return (
+      data?.email || data?.user?.email || data?.admin?.email || data?.data?.email || ""
+    );
+  } catch {
+    return "";
+  }
+}
+async function resolveCurrentEmail() {
+  const token = Cookies.get("token") || "";
+  // 1) JWT
+  try {
+    const [, payload] = token.split(".");
+    if (payload) {
+      const decoded = base64UrlToJson(payload);
+      const jwtEmail =
+        decoded?.email ||
+        decoded?.user?.email ||
+        decoded?.data?.email ||
+        decoded?.preferred_username ||
+        decoded?.sub ||
+        "";
+      if (jwtEmail && jwtEmail.includes("@")) return jwtEmail;
+    }
+  } catch {}
+  // 2) localStorage fallback (if you store it)
+  try {
+    const lsEmail =
+      localStorage.getItem("email") || localStorage.getItem("userEmail") || "";
+    if (lsEmail && lsEmail.includes("@")) return lsEmail;
+  } catch {}
+  // 3) /admin/verify (same endpoint you already use)
+  const apiEmail = await fetchEmailFromVerify(token);
+  if (apiEmail && apiEmail.includes("@")) return apiEmail;
+
+  return "";
+}
+/* --------------------------------------------------------------------- */
 
 function ParticipantInformation() {
   const {
@@ -28,6 +86,19 @@ function ParticipantInformation() {
     setFormData,
     getSiteInformation,
   } = useContext(CreateNewOrderContext);
+
+  const [currentEmail, setCurrentEmail] = useState("");
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const email = await resolveCurrentEmail();
+      if (mounted) setCurrentEmail(email);
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   // 👉 Set default order expiry = today + 10 days
   useEffect(() => {
@@ -41,6 +112,21 @@ function ParticipantInformation() {
       }));
     }
   }, [formData.orderExpires, setFormData]);
+
+  // If user chose to send donor pass, keep donorEmail synced
+  const donorPassOn = Boolean(formData.donorPass || formData.sendDonorPass);
+  useEffect(() => {
+    if (donorPassOn && currentEmail && formData.donorEmail !== currentEmail) {
+      setFormData((prev) => ({ ...prev, donorEmail: currentEmail }));
+    }
+  }, [donorPassOn, currentEmail, formData.donorEmail, setFormData]);
+
+  // Prefill scheduling email when sendLink is ON and field empty
+  useEffect(() => {
+    if (formData.sendLink && currentEmail && !formData.email) {
+      setFormData((prev) => ({ ...prev, email: currentEmail }));
+    }
+  }, [formData.sendLink, currentEmail, formData.email, setFormData]);
 
   // 👉 Reorder US_STATES so the selected state appears at the top
   const reorderedStates = useMemo(() => {
@@ -60,19 +146,17 @@ function ParticipantInformation() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
+
     // Handle SSN state change - combine with SSN value
     if (name === "ssnState") {
-      const ssnValue = formData.ssn?.replace(/^[A-Z]{2}/, '') || ''; // Remove any existing state prefix
+      const ssnValue = formData.ssn?.replace(/^[A-Z]{2}/, "") || ""; // Remove any existing state prefix
       const combinedSSN = value ? `${value}${ssnValue}` : ssnValue;
       setFormData((prev) => ({
         ...prev,
         ssnState: value,
         ssn: combinedSSN,
       }));
-    }
-   
-    else {
+    } else {
       setFormData((prev) => ({
         ...prev,
         [name]: type === "checkbox" ? checked : value,
@@ -93,6 +177,7 @@ function ParticipantInformation() {
   };
 
   const handSubmitLink = () => {
+    // donorEmail / email already synced by effects if toggles are on
     getSiteInformation();
   };
 
@@ -100,9 +185,9 @@ function ParticipantInformation() {
   const getDisplaySSN = () => {
     if (formData.ssn && formData.ssnState) {
       // Remove the state prefix for display
-      return formData.ssn.replace(new RegExp(`^${formData.ssnState}`), '');
+      return formData.ssn.replace(new RegExp(`^${formData.ssnState}`), "");
     }
-    return formData.ssn || '';
+    return formData.ssn || "";
   };
 
   // Validate required fields
@@ -167,7 +252,7 @@ function ParticipantInformation() {
       {/* Personal Details */}
       <Row className="mb-3">
         <Col md={4}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ display: "flex", gap: 1 }}>
             <FormControl sx={{ minWidth: 80 }}>
               <InputLabel id="ssn-state-label">State</InputLabel>
               <Select
@@ -180,10 +265,10 @@ function ParticipantInformation() {
                 sx={{
                   backgroundColor: "#fff",
                   borderRadius: 1,
-                  '& .MuiOutlinedInput-root': {
+                  "& .MuiOutlinedInput-root": {
                     borderTopRightRadius: 0,
                     borderBottomRightRadius: 0,
-                  }
+                  },
                 }}
               >
                 <MenuItem value="">
@@ -212,10 +297,10 @@ function ParticipantInformation() {
               value={getDisplaySSN()}
               onChange={handleChange}
               sx={{
-                '& .MuiOutlinedInput-root': {
+                "& .MuiOutlinedInput-root": {
                   borderTopLeftRadius: 0,
                   borderBottomLeftRadius: 0,
-                }
+                },
               }}
             />
           </Box>
@@ -375,8 +460,8 @@ function ParticipantInformation() {
         </Col>
       </Row>
 
-      {/* Donar Pass */}
-      <DonarPass />
+      {/* Donor Pass */}
+      <DonarPass currentEmail={currentEmail} />
 
       {/* Actions */}
       <Box display="flex" justifyContent="space-between">
@@ -438,7 +523,6 @@ const US_STATES = [
   { label: "Wisconsin", value: "WI" }, { label: "Wyoming", value: "WY" },
 ];
 
-// Menu props styling remains inline
 const menuProps = {
   PaperProps: {
     style: {
@@ -451,8 +535,6 @@ const menuProps = {
     },
   },
   MenuListProps: {
-    style: {
-      padding: 0,
-    },
+    style: { padding: 0 },
   },
 };
