@@ -25,6 +25,7 @@ import ServiceCards from "./ServiceCards";
 import HeroComponent from "./HeroSection";
 import Header from "./Header";
 import ScrollObserver from "./ScrollObserver";
+import ContactSection from "./aboutus";
 
 
 const pageVariants = {
@@ -196,6 +197,7 @@ function Home() {
         </Routes>
       </AnimatePresence>
 
+      <ContactSection/>
       <Footer />
     </div>
   );

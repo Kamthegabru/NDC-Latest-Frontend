@@ -93,18 +93,18 @@ export default function HeroComponent() {
             Ensure workplace safety and compliance with our comprehensive DOT drug testing services. We offer reliable and efficient testing solutions tailored to meet your specific needs.
           </p>
 
-          <div className="w-full max-w-md mx-auto mt-2 sm:mt-6 flex flex-row gap-2 ">
+          <div className="w-full  max-w-md mx-auto mt-2 sm:mt-6 flex flex-row  justify-center align-items-center gap-2 ">
             <a href="/pricing" className="no-underline">
-              <button className="bg-[#022B36] text-white md:block hidden hover:bg-transparent border-[2px] text-[16px] border-[#575958] hover:text-white max-h-[60px] px-6 hover:text-[#022B36] text-black font-semibold py-3 rounded-[10px]">
-                <p className="min-w-[130px]">Get Started</p>
+              <button className="bg-[#022B36] text-white hover:bg-transparent border-[2px] text-[16px] border-[#575958] hover:text-white max-h-[60px] px-3 md:max-h-[60px] md:px-6 hover:text-[#022B36] text-black font-semibold py-3 rounded-[10px]">
+                <p className="min-w-[90px] md:min-w-[130px]">Get Started</p>
               </button>
             </a>
             <a
   href="tel:+13602497511"
   aria-label="Call 360-249-7511"
-  className="bg-[#022B36] text-white md:block hidden hover:bg-transparent border-[2px] text-[16px] border-[#575958] hover:text-[#022B36] max-h-[60px] px-6 font-semibold py-3 rounded-[10px]"
+  className="bg-[#022B36] text-white  hover:bg-transparent border-[2px] text-[16px] border-[#575958] hover:text-[#022B36] max-h-[60px] px-3 md:px-6 font-semibold py-3 rounded-[10px]"
 >
-  <span className="min-w-[130px] inline-block text-center">Call Us</span>
+  <span className="min-w-[90px] md:min-w-[130px] inline-block text-center">Call Us</span>
 </a>
 
           </div>
