@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect } from "react";
+import React, { useContext, useState, useEffect, useMemo } from "react";
 import {
   Button,
   TextField,
@@ -31,6 +31,7 @@ import AddIcon from "@mui/icons-material/Add";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import PersonIcon from "@mui/icons-material/Person";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
+import ScienceIcon from "@mui/icons-material/Science";
 import NumbersIcon from "@mui/icons-material/Numbers";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CloseIcon from "@mui/icons-material/Close";
@@ -60,16 +61,21 @@ function AddResult() {
   const [resultData, setResultData] = useState({
     driverId: "",
     date: "",
-    testType: "",   // now controlled by a dropdown
+    testType: "",
     caseNumber: "",
     file: null,
-    status: "Pending",
+    status: "Pending", // Result status
   });
 
-  // Build driver list: exclude only deleted; keep selected if flags changed
+  // ---- Driver list logic (FIX) ----
+  // Only hide truly deleted drivers. Keep selected driver in list even if flags changed.
   useEffect(() => {
     if (!userDetails?.drivers) return;
+
     const nonDeleted = (userDetails.drivers || []).filter((d) => !d?.isDeleted);
+
+    // If a driver is currently selected but isn't in nonDeleted (e.g., flags changed),
+    // force-include them at the top so user can add multiple results.
     let next = [...nonDeleted];
     if (resultData.driverId && !next.some((d) => d._id === resultData.driverId)) {
       const selected = (userDetails.drivers || []).find((d) => d._id === resultData.driverId);
@@ -100,14 +106,15 @@ function AddResult() {
 
   const validateForm = () => {
     const newErrors = {};
+
     if (!resultData.driverId) newErrors.driverId = "Driver selection is required";
     if (!resultData.date) newErrors.date = "Test date is required";
-    if (!resultData.testType) newErrors.testType = "Test type is required";
+    if (!resultData.testType.trim()) newErrors.testType = "Test type is required";
     if (!resultData.caseNumber.trim()) newErrors.caseNumber = "Case number is required";
 
     if (resultData.file) {
-      const allowed = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
-      if (!allowed.includes(resultData.file.type)) {
+      const allowedTypes = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
+      if (!allowedTypes.includes(resultData.file.type)) {
         newErrors.file = "Only PDF, JPG, JPEG, and PNG files are allowed";
       }
       if (resultData.file.size > 10 * 1024 * 1024) {
@@ -150,10 +157,12 @@ function AddResult() {
       await addResult(formData);
       setUploadProgress(100);
 
+      // Refresh data so the new result appears immediately
       await getSingleUserData(currentId);
+
       handleClose();
-    } catch (err) {
-      console.error("Error adding result:", err);
+    } catch (error) {
+      console.error("Error adding result:", error);
       setErrors({ submit: "Failed to add result. Please try again." });
     } finally {
       setLoading(false);
@@ -169,8 +178,8 @@ function AddResult() {
   };
 
   const formatFileSize = (bytes) => {
-    if (bytes === 0) return "0 Bytes";
     if (!bytes && bytes !== 0) return "";
+    if (bytes === 0) return "0 Bytes";
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -305,7 +314,13 @@ function AddResult() {
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
                             {driver.first_name} {driver.last_name}
                             {driver.isActive === false && (
-                              <Chip size="small" label="Inactive" sx={{ ml: 1 }} color="default" variant="outlined" />
+                              <Chip
+                                size="small"
+                                label="Inactive"
+                                sx={{ ml: 1 }}
+                                color="default"
+                                variant="outlined"
+                              />
                             )}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
@@ -356,26 +371,24 @@ function AddResult() {
               />
             </Grid>
 
-            {/* CHANGED: Test Type → Dropdown with Test1, Test2 */}
             <Grid item xs={12} sm={6}>
-              <FormControl fullWidth error={!!errors.testType}>
-                <InputLabel>Test Type</InputLabel>
-                <Select
-                  name="testType"
-                  label="Test Type"
-                  value={resultData.testType}
-                  onChange={handleChange}
-                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-                >
-                  <MenuItem value="Test1">Test1</MenuItem>
-                  <MenuItem value="Test2">Test2</MenuItem>
-                </Select>
-                {errors.testType && (
-                  <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
-                    {errors.testType}
-                  </Typography>
-                )}
-              </FormControl>
+              <TextField
+                fullWidth
+                label="Test Type"
+                name="testType"
+                value={resultData.testType}
+                onChange={handleChange}
+                error={!!errors.testType}
+                helperText={errors.testType || "e.g., Drug Test, Alcohol Test"}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <ScienceIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              />
             </Grid>
 
             <Grid item xs={12} sm={6}>
