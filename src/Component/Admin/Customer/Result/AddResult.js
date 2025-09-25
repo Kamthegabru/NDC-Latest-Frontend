@@ -22,7 +22,7 @@ import {
   Paper,
   LinearProgress,
   Avatar,
-  Chip
+  Chip,
 } from "@mui/material";
 import { useTheme, alpha } from "@mui/material/styles";
 
@@ -31,7 +31,6 @@ import AddIcon from "@mui/icons-material/Add";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import PersonIcon from "@mui/icons-material/Person";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import ScienceIcon from "@mui/icons-material/Science";
 import NumbersIcon from "@mui/icons-material/Numbers";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CloseIcon from "@mui/icons-material/Close";
@@ -54,30 +53,35 @@ function AddResult() {
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
   const [uploadProgress, setUploadProgress] = useState(0);
+
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const [resultData, setResultData] = useState({
     driverId: "",
     date: "",
-    testType: "",
+    testType: "",   // now controlled by a dropdown
     caseNumber: "",
     file: null,
     status: "Pending",
   });
 
+  // Build driver list: exclude only deleted; keep selected if flags changed
   useEffect(() => {
-    if (userDetails?.drivers) {
-      const filteredDrivers = userDetails.drivers.filter(
-        (driver) => driver.isActive && !driver.isDeleted
-      );
-      setDrivers(filteredDrivers);
+    if (!userDetails?.drivers) return;
+    const nonDeleted = (userDetails.drivers || []).filter((d) => !d?.isDeleted);
+    let next = [...nonDeleted];
+    if (resultData.driverId && !next.some((d) => d._id === resultData.driverId)) {
+      const selected = (userDetails.drivers || []).find((d) => d._id === resultData.driverId);
+      if (selected) next = [selected, ...next];
     }
-  }, [userDetails]);
+    setDrivers(next);
+  }, [userDetails, resultData.driverId]);
 
   const handleClickOpen = () => {
     setOpen(true);
     setErrors({});
+    setUploadProgress(0);
     setResultData({
       driverId: "",
       date: "",
@@ -96,18 +100,17 @@ function AddResult() {
 
   const validateForm = () => {
     const newErrors = {};
-    
     if (!resultData.driverId) newErrors.driverId = "Driver selection is required";
     if (!resultData.date) newErrors.date = "Test date is required";
-    if (!resultData.testType.trim()) newErrors.testType = "Test type is required";
+    if (!resultData.testType) newErrors.testType = "Test type is required";
     if (!resultData.caseNumber.trim()) newErrors.caseNumber = "Case number is required";
-    
+
     if (resultData.file) {
-      const allowedTypes = ['application/pdf', 'image/jpeg', 'image/jpg', 'image/png'];
-      if (!allowedTypes.includes(resultData.file.type)) {
+      const allowed = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
+      if (!allowed.includes(resultData.file.type)) {
         newErrors.file = "Only PDF, JPG, JPEG, and PNG files are allowed";
       }
-      if (resultData.file.size > 10 * 1024 * 1024) { // 10MB limit
+      if (resultData.file.size > 10 * 1024 * 1024) {
         newErrors.file = "File size must be less than 10MB";
       }
     }
@@ -119,46 +122,38 @@ function AddResult() {
   const handleChange = (e) => {
     const { name, value } = e.target;
     setResultData((prev) => ({ ...prev, [name]: value }));
-    
-    // Clear error when user starts typing
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: "" }));
-    }
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: "" }));
   };
 
   const handleFileChange = (e) => {
-    const file = e.target.files[0];
+    const file = e.target.files?.[0] || null;
     setResultData((prev) => ({ ...prev, file }));
-    
-    if (errors.file) {
-      setErrors(prev => ({ ...prev, file: "" }));
-    }
+    if (errors.file) setErrors((prev) => ({ ...prev, file: "" }));
   };
 
   const handleSave = async () => {
     if (!validateForm()) return;
-    
+
     setLoading(true);
-    setUploadProgress(20);
-    
+    setUploadProgress(25);
     try {
       const formData = new FormData();
+      formData.append("currentId", currentId);
       formData.append("driverId", resultData.driverId);
       formData.append("date", resultData.date);
       formData.append("testType", resultData.testType);
       formData.append("caseNumber", resultData.caseNumber);
-      formData.append("file", resultData.file);
       formData.append("status", resultData.status);
-      formData.append("currentId", currentId);
-      
+      if (resultData.file) formData.append("file", resultData.file);
+
       setUploadProgress(60);
       await addResult(formData);
       setUploadProgress(100);
-      
-      getSingleUserData(currentId);
+
+      await getSingleUserData(currentId);
       handleClose();
-    } catch (error) {
-      console.error("Error adding result:", error);
+    } catch (err) {
+      console.error("Error adding result:", err);
       setErrors({ submit: "Failed to add result. Please try again." });
     } finally {
       setLoading(false);
@@ -168,17 +163,18 @@ function AddResult() {
 
   const getFileIcon = (file) => {
     if (!file) return <AttachFileIcon />;
-    if (file.type === 'application/pdf') return <PictureAsPdfIcon />;
-    if (file.type.startsWith('image/')) return <ImageIcon />;
+    if (file.type === "application/pdf") return <PictureAsPdfIcon />;
+    if (file.type?.startsWith("image/")) return <ImageIcon />;
     return <AttachFileIcon />;
   };
 
   const formatFileSize = (bytes) => {
-    if (bytes === 0) return '0 Bytes';
+    if (bytes === 0) return "0 Bytes";
+    if (!bytes && bytes !== 0) return "";
     const k = 1024;
-    const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+    const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + " " + sizes[i];
   };
 
   const getStatusChip = (status) => {
@@ -194,8 +190,8 @@ function AddResult() {
   };
 
   const getDriverName = (driverId) => {
-    const driver = drivers.find(d => d._id === driverId);
-    return driver ? `${driver.first_name} ${driver.last_name}` : "";
+    const d = drivers.find((x) => x._id === driverId);
+    return d ? `${d.first_name ?? ""} ${d.last_name ?? ""}`.trim() : "";
   };
 
   return (
@@ -205,51 +201,40 @@ function AddResult() {
         startIcon={<AddIcon />}
         onClick={handleClickOpen}
         sx={{
-          bgcolor: 'primary.main',
-          color: 'white',
+          bgcolor: "primary.main",
+          color: "white",
           borderRadius: 2,
           px: 3,
           py: 1.5,
           fontWeight: 600,
-          textTransform: 'none',
+          textTransform: "none",
           boxShadow: theme.shadows[3],
-          '&:hover': {
-            bgcolor: 'primary.dark',
-            transform: 'translateY(-1px)',
-            boxShadow: theme.shadows[4],
-          },
-          '&:active': {
-            transform: 'translateY(0)',
-          },
-          transition: 'all 0.2s ease',
+          "&:hover": { bgcolor: "primary.dark", transform: "translateY(-1px)", boxShadow: theme.shadows[4] },
+          "&:active": { transform: "translateY(0)" },
+          transition: "all 0.2s ease",
         }}
       >
         Add Result
       </Button>
 
-      <Dialog 
-        open={open} 
+      <Dialog
+        open={open}
         onClose={handleClose}
         maxWidth="md"
         fullWidth
         fullScreen={isMobile}
-        PaperProps={{
-          sx: {
-            borderRadius: isMobile ? 0 : 3,
-            minHeight: isMobile ? '100vh' : 'auto'
-          }
-        }}
+        PaperProps={{ sx: { borderRadius: isMobile ? 0 : 3, minHeight: isMobile ? "100vh" : "auto" } }}
       >
         <DialogTitle
           sx={{
             p: 0,
             background: `linear-gradient(135deg, ${theme.palette.primary.main} 0%, ${theme.palette.primary.dark} 100%)`,
-            color: 'white',
-            position: 'relative'
+            color: "white",
+            position: "relative",
           }}
         >
           <Box sx={{ p: 3, pr: 6 }}>
-            <Typography variant="h5" sx={{ fontWeight: 600, display: 'flex', alignItems: 'center', gap: 1 }}>
+            <Typography variant="h5" sx={{ fontWeight: 600, display: "flex", alignItems: "center", gap: 1 }}>
               <AssessmentIcon />
               Add New Result
             </Typography>
@@ -260,11 +245,11 @@ function AddResult() {
           <IconButton
             onClick={handleClose}
             sx={{
-              position: 'absolute',
+              position: "absolute",
               right: 8,
               top: 8,
-              color: 'white',
-              '&:hover': { bgcolor: alpha(theme.palette.common.white, 0.1) }
+              color: "white",
+              "&:hover": { bgcolor: alpha(theme.palette.common.white, 0.1) },
             }}
           >
             <CloseIcon />
@@ -273,7 +258,7 @@ function AddResult() {
 
         <DialogContent sx={{ p: 3 }}>
           {loading && (
-            <Box sx={{ width: '100%', mb: 2 }}>
+            <Box sx={{ width: "100%", mb: 2 }}>
               <LinearProgress variant="determinate" value={uploadProgress} sx={{ borderRadius: 1 }} />
               <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5 }}>
                 Processing... {uploadProgress}%
@@ -282,10 +267,10 @@ function AddResult() {
           )}
 
           <Grid container spacing={3} sx={{ mt: 0 }}>
-            {/* Driver Selection Section */}
+            {/* Driver Selection */}
             <Grid item xs={12}>
               <Box sx={{ mb: 2 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main', mb: 1 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "primary.main", mb: 1 }}>
                   Driver Selection
                 </Typography>
                 <Divider />
@@ -305,20 +290,26 @@ function AddResult() {
                       <PersonIcon />
                     </InputAdornment>
                   }
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
                 >
                   {drivers.map((driver) => (
                     <MenuItem key={driver._id} value={driver._id}>
                       <Stack direction="row" spacing={2} alignItems="center">
-                        <Avatar sx={{ width: 32, height: 32, bgcolor: theme.palette.primary.main, fontSize: '0.75rem' }}>
-                          {driver.first_name?.charAt(0)}{driver.last_name?.charAt(0)}
+                        <Avatar
+                          sx={{ width: 32, height: 32, bgcolor: theme.palette.primary.main, fontSize: "0.75rem" }}
+                        >
+                          {(driver.first_name?.[0] || "").toUpperCase()}
+                          {(driver.last_name?.[0] || "").toUpperCase()}
                         </Avatar>
                         <Box>
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
                             {driver.first_name} {driver.last_name}
+                            {driver.isActive === false && (
+                              <Chip size="small" label="Inactive" sx={{ ml: 1 }} color="default" variant="outlined" />
+                            )}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
-                            License: {driver.government_id}
+                            License: {driver.government_id || "—"}
                           </Typography>
                         </Box>
                       </Stack>
@@ -333,10 +324,10 @@ function AddResult() {
               </FormControl>
             </Grid>
 
-            {/* Test Information Section */}
+            {/* Test Information */}
             <Grid item xs={12}>
               <Box sx={{ mt: 2, mb: 2 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main', mb: 1 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "primary.main", mb: 1 }}>
                   Test Information
                 </Typography>
                 <Divider />
@@ -361,28 +352,30 @@ function AddResult() {
                     </InputAdornment>
                   ),
                 }}
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
               />
             </Grid>
 
+            {/* CHANGED: Test Type → Dropdown with Test1, Test2 */}
             <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Test Type"
-                name="testType"
-                value={resultData.testType}
-                onChange={handleChange}
-                error={!!errors.testType}
-                helperText={errors.testType || "e.g., Drug Test, Alcohol Test"}
-                InputProps={{
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <ScienceIcon color="action" />
-                    </InputAdornment>
-                  ),
-                }}
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
-              />
+              <FormControl fullWidth error={!!errors.testType}>
+                <InputLabel>Test Type</InputLabel>
+                <Select
+                  name="testType"
+                  label="Test Type"
+                  value={resultData.testType}
+                  onChange={handleChange}
+                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                >
+                  <MenuItem value="Test1">Test1</MenuItem>
+                  <MenuItem value="Test2">Test2</MenuItem>
+                </Select>
+                {errors.testType && (
+                  <Typography variant="caption" color="error" sx={{ mt: 0.5 }}>
+                    {errors.testType}
+                  </Typography>
+                )}
+              </FormControl>
             </Grid>
 
             <Grid item xs={12} sm={6}>
@@ -401,7 +394,7 @@ function AddResult() {
                     </InputAdornment>
                   ),
                 }}
-                sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
               />
             </Grid>
 
@@ -413,7 +406,7 @@ function AddResult() {
                   name="status"
                   onChange={handleChange}
                   label="Result Status"
-                  sx={{ '& .MuiOutlinedInput-root': { borderRadius: 2 } }}
+                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
                 >
                   <MenuItem value="Pending">
                     <Stack direction="row" spacing={1} alignItems="center">
@@ -437,10 +430,10 @@ function AddResult() {
               </FormControl>
             </Grid>
 
-            {/* File Upload Section */}
+            {/* File Upload */}
             <Grid item xs={12}>
               <Box sx={{ mt: 2, mb: 2 }}>
-                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main', mb: 1 }}>
+                <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "primary.main", mb: 1 }}>
                   Result Document (Optional)
                 </Typography>
                 <Divider />
@@ -452,27 +445,25 @@ function AddResult() {
                 variant="outlined"
                 sx={{
                   p: 3,
-                  textAlign: 'center',
+                  textAlign: "center",
                   borderRadius: 2,
-                  borderStyle: 'dashed',
+                  borderStyle: "dashed",
                   bgcolor: resultData.file ? alpha(theme.palette.success.main, 0.05) : alpha(theme.palette.primary.main, 0.02),
-                  borderColor: resultData.file ? 'success.main' : 'primary.main',
-                  cursor: 'pointer',
-                  transition: 'all 0.2s ease',
-                  '&:hover': {
-                    bgcolor: alpha(theme.palette.primary.main, 0.08),
-                  }
+                  borderColor: resultData.file ? "success.main" : "primary.main",
+                  cursor: "pointer",
+                  transition: "all 0.2s ease",
+                  "&:hover": { bgcolor: alpha(theme.palette.primary.main, 0.08) },
                 }}
-                onClick={() => document.getElementById('result-file-input').click()}
+                onClick={() => document.getElementById("result-file-input").click()}
               >
                 <input
                   id="result-file-input"
                   type="file"
                   accept=".pdf,.jpg,.jpeg,.png"
                   onChange={handleFileChange}
-                  style={{ display: 'none' }}
+                  style={{ display: "none" }}
                 />
-                
+
                 <Stack spacing={2} alignItems="center">
                   {resultData.file ? (
                     <>
@@ -485,18 +476,13 @@ function AddResult() {
                           {formatFileSize(resultData.file.size)}
                         </Typography>
                       </Box>
-                      <Button
-                        variant="outlined"
-                        size="small"
-                        startIcon={<CloudUploadIcon />}
-                        sx={{ borderRadius: 2 }}
-                      >
+                      <Button variant="outlined" size="small" startIcon={<CloudUploadIcon />} sx={{ borderRadius: 2 }}>
                         Change File
                       </Button>
                     </>
                   ) : (
                     <>
-                      <CloudUploadIcon sx={{ fontSize: 48, color: 'primary.main', opacity: 0.7 }} />
+                      <CloudUploadIcon sx={{ fontSize: 48, color: "primary.main", opacity: 0.7 }} />
                       <Box>
                         <Typography variant="h6" sx={{ fontWeight: 600, mb: 0.5 }}>
                           Upload Result Document
@@ -512,36 +498,38 @@ function AddResult() {
                   )}
                 </Stack>
               </Paper>
-              
+
               {errors.file && (
-                <Typography variant="caption" color="error" sx={{ mt: 1, display: 'block' }}>
+                <Typography variant="caption" color="error" sx={{ mt: 1, display: "block" }}>
                   {errors.file}
                 </Typography>
               )}
             </Grid>
 
-            {/* Preview Section */}
+            {/* Preview */}
             {resultData.driverId && resultData.status && (
               <Grid item xs={12}>
                 <Box sx={{ mt: 2, mb: 2 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, color: 'primary.main', mb: 1 }}>
+                  <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "primary.main", mb: 1 }}>
                     Result Preview
                   </Typography>
                   <Divider />
                 </Box>
-                <Paper sx={{ p: 2, bgcolor: 'grey.50' }}>
+                <Paper sx={{ p: 2, bgcolor: "grey.50" }}>
                   <Grid container spacing={2}>
                     <Grid item xs={12} sm={6}>
-                      <Typography variant="caption" color="text.secondary">Driver</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        Driver
+                      </Typography>
                       <Typography variant="body2" sx={{ fontWeight: 600 }}>
                         {getDriverName(resultData.driverId)}
                       </Typography>
                     </Grid>
                     <Grid item xs={12} sm={6}>
-                      <Typography variant="caption" color="text.secondary">Status</Typography>
-                      <Box sx={{ mt: 0.5 }}>
-                        {getStatusChip(resultData.status)}
-                      </Box>
+                      <Typography variant="caption" color="text.secondary">
+                        Status
+                      </Typography>
+                      <Box sx={{ mt: 0.5 }}>{getStatusChip(resultData.status)}</Box>
                     </Grid>
                   </Grid>
                 </Paper>
@@ -549,50 +537,40 @@ function AddResult() {
             )}
           </Grid>
 
-          {(Object.keys(errors).length > 0 && !errors.file) || errors.submit && (
-            <Alert 
-              severity="error" 
-              sx={{ mt: 3, borderRadius: 2 }}
-              icon={false}
-            >
+          {(Object.keys(errors).length > 0 && !errors.file) || errors.submit ? (
+            <Alert severity="error" sx={{ mt: 3, borderRadius: 2 }} icon={false}>
               <Typography variant="body2" sx={{ fontWeight: 500 }}>
                 {errors.submit || "Please fix the errors above to continue"}
               </Typography>
             </Alert>
-          )}
+          ) : null}
         </DialogContent>
 
         <DialogActions sx={{ p: 3, pt: 0 }}>
           <Stack direction="row" spacing={2} width="100%">
-            <Button 
+            <Button
               onClick={handleClose}
               variant="outlined"
               disabled={loading}
-              sx={{ 
-                flex: 1,
-                borderRadius: 2,
-                py: 1.5,
-                textTransform: 'none',
-                fontWeight: 600
-              }}
+              sx={{ flex: 1, borderRadius: 2, py: 1.5, textTransform: "none", fontWeight: 600 }}
             >
               Cancel
             </Button>
-            <Button 
+            <Button
               onClick={handleSave}
               variant="contained"
               disabled={loading}
-              sx={{ 
+              sx={{
                 flex: 1,
                 borderRadius: 2,
                 py: 1.5,
-                textTransform: 'none',
+                textTransform: "none",
                 fontWeight: 600,
-                bgcolor: 'primary.main',
-                '&:hover': { bgcolor: 'primary.dark' }
+                bgcolor: "primary.main",
+                "&:hover": { bgcolor: "primary.dark" },
               }}
             >
-              {loading ? 'Adding Result...' : 'Add Result'}
+              {loading ? "Adding Result..." : "Add Result"}
             </Button>
           </Stack>
         </DialogActions>
