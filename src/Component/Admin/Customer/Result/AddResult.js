@@ -1,4 +1,4 @@
-import React, { useContext, useState, useEffect, useMemo } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import {
   Button,
   TextField,
@@ -31,7 +31,6 @@ import AddIcon from "@mui/icons-material/Add";
 import AssessmentIcon from "@mui/icons-material/Assessment";
 import PersonIcon from "@mui/icons-material/Person";
 import CalendarTodayIcon from "@mui/icons-material/CalendarToday";
-import ScienceIcon from "@mui/icons-material/Science";
 import NumbersIcon from "@mui/icons-material/Numbers";
 import CloudUploadIcon from "@mui/icons-material/CloudUpload";
 import CloseIcon from "@mui/icons-material/Close";
@@ -41,6 +40,8 @@ import ImageIcon from "@mui/icons-material/Image";
 import CheckCircleIcon from "@mui/icons-material/CheckCircle";
 import ErrorIcon from "@mui/icons-material/Error";
 import PendingIcon from "@mui/icons-material/Pending";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import AssignmentIcon from "@mui/icons-material/Assignment";
 
 import CustomerContext from "../../../../Context/Admin/Customer/CustomerContext";
 import ResultContext from "../../../../Context/Admin/Customer/Result/ResultContext";
@@ -58,24 +59,36 @@ function AddResult() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
+  // Build options from Membership
+  const packageOptions = Array.from(
+    new Set(
+      (userDetails?.Membership?.package || [])
+        .map((p) => p?.package_name)
+        .filter(Boolean)
+    )
+  );
+  const orderReasonOptions = Array.from(
+    new Set(
+      (userDetails?.Membership?.order_reason || [])
+        .map((r) => r?.order_reason_name)
+        .filter(Boolean)
+    )
+  );
+
   const [resultData, setResultData] = useState({
     driverId: "",
     date: "",
-    testType: "",
+    testType: "",       // from Membership.package
+    orderReason: "",    // from Membership.order_reason
     caseNumber: "",
     file: null,
-    status: "Pending", // Result status
+    status: "Pending",  // RESULT STATUS DROPDOWN
   });
 
-  // ---- Driver list logic (FIX) ----
-  // Only hide truly deleted drivers. Keep selected driver in list even if flags changed.
+  // Driver list: exclude only deleted; keep selected if flags changed
   useEffect(() => {
     if (!userDetails?.drivers) return;
-
     const nonDeleted = (userDetails.drivers || []).filter((d) => !d?.isDeleted);
-
-    // If a driver is currently selected but isn't in nonDeleted (e.g., flags changed),
-    // force-include them at the top so user can add multiple results.
     let next = [...nonDeleted];
     if (resultData.driverId && !next.some((d) => d._id === resultData.driverId)) {
       const selected = (userDetails.drivers || []).find((d) => d._id === resultData.driverId);
@@ -92,6 +105,7 @@ function AddResult() {
       driverId: "",
       date: "",
       testType: "",
+      orderReason: "",
       caseNumber: "",
       file: null,
       status: "Pending",
@@ -106,15 +120,23 @@ function AddResult() {
 
   const validateForm = () => {
     const newErrors = {};
-
     if (!resultData.driverId) newErrors.driverId = "Driver selection is required";
     if (!resultData.date) newErrors.date = "Test date is required";
-    if (!resultData.testType.trim()) newErrors.testType = "Test type is required";
+    if (!resultData.testType) {
+      newErrors.testType = packageOptions.length
+        ? "Select a test type"
+        : "No packages configured in membership";
+    }
+    if (!resultData.orderReason) {
+      newErrors.orderReason = orderReasonOptions.length
+        ? "Select an order reason"
+        : "No order reasons configured in membership";
+    }
     if (!resultData.caseNumber.trim()) newErrors.caseNumber = "Case number is required";
 
     if (resultData.file) {
-      const allowedTypes = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
-      if (!allowedTypes.includes(resultData.file.type)) {
+      const allowed = ["application/pdf", "image/jpeg", "image/jpg", "image/png"];
+      if (!allowed.includes(resultData.file.type)) {
         newErrors.file = "Only PDF, JPG, JPEG, and PNG files are allowed";
       }
       if (resultData.file.size > 10 * 1024 * 1024) {
@@ -149,6 +171,7 @@ function AddResult() {
       formData.append("driverId", resultData.driverId);
       formData.append("date", resultData.date);
       formData.append("testType", resultData.testType);
+      formData.append("orderReason", resultData.orderReason);
       formData.append("caseNumber", resultData.caseNumber);
       formData.append("status", resultData.status);
       if (resultData.file) formData.append("file", resultData.file);
@@ -157,12 +180,10 @@ function AddResult() {
       await addResult(formData);
       setUploadProgress(100);
 
-      // Refresh data so the new result appears immediately
       await getSingleUserData(currentId);
-
       handleClose();
-    } catch (error) {
-      console.error("Error adding result:", error);
+    } catch (err) {
+      console.error("Error adding result:", err);
       setErrors({ submit: "Failed to add result. Please try again." });
     } finally {
       setLoading(false);
@@ -178,8 +199,8 @@ function AddResult() {
   };
 
   const formatFileSize = (bytes) => {
-    if (!bytes && bytes !== 0) return "";
     if (bytes === 0) return "0 Bytes";
+    if (!bytes && bytes !== 0) return "";
     const k = 1024;
     const sizes = ["Bytes", "KB", "MB", "GB"];
     const i = Math.floor(Math.log(bytes) / Math.log(k));
@@ -196,11 +217,6 @@ function AddResult() {
       default:
         return <Chip size="small" label="Pending" color="warning" icon={<PendingIcon />} />;
     }
-  };
-
-  const getDriverName = (driverId) => {
-    const d = drivers.find((x) => x._id === driverId);
-    return d ? `${d.first_name ?? ""} ${d.last_name ?? ""}`.trim() : "";
   };
 
   return (
@@ -314,13 +330,7 @@ function AddResult() {
                           <Typography variant="body2" sx={{ fontWeight: 600 }}>
                             {driver.first_name} {driver.last_name}
                             {driver.isActive === false && (
-                              <Chip
-                                size="small"
-                                label="Inactive"
-                                sx={{ ml: 1 }}
-                                color="default"
-                                variant="outlined"
-                              />
+                              <Chip size="small" label="Inactive" sx={{ ml: 1 }} color="default" variant="outlined" />
                             )}
                           </Typography>
                           <Typography variant="caption" color="text.secondary">
@@ -371,46 +381,65 @@ function AddResult() {
               />
             </Grid>
 
+            {/* Test Type from Membership.Packages */}
             <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Test Type"
-                name="testType"
-                value={resultData.testType}
-                onChange={handleChange}
-                error={!!errors.testType}
-                helperText={errors.testType || "e.g., Drug Test, Alcohol Test"}
-                InputProps={{
-                  startAdornment: (
+              <FormControl fullWidth error={!!errors.testType}>
+                <InputLabel>Test Type</InputLabel>
+                <Select
+                  name="testType"
+                  label="Test Type"
+                  value={resultData.testType}
+                  onChange={handleChange}
+                  disabled={packageOptions.length === 0}
+                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                  startAdornment={
                     <InputAdornment position="start">
-                      <ScienceIcon color="action" />
+                      <InventoryIcon color={packageOptions.length ? "action" : "disabled"} />
                     </InputAdornment>
-                  ),
-                }}
-                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-              />
+                  }
+                >
+                  {packageOptions.map((pkg) => (
+                    <MenuItem key={pkg} value={pkg}>
+                      {pkg}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <Typography variant="caption" sx={{ mt: 0.5 }} color={errors.testType ? "error" : "text.secondary"}>
+                  {errors.testType || (packageOptions.length === 0 && "No packages found in membership")}
+                </Typography>
+              </FormControl>
             </Grid>
 
+            {/* Order Reason from Membership.order_reason */}
             <Grid item xs={12} sm={6}>
-              <TextField
-                fullWidth
-                label="Case Number"
-                name="caseNumber"
-                value={resultData.caseNumber}
-                onChange={handleChange}
-                error={!!errors.caseNumber}
-                helperText={errors.caseNumber}
-                InputProps={{
-                  startAdornment: (
+              <FormControl fullWidth error={!!errors.orderReason}>
+                <InputLabel>Order Reason</InputLabel>
+                <Select
+                  name="orderReason"
+                  label="Order Reason"
+                  value={resultData.orderReason}
+                  onChange={handleChange}
+                  disabled={orderReasonOptions.length === 0}
+                  sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+                  startAdornment={
                     <InputAdornment position="start">
-                      <NumbersIcon color="action" />
+                      <AssignmentIcon color={orderReasonOptions.length ? "action" : "disabled"} />
                     </InputAdornment>
-                  ),
-                }}
-                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
-              />
+                  }
+                >
+                  {orderReasonOptions.map((reason) => (
+                    <MenuItem key={reason} value={reason}>
+                      {reason}
+                    </MenuItem>
+                  ))}
+                </Select>
+                <Typography variant="caption" sx={{ mt: 0.5 }} color={errors.orderReason ? "error" : "text.secondary"}>
+                  {errors.orderReason || (orderReasonOptions.length === 0 && "No order reasons found in membership")}
+                </Typography>
+              </FormControl>
             </Grid>
 
+            {/* RESULT STATUS DROPDOWN */}
             <Grid item xs={12} sm={6}>
               <FormControl fullWidth>
                 <InputLabel>Result Status</InputLabel>
@@ -441,6 +470,26 @@ function AddResult() {
                   </MenuItem>
                 </Select>
               </FormControl>
+            </Grid>
+
+            <Grid item xs={12} sm={6}>
+              <TextField
+                fullWidth
+                label="Case Number"
+                name="caseNumber"
+                value={resultData.caseNumber}
+                onChange={handleChange}
+                error={!!errors.caseNumber}
+                helperText={errors.caseNumber}
+                InputProps={{
+                  startAdornment: (
+                    <InputAdornment position="start">
+                      <NumbersIcon color="action" />
+                    </InputAdornment>
+                  ),
+                }}
+                sx={{ "& .MuiOutlinedInput-root": { borderRadius: 2 } }}
+              />
             </Grid>
 
             {/* File Upload */}
@@ -519,35 +568,7 @@ function AddResult() {
               )}
             </Grid>
 
-            {/* Preview */}
-            {resultData.driverId && resultData.status && (
-              <Grid item xs={12}>
-                <Box sx={{ mt: 2, mb: 2 }}>
-                  <Typography variant="subtitle1" sx={{ fontWeight: 600, color: "primary.main", mb: 1 }}>
-                    Result Preview
-                  </Typography>
-                  <Divider />
-                </Box>
-                <Paper sx={{ p: 2, bgcolor: "grey.50" }}>
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="caption" color="text.secondary">
-                        Driver
-                      </Typography>
-                      <Typography variant="body2" sx={{ fontWeight: 600 }}>
-                        {getDriverName(resultData.driverId)}
-                      </Typography>
-                    </Grid>
-                    <Grid item xs={12} sm={6}>
-                      <Typography variant="caption" color="text.secondary">
-                        Status
-                      </Typography>
-                      <Box sx={{ mt: 0.5 }}>{getStatusChip(resultData.status)}</Box>
-                    </Grid>
-                  </Grid>
-                </Paper>
-              </Grid>
-            )}
+            {/* (Preview section removed as requested) */}
           </Grid>
 
           {(Object.keys(errors).length > 0 && !errors.file) || errors.submit ? (
