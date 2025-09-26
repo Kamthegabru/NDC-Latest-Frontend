@@ -190,11 +190,42 @@ function DisplayResult() {
     setShowRemoveDialog(true);
   };
 
-  const confirmRemove = () => {
-    // Here you should call your API to remove selected results
+const confirmRemove = async () => {
+  try {
+    // Create promises for deleting each selected result
+    const deletePromises = selectedIds.map(async (caseNumber) => {
+      // Find the result to get its ID and userId
+      const resultToDelete = results.find(r => r.caseNumber === caseNumber);
+      if (!resultToDelete) return;
+      
+      // Make API call to delete the result
+      return axios.post(`${API_URL}/admin/deleteResult`, {
+        currentId: resultToDelete.userId,
+        resultId: resultToDelete._id
+      });
+    });
+    
+    // Wait for all deletions to complete
+    await Promise.all(deletePromises);
+    
+    // Update the local state by removing deleted results
+    const updatedResults = results.filter(r => !selectedIds.includes(r.caseNumber));
+    setResults(updatedResults);
+    
+    // Update cached results
+    cachedResults = updatedResults;
+    
+    // Clear selections and close dialog
     setSelectedIds([]);
     setShowRemoveDialog(false);
-  };
+    
+    console.log('Results deleted successfully');
+    
+  } catch (error) {
+    console.error('Error deleting results:', error);
+    alert('Error deleting results. Please try again.');
+  }
+};
 
   const handleView = (result) => {
     setSelectedResult(result);

@@ -1,72 +1,187 @@
 <!DOCTYPE html>
 <html lang="en">
+
+
 <head>
+  <!-- Charset & viewport -->
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Colors & PWA -->
   <meta name="theme-color" content="#0B4D8F" />
-  <meta name="robots" content="index,follow" />
+  <meta name="color-scheme" content="light only" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="NDC – NW Drug Testing" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="/manifest.json" />
 
-  <!-- Title + Description -->
-  <title>DOT Drug Testing Nationwide | Random Consortium, FMCSA Clearinghouse | NDC</title>
-  <meta name="description" content="NDC provides fast, DOT-compliant drug & alcohol testing with 20,000+ locations, random consortium management, FMCSA Clearinghouse support, and MRO-reviewed results. Book online today.">
+  <!-- Search indexing (strict, modern) -->
+  <meta name="robots" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" />
+  <meta name="googlebot" content="index,follow,max-snippet:-1,max-image-preview:large,max-video-preview:-1" />
+  <meta name="bingbot" content="index,follow" />
+
+  <!-- Canonical + hreflang -->
   <link rel="canonical" href="https://nwdrugtesting.com/" />
+  <link rel="alternate" href="https://nwdrugtesting.com/" hreflang="en-us" />
+  <link rel="alternate" href="https://nwdrugtesting.com/" hreflang="x-default" />
 
-  <!-- Favicons / Site icons -->
+  <!-- Title + Meta -->
+  <title>DOT Drug Testing Nationwide | Random Consortium, FMCSA Clearinghouse | NDC</title>
+  <meta name="description" content="NDC provides fast, DOT-compliant drug & alcohol testing with 20,000+ locations, random consortium management, FMCSA Clearinghouse support, and MRO-reviewed results. Book online today." />
+  <meta name="keywords" content="DOT drug testing, FMCSA Clearinghouse, DOT consortium, random testing program, post-accident testing, mobile drug testing, MRO, breath alcohol testing, non-DOT testing, nationwide drug testing, NDC, nationwide drug, NWD" />
+
+  <!-- Favicons / Icons -->
   <link rel="icon" href="/favicon.ico" />
-  <link rel="icon" type="image/png" sizes="16x16" href="/icon-16.png">
-  <link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png">
-  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png">
-  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
-  <link rel="manifest" href="/manifest.json">
+  <link rel="icon" type="image/png" sizes="16x16" href="/icon-16.png" />
+  <link rel="icon" type="image/png" sizes="32x32" href="/icon-32.png" />
+  <link rel="icon" type="image/png" sizes="192x192" href="/icon-192.png" />
+  <link rel="icon" type="image/png" sizes="512x512" href="/icon-512.png" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+  <link rel="mask-icon" href="/safari-pinned-tab.svg" color="#0B4D8F" />
+  <meta name="msapplication-TileColor" content="#0B4D8F" />
 
-  <!-- Open Graph (preview image for Google/Bing/FB) -->
-  <meta property="og:type" content="website"> 
-  <meta property="og:title" content="DOT Drug Testing Nationwide | Random Consortium & FMCSA Support">
-  <meta property="og:description" content="Book DOT and non-DOT tests fast. 20,000+ collection sites, MRO-reviewed results, FMCSA Clearinghouse help, and nationwide random consortium programs.">
-  <meta property="og:url" content="https://nwdrugtesting.com/">
-  <meta property="og:image" content="https://nwdrugtesting.com/og-cover.jpg">
-  <meta property="og:image:width" content="1200">
-  <meta property="og:image:height" content="630">
-  <meta property="og:image:type" content="image/jpeg">
+  <!-- Open Graph -->
+  <meta property="og:type" content="website" />
+  <meta property="og:site_name" content="NDC – NW Drug Testing" />
+  <meta property="og:title" content="DOT Drug Testing Nationwide | Random Consortium & FMCSA Support" />
+  <meta property="og:description" content="Book DOT and non-DOT tests fast. 20,000+ collection sites, MRO-reviewed results, FMCSA Clearinghouse help, and nationwide random consortium programs." />
+  <meta property="og:url" content="https://nwdrugtesting.com/" />
+  <meta property="og:image" content="https://nwdrugtesting.com/og-cover.jpg" />
+  <meta property="og:image:width" content="1200" />
+  <meta property="og:image:height" content="630" />
+  <meta property="og:image:type" content="image/jpeg" />
+  <meta property="og:locale" content="en_US" />
+  <!-- Optional FB App ID -->
+  <!-- <meta property="fb:app_id" content="REPLACE_WITH_FB_APP_ID" /> -->
 
   <!-- Twitter -->
-  <meta name="twitter:card" content="summary_large_image">
-  <meta name="twitter:title" content="DOT Drug Testing Nationwide | Random Consortium & FMCSA Support">
-  <meta name="twitter:description" content="Fast appointments, certified labs, MRO review, and nationwide coverage. Schedule your DOT drug test today.">
-  <meta name="twitter:image" content="https://nwdrugtesting.com/og-cover.jpg">
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="DOT Drug Testing Nationwide | Random Consortium & FMCSA Support" />
+  <meta name="twitter:description" content="Fast appointments, certified labs, MRO review, and nationwide coverage. Schedule your DOT drug test today." />
+  <meta name="twitter:image" content="https://nwdrugtesting.com/og-cover.jpg" />
+  <meta name="twitter:site" content="@REPLACE_TWITTER_HANDLE" />
 
-  <!-- CSS (yours) -->
-  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
-        rel="stylesheet"
-        integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
-        crossorigin="anonymous">
+  <!-- Security/Privacy hints (harmless client hints) -->
+  <meta http-equiv="Permissions-Policy" content="interest-cohort=()" />
 
-  <!-- Optional: preconnect for fonts -->
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <!-- Preconnect / DNS Prefetch (speed) -->
+  <link rel="preconnect" href="https://nwdrugtesting.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://cdn.jsdelivr.net" />
+  <link rel="dns-prefetch" href="https://fonts.gstatic.com" />
+  <link rel="dns-prefetch" href="https://fonts.googleapis.com" />
+  <link rel="dns-prefetch" href="https://cdn.jsdelivr.net" />
 
-  <!-- Organization JSON-LD (note the logo is absolute) -->
+  <!-- Preload critical assets (edit paths/types) -->
+  <!-- Replace with your actual hero and font files -->
+  <link rel="preload" as="image" href="/images/hero@2x.jpg" imagesrcset="/images/hero@1x.jpg 1x, /images/hero@2x.jpg 2x" />
+  <link rel="preload" as="font" href="/fonts/REPLACE-Inter-Variable.woff2" type="font/woff2" crossorigin />
+  <!-- If using a critical CSS file -->
+  <!-- <link rel="preload" href="/css/critical.css" as="style" /> -->
+
+  <!-- CSS (Bootstrap example) -->
+  <link
+    href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css"
+    rel="stylesheet"
+    integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC"
+    crossorigin="anonymous"
+  />
+
+  <!-- Analytics/site verification (optional placeholders) -->
+  <!-- <meta name="google-site-verification" content="REPLACE_GOOGLE_VERIFICATION" /> -->
+  <!-- <meta name="msvalidate.01" content="REPLACE_BING_VERIFICATION" /> -->
+
+  <!-- ===================== JSON-LD: Organization ===================== -->
   <script type="application/ld+json">
   {
     "@context": "https://schema.org",
     "@type": "Organization",
-    "name": "NDC – NW Drug Testing",
+    "name": "Nationwide Drug Center (NDC)",
     "url": "https://nwdrugtesting.com/",
     "logo": "https://nwdrugtesting.com/logo.png",
     "sameAs": [
-      "https://www.facebook.com/yourhandle",
-      "https://www.instagram.com/yourhandle",
-      "https://www.linkedin.com/company/yourhandle"
+      "https://www.facebook.com/REPLACE_FACEBOOK",
+      "https://www.instagram.com/REPLACE_INSTAGRAM",
+      "https://www.linkedin.com/company/REPLACE_LINKEDIN"
     ],
     "contactPoint": [{
       "@type": "ContactPoint",
-      "telephone": "+1-XXX-XXX-XXXX",
-      "contactType": "customer service",
+      "telephone": "+1-360-249-7511",
+      "contactType": "customer support",
       "areaServed": "US",
       "availableLanguage": ["en","es"]
-    }]
+    }],
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "3055 NW YEON AVE UNIT #271",
+      "addressLocality": "Portland",
+      "addressRegion": "OR",
+      "postalCode": "97210",
+      "addressCountry": "US"
+    }
   }
   </script>
+
+  <!-- ===================== JSON-LD: WebSite + Sitelinks Search ===================== -->
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "name": "NDC – NW Drug Testing",
+    "url": "https://nwdrugtesting.com/",
+    "potentialAction": {
+      "@type": "SearchAction",
+      "target": "https://nwdrugtesting.com/search?q={search_term_string}",
+      "query-input": "required name=search_term_string"
+    }
+  }
+  </script>
+
+  <!-- ===================== JSON-LD: Service (DOT Consortium example) ===================== -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"Service",
+    "serviceType":"DOT Random Drug & Alcohol Testing Consortium (C/TPA)",
+    "provider":{"@type":"Organization","name":"Nationwide Drug Center (NDC)","url":"https://nwdrugtesting.com/"},
+    "areaServed":"US",
+    "offers":{
+      "@type":"Offer",
+      "priceCurrency":"USD",
+      "price":"150",
+      "priceSpecification":{"@type":"UnitPriceSpecification","price":"150","unitCode":"ANN"},
+      "url":"https://nwdrugtesting.com/dot-consortium-program/"
+    }
+  }
+  </script>
+
+  <!-- ===================== JSON-LD: FAQ (tiny, compliant) ===================== -->
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"FAQPage",
+    "mainEntity":[
+      {
+        "@type":"Question",
+        "name":"Do employers need annual Clearinghouse queries?",
+        "acceptedAnswer":{"@type":"Answer","text":"Yes. Employers must run annual limited queries on all CDL drivers and full pre-employment queries for new hires. NDC sets this up and keeps you compliant."}
+      },
+      {
+        "@type":"Question",
+        "name":"How fast can I enroll in a DOT random consortium?",
+        "acceptedAnswer":{"@type":"Answer","text":"Same day. You receive an enrollment certificate immediately after sign-up and we manage your pool and documentation year-round."}
+      }
+    ]
+  }
+  </script>
+
+  <!-- Performance best practices -->
+  <meta http-equiv="x-dns-prefetch-control" content="on" />
+  <link rel="prefetch" href="/locations/" as="document" />
+  <link rel="prefetch" href="/fmcsa-clearinghouse-assistance/" as="document" />
+  <link rel="prefetch" href="/dot-consortium-program/" as="document" />
 </head>
 
 

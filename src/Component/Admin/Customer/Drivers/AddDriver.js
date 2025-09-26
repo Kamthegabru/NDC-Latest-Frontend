@@ -71,16 +71,16 @@ function AddDriver() {
     if (!driverData.lastName.trim()) newErrors.lastName = "Last name is required";
     if (!driverData.license.trim()) newErrors.license = "License number is required";
     if (!driverData.dob) newErrors.dob = "Date of birth is required";
-    if (!driverData.email.trim()) {
-      newErrors.email = "Email is required";
-    } else if (!/\S+@\S+\.\S+/.test(driverData.email)) {
-      newErrors.email = "Email is invalid";
-    }
-    if (!driverData.phone.trim()) {
-      newErrors.phone = "Phone number is required";
-    } else if (!/^\d{10}$/.test(driverData.phone.replace(/\D/g, ''))) {
-      newErrors.phone = "Phone number must be 10 digits";
-    }
+    // if (!driverData.email.trim()) {
+    //   newErrors.email = "Email is required";
+    // } else if (!/\S+@\S+\.\S+/.test(driverData.email)) {
+    //   newErrors.email = "Email is invalid";
+    // }
+    // if (!driverData.phone.trim()) {
+    //   newErrors.phone = "Phone number is required";
+    // } else if (!/^\d{10}$/.test(driverData.phone.replace(/\D/g, ''))) {
+    //   newErrors.phone = "Phone number must be 10 digits";
+    // }
 
     setErrors(newErrors);
     return Object.keys(newErrors).length === 0;
@@ -353,8 +353,7 @@ function AddDriver() {
               icon={false}
             >
               <Typography variant="body2" sx={{ fontWeight: 500 }}>
-                Please fix the errors above to continue
-              </Typography>
+                Please fill the required fields              </Typography>
             </Alert>
           )}
         </DialogContent>
