@@ -27,7 +27,7 @@ function ParticipantInformation() {
     formData,
     setFormData,
     getSiteInformation,
-    selectedCompanyEmail, // Add this to access company email
+    selectedCompanyEmail,
   } = useContext(CreateNewOrderContext);
 
   // 👉 Set default order expiry = today + 10 days
@@ -35,13 +35,23 @@ function ParticipantInformation() {
     if (!formData.orderExpires) {
       const now = new Date();
       now.setDate(now.getDate() + 10);
-      const formatted = now.toISOString().slice(0, 16); // yyyy-MM-ddTHH:mm
+      const formatted = now.toISOString().slice(0, 16);
       setFormData((prev) => ({
         ...prev,
         orderExpires: formatted,
       }));
     }
   }, [formData.orderExpires, setFormData]);
+
+  // 👉 Auto-fill email from selectedCompanyEmail if not already set
+  useEffect(() => {
+    if (selectedCompanyEmail && !formData.email) {
+      setFormData((prev) => ({
+        ...prev,
+        email: selectedCompanyEmail,
+      }));
+    }
+  }, [selectedCompanyEmail, formData.email, setFormData]);
 
   // 👉 Reorder US_STATES so the selected state appears at the top
   const reorderedStates = useMemo(() => {
@@ -64,7 +74,7 @@ function ParticipantInformation() {
     
     // Handle SSN state change - combine with SSN value
     if (name === "ssnState") {
-      const ssnValue = formData.ssn?.replace(/^[A-Z]{2}/, '') || ''; // Remove any existing state prefix
+      const ssnValue = formData.ssn?.replace(/^[A-Z]{2}/, '') || '';
       const combinedSSN = value ? `${value}${ssnValue}` : ssnValue;
       setFormData((prev) => ({
         ...prev,
@@ -100,7 +110,6 @@ function ParticipantInformation() {
   // Helper function to display SSN without state prefix in the input field
   const getDisplaySSN = () => {
     if (formData.ssn && formData.ssnState) {
-      // Remove the state prefix for display
       return formData.ssn.replace(new RegExp(`^${formData.ssnState}`), '');
     }
     return formData.ssn || '';
@@ -130,9 +139,6 @@ function ParticipantInformation() {
         Use the form below to enter participant information. All required fields
         are marked <span className="text-danger">*</span>.
       </Typography>
-
-     
-      
 
       {/* Name Fields */}
       <Row className="mb-3">
@@ -247,9 +253,9 @@ function ParticipantInformation() {
         </Col>
       </Row>
 
-      {/* Extra Contact Info */}
+      {/* Extra Contact Info - Added Email Field */}
       <Row className="mb-3">
-        <Col md={6}>
+        <Col md={4}>
           <TextField
             fullWidth
             label="Phone 2"
@@ -259,7 +265,19 @@ function ParticipantInformation() {
           />
         </Col>
 
-        <Col md={6}>
+        <Col md={4}>
+          <TextField
+            fullWidth
+            label="Email"
+            name="email"
+            type="email"
+            value={formData.email || ""}
+            onChange={handleChange}
+            helperText={selectedCompanyEmail && formData.email === selectedCompanyEmail ? "Auto-filled from company" : ""}
+          />
+        </Col>
+
+        <Col md={4}>
           <TextField
             fullWidth
             label="Order Expires"
@@ -378,7 +396,7 @@ function ParticipantInformation() {
         </Col>
       </Row>
 
-      {/* Donar Pass - This component now has access to selectedCompanyEmail */}
+      {/* Donar Pass */}
       <DonarPass />
 
       {/* Actions */}
@@ -412,7 +430,6 @@ function ParticipantInformation() {
 
 export default ParticipantInformation;
 
-// State list remains inline
 const US_STATES = [
   { label: "Alabama", value: "AL" }, { label: "Alaska", value: "AK" },
   { label: "Arizona", value: "AZ" }, { label: "Arkansas", value: "AR" },
@@ -441,7 +458,6 @@ const US_STATES = [
   { label: "Wisconsin", value: "WI" }, { label: "Wyoming", value: "WY" },
 ];
 
-// Menu props styling remains inline
 const menuProps = {
   PaperProps: {
     style: {
