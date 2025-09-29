@@ -12,7 +12,6 @@ import {
   Button,
   Typography,
   Box,
-  InputAdornment,
 } from "@mui/material";
 import { Row, Col } from "react-bootstrap";
 import CreateNewOrderContext from "../../../Context/Admin/CreateNewOrder/CreateNewOrderContext";
@@ -43,16 +42,6 @@ function ParticipantInformation() {
     }
   }, [formData.orderExpires, setFormData]);
 
-  // 👉 Auto-fill email from selectedCompanyEmail if not already set
-  useEffect(() => {
-    if (selectedCompanyEmail && !formData.email) {
-      setFormData((prev) => ({
-        ...prev,
-        email: selectedCompanyEmail,
-      }));
-    }
-  }, [selectedCompanyEmail, formData.email, setFormData]);
-
   // 👉 Reorder US_STATES so the selected state appears at the top
   const reorderedStates = useMemo(() => {
     if (!formData.state) return US_STATES;
@@ -82,7 +71,14 @@ function ParticipantInformation() {
         ssn: combinedSSN,
       }));
     }
-    
+    // Handle SSN input change - allow full editing
+    else if (name === "ssn") {
+      // Update the SSN value directly without restrictions
+      setFormData((prev) => ({
+        ...prev,
+        ssn: value,
+      }));
+    }
     else {
       setFormData((prev) => ({
         ...prev,
@@ -253,9 +249,9 @@ function ParticipantInformation() {
         </Col>
       </Row>
 
-      {/* Extra Contact Info - Added Email Field */}
+      {/* Extra Contact Info */}
       <Row className="mb-3">
-        <Col md={4}>
+        <Col md={6}>
           <TextField
             fullWidth
             label="Phone 2"
@@ -265,19 +261,7 @@ function ParticipantInformation() {
           />
         </Col>
 
-        <Col md={4}>
-          <TextField
-            fullWidth
-            label="Email"
-            name="email"
-            type="email"
-            value={formData.email || ""}
-            onChange={handleChange}
-            helperText={selectedCompanyEmail && formData.email === selectedCompanyEmail ? "Auto-filled from company" : ""}
-          />
-        </Col>
-
-        <Col md={4}>
+        <Col md={6}>
           <TextField
             fullWidth
             label="Order Expires"
@@ -396,7 +380,6 @@ function ParticipantInformation() {
         </Col>
       </Row>
 
-      {/* Donar Pass */}
       <DonarPass />
 
       {/* Actions */}
