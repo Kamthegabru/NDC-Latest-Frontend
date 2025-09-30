@@ -17,7 +17,7 @@ import { Row, Col } from "react-bootstrap";
 import CreateNewOrderContext from "../../../Context/Admin/CreateNewOrder/CreateNewOrderContext";
 import DonarPass from "./DonarPass";
 
-function ParticipantInformation() {
+export default function ParticipantInformation(props) {
   const {
     currentPosition,
     maxPosition,
@@ -26,21 +26,71 @@ function ParticipantInformation() {
     formData,
     setFormData,
     getSiteInformation,
-    selectedCompanyEmail,
   } = useContext(CreateNewOrderContext);
 
-  // 👉 Set default order expiry = today + 10 days
+  // reschedule props
+  const rescheduleEnabled = !!props?.rescheduleEnabled;
+  const prefill = props?.prefill || {};
+
+  // 👉 Set default order expiry = today + 10 days (only if empty)
   useEffect(() => {
     if (!formData.orderExpires) {
       const now = new Date();
       now.setDate(now.getDate() + 10);
-      const formatted = now.toISOString().slice(0, 16);
+      const formatted = now.toISOString().slice(0, 16); // yyyy-MM-ddTHH:mm
       setFormData((prev) => ({
         ...prev,
         orderExpires: formatted,
       }));
     }
   }, [formData.orderExpires, setFormData]);
+
+  // ✅ Apply reschedule prefill once
+  useEffect(() => {
+    if (!rescheduleEnabled) return;
+
+    // to "date" input -> yyyy-MM-dd
+    const toDate = (v) => {
+      if (!v) return "";
+      const d = new Date(v);
+      return Number.isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 10);
+    };
+    // to "datetime-local" -> yyyy-MM-ddTHH:mm
+    const toDTLocal = (v) => {
+      if (!v) return "";
+      const d = new Date(v);
+      return Number.isNaN(d.getTime()) ? "" : d.toISOString().slice(0, 16);
+    };
+
+    setFormData((prev) => ({
+      ...prev,
+      // names
+      firstName: prefill.firstName || prev.firstName || "",
+      middleName: prefill.middleName || prev.middleName || "",
+      lastName: prefill.lastName || prev.lastName || "",
+      // id / dob / phones
+      ssnState: prev.ssnState || "",
+      ssn: prefill.ssnEid || prev.ssn || "",
+      dob: toDate(prefill.dob) || prev.dob || "",
+      phone1: prefill.phone1 || prev.phone1 || "",
+      phone2: prefill.phone2 || prev.phone2 || "",
+      // observed + expiry
+      observed: prefill.observed ? "1" : "0",
+      orderExpires: toDTLocal(prefill.orderExpires) || prev.orderExpires || "",
+      // address
+      address: prefill.addr1 || prev.address || "",
+      address2: prefill.addr2 || prev.address2 || "",
+      city: prefill.city || prev.city || "",
+      state: prefill.stateShort || prev.state || "",
+      zip: prefill.zip || prev.zip || "",
+      // comms
+      sendLink: prefill.sendSchedulingLink ?? false,
+      donorPass: prefill.sendDonorPass ?? true,
+      email: prefill.email || prev.email || "",
+      ccEmail: prefill.ccEmails || prev.ccEmail || "",
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [rescheduleEnabled]);
 
   // 👉 Reorder US_STATES so the selected state appears at the top
   const reorderedStates = useMemo(() => {
@@ -60,26 +110,22 @@ function ParticipantInformation() {
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
-    
-    // Handle SSN state change - combine with SSN value
+
     if (name === "ssnState") {
-      const ssnValue = formData.ssn?.replace(/^[A-Z]{2}/, '') || '';
+      const ssnValue = formData.ssn?.replace(/^[A-Z]{2}/, "") || ""; // Remove any existing state prefix
       const combinedSSN = value ? `${value}${ssnValue}` : ssnValue;
       setFormData((prev) => ({
         ...prev,
         ssnState: value,
         ssn: combinedSSN,
       }));
-    }
-    // Handle SSN input change - allow full editing
-    else if (name === "ssn") {
-      // Update the SSN value directly without restrictions
+    } else if (name === "ssn") {
+      // keep storage WITH prefix (if present)
       setFormData((prev) => ({
         ...prev,
-        ssn: value,
+        ssn: (prev.ssnState || "") + value,
       }));
-    }
-    else {
+    } else {
       setFormData((prev) => ({
         ...prev,
         [name]: type === "checkbox" ? checked : value,
@@ -87,28 +133,20 @@ function ParticipantInformation() {
     }
   };
 
-  const handlePrevious = () => {
-    setCurrentPosition(currentPosition - 1);
-  };
+  const handlePrevious = () => setCurrentPosition(currentPosition - 1);
 
   const handleContinue = () => {
-    if (currentPosition === maxPosition) {
-      setMaxPosition(maxPosition + 1);
-    }
+    if (currentPosition === maxPosition) setMaxPosition(maxPosition + 1);
     setCurrentPosition(currentPosition + 1);
     getSiteInformation();
   };
 
-  const handSubmitLink = () => {
-    getSiteInformation();
-  };
-
-  // Helper function to display SSN without state prefix in the input field
+  // Display SSN without state prefix in the input field
   const getDisplaySSN = () => {
     if (formData.ssn && formData.ssnState) {
-      return formData.ssn.replace(new RegExp(`^${formData.ssnState}`), '');
+      return formData.ssn.replace(new RegExp(`^${formData.ssnState}`), "");
     }
-    return formData.ssn || '';
+    return formData.ssn || "";
   };
 
   const validateRequiredFields = () => {
@@ -172,7 +210,7 @@ function ParticipantInformation() {
       {/* Personal Details */}
       <Row className="mb-3">
         <Col md={4}>
-          <Box sx={{ display: 'flex', gap: 1 }}>
+          <Box sx={{ display: "flex", gap: 1 }}>
             <FormControl sx={{ minWidth: 80 }}>
               <InputLabel id="ssn-state-label">State</InputLabel>
               <Select
@@ -185,10 +223,10 @@ function ParticipantInformation() {
                 sx={{
                   backgroundColor: "#fff",
                   borderRadius: 1,
-                  '& .MuiOutlinedInput-root': {
+                  "& .MuiOutlinedInput-root": {
                     borderTopRightRadius: 0,
                     borderBottomRightRadius: 0,
-                  }
+                  },
                 }}
               >
                 <MenuItem value="">
@@ -217,10 +255,10 @@ function ParticipantInformation() {
               value={getDisplaySSN()}
               onChange={handleChange}
               sx={{
-                '& .MuiOutlinedInput-root': {
+                "& .MuiOutlinedInput-root": {
                   borderTopLeftRadius: 0,
                   borderBottomLeftRadius: 0,
-                }
+                },
               }}
             />
           </Box>
@@ -352,7 +390,7 @@ function ParticipantInformation() {
               <MenuItem value="">
                 <em>Select state</em>
               </MenuItem>
-              {reorderedStates.map((state) => (
+              {US_STATES.map((state) => (
                 <MenuItem
                   key={state.value}
                   value={state.value}
@@ -380,28 +418,25 @@ function ParticipantInformation() {
         </Col>
       </Row>
 
+      {/* Donor Pass */}
       <DonarPass />
 
       {/* Actions */}
       <Box display="flex" justifyContent="space-between">
-        <Button variant="outlined" onClick={handlePrevious}>
+        <Button variant="outlined" onClick={() => setCurrentPosition(currentPosition - 1)}>
           Previous
         </Button>
         <Box>
           {formData.sendLink ? (
-            <Button
-              variant="contained"
-              onClick={handSubmitLink}
-              disabled={!validateRequiredFields()}
-            >
+            <Button variant="contained" onClick={getSiteInformation} disabled={!validateRequiredFields()}>
               Submit
             </Button>
           ) : (
-            <Button
-              variant="contained"
-              onClick={handleContinue}
-              disabled={!validateRequiredFields()}
-            >
+            <Button variant="contained" onClick={() => {
+              if (currentPosition === maxPosition) setMaxPosition(maxPosition + 1);
+              setCurrentPosition(currentPosition + 1);
+              getSiteInformation();
+            }} disabled={!validateRequiredFields()}>
               Continue
             </Button>
           )}
@@ -411,8 +446,7 @@ function ParticipantInformation() {
   );
 }
 
-export default ParticipantInformation;
-
+// State list inline
 const US_STATES = [
   { label: "Alabama", value: "AL" }, { label: "Alaska", value: "AK" },
   { label: "Arizona", value: "AZ" }, { label: "Arkansas", value: "AR" },
