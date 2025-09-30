@@ -88,13 +88,18 @@ export default function OrderInformation(props) {
     formData,
   } = useContext(CreateNewOrderContext);
 
-  const devDebug = props?.devDebug ?? false; // quiet by default
+  const devDebug = props?.devDebug ?? false;
   const rescheduleEnabled = !!props?.rescheduleEnabled;
   const prefill = props?.prefill || {};
 
   const [availablePackages, setAvailablePackages] = useState([]);
   const [availableReasons, setAvailableReasons] = useState([]);
   const [loadingCompanies, setLoadingCompanies] = useState(false);
+
+  // Managing agency lookup state
+  const [managingAgencyEmail, setManagingAgencyEmail] = useState(""); // <- only the email we want to show
+  const [agencyLookupLoading, setAgencyLookupLoading] = useState(false);
+  const [agencyLookupError, setAgencyLookupError] = useState("");
 
   // case-insensitive check for DOT packages
   const showDotAgency =
@@ -129,7 +134,6 @@ export default function OrderInformation(props) {
       const company = allCompanyData.find((c) => c._id === companyId);
       setAvailablePackages(company?.packages || []);
       setAvailableReasons(company?.orderReasons || []);
-      // allow reseed when company changes
       seededRef.current = false;
     } else {
       setAvailablePackages([]);
@@ -148,9 +152,7 @@ export default function OrderInformation(props) {
     const norm = (s) => (s || "").toString().trim().toLowerCase();
     const targetName = norm(prefill.companyName);
 
-    let match =
-      allCompanyData.find((c) => norm(c.companyName) === targetName);
-
+    const match = allCompanyData.find((c) => norm(c.companyName) === targetName);
     if (match) handleCompanySelect(null, match);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [rescheduleEnabled, allCompanyData, prefill?.companyName, companyId]);
@@ -202,7 +204,7 @@ export default function OrderInformation(props) {
     setDotAgency,
   ]);
 
-  // 🔎 DEV: log whenever the three critical fields change
+  // Dev logging
   useEffect(() => {
     if (!devDebug) return;
     // eslint-disable-next-line no-console
@@ -211,8 +213,43 @@ export default function OrderInformation(props) {
       packageId,
       orderReasonId,
       dotAgency,
+      managingAgencyEmail,
     });
-  }, [companyId, packageId, orderReasonId, dotAgency, devDebug]);
+  }, [companyId, packageId, orderReasonId, dotAgency, managingAgencyEmail, devDebug]);
+
+  // Backend-driven agency lookup
+  const lookupManagingAgency = async (companyDisplayName) => {
+    if (!companyDisplayName) {
+      setManagingAgencyEmail("");
+      setFormData((prev) => ({ ...prev, managingAgencyEmail: "" }));
+      return;
+    }
+    try {
+      setAgencyLookupLoading(true);
+      setAgencyLookupError("");
+      const token = Cookies.get("token");
+      if (token) axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+      const resp = await axios.post(`${API_URL}/admin/findAgencyByCompanyName`, {
+        companyName: companyDisplayName,
+      });
+      const email = resp?.data?.data?.agencyEmail || "";
+      setManagingAgencyEmail(email);
+      // expose to Donor Pass via formData
+      setFormData((prev) => ({ ...prev, managingAgencyEmail: email }));
+    } catch (err) {
+      setManagingAgencyEmail("");
+      setFormData((prev) => ({ ...prev, managingAgencyEmail: "" }));
+      // 404 means "not found"
+      if (err?.response?.status !== 404) {
+        setAgencyLookupError("Agency lookup failed");
+        console.error("Agency lookup error:", err);
+      } else {
+        setAgencyLookupError("");
+      }
+    } finally {
+      setAgencyLookupLoading(false);
+    }
+  };
 
   // Company selector
   const handleCompanySelect = (_e, company) => {
@@ -221,6 +258,8 @@ export default function OrderInformation(props) {
       setPackageId("");
       setOrderReasonId("");
       setSelectedCompanyEmail("");
+      setManagingAgencyEmail("");
+      setAgencyLookupError("");
       setFormData((prev) => ({
         ...prev,
         address: "",
@@ -229,6 +268,7 @@ export default function OrderInformation(props) {
         phone1: "",
         state: "",
         ccEmail: prev.donorPass ? "" : prev.ccEmail,
+        managingAgencyEmail: "", // reset for Donor Pass
       }));
       return;
     }
@@ -252,8 +292,18 @@ export default function OrderInformation(props) {
         phone1: company.companyDetails?.contactNumber || "",
         state: company.companyDetails?.state || "",
         ccEmail: shouldSeedCc ? email : prev.ccEmail,
+        managingAgencyEmail: "", // clear before lookup fills it
       };
     });
+
+    // Decide which name to send to backend
+    const displayName =
+      company.companyName ||
+      company.companyDetails?.companyName ||
+      company.companyInfoData?.companyName ||
+      "";
+
+    lookupManagingAgency(displayName);
   };
 
   const handlePackageChange = (e) => {
@@ -275,7 +325,8 @@ export default function OrderInformation(props) {
     setCurrentPosition(currentPosition + 1);
   };
 
-  const allGood = !!companyId && !!packageId && !!orderReasonId && (!showDotAgency || !!dotAgency);
+  const allGood =
+    !!companyId && !!packageId && !!orderReasonId && (!showDotAgency || !!dotAgency);
 
   return (
     <Box className="container py-4">
@@ -289,11 +340,12 @@ export default function OrderInformation(props) {
       {/* Dev: show what we will send to backend later */}
       {devDebug && (
         <Alert severity={allGood ? "success" : "info"} sx={{ mb: 2 }}>
-          <strong>Debug:</strong> companyId=<code>{companyId || "-"}</code>, package=<code>{packageId || "-"}</code>, reason=<code>{orderReasonId || "-"}</code>
-          {` `}
+          <strong>Debug:</strong> companyId=<code>{companyId || "-"}</code>, package=
+          <code>{packageId || "-"}</code>, reason=<code>{orderReasonId || "-"}</code>{" "}
           {DOT_PACKAGES_NORM.includes((packageId || "").toLowerCase()) && (
             <>| dotAgency=<code>{dotAgency || "-"}</code></>
           )}
+          {" | "}agencyEmail=<code>{managingAgencyEmail || "-"}</code>
         </Alert>
       )}
 
@@ -320,19 +372,33 @@ export default function OrderInformation(props) {
         </FormControl>
       </Box>
 
-      {/* Picked email */}
+      {/* Company email + Agency email (email only) */}
       {companyId && (
-        <Stack direction="row" spacing={1} mb={2}>
-          <Chip
-            size="small"
-            variant="outlined"
-            label={
-              selectedCompanyEmail
-                ? `Email: ${selectedCompanyEmail}`
-                : ""
-            }
-            color={selectedCompanyEmail ? "primary" : "default"}
-          />
+        <Stack direction={{ xs: "column", sm: "row" }} spacing={1} mb={2}>
+          {selectedCompanyEmail && (
+            <Chip
+              size="small"
+              variant="outlined"
+              label={`Email: ${selectedCompanyEmail}`}
+              color="primary"
+            />
+          )}
+
+          {agencyLookupLoading && (
+            <Chip size="small" variant="outlined" label="Finding agency..." />
+          )}
+
+          {!agencyLookupLoading && managingAgencyEmail && (
+            <Chip size="small" variant="outlined" label={`Agency Email: ${managingAgencyEmail}`} />
+          )}
+
+          {!agencyLookupLoading && !managingAgencyEmail && !agencyLookupError && (
+            <Chip size="small" variant="outlined" label="No managing agency found" />
+          )}
+
+          {agencyLookupError && (
+            <Chip size="small" color="warning" variant="outlined" label={agencyLookupError} />
+          )}
         </Stack>
       )}
 
