@@ -18,7 +18,7 @@ import Cookies from "js-cookie";
 import CreateNewOrderContext from "../../../Context/Agency/CreateNewOrder/CreateNewOrderContext";
 import DonarPass from "./DonarPass";
 
-/* ----------------- robust current-user email resolver ----------------- */
+/* -------- resolve current user's email (Agency-first, Admin fallback) -------- */
 function base64UrlToJson(str) {
   try {
     const pad = "=".repeat((4 - (str.length % 4)) % 4);
@@ -31,19 +31,24 @@ function base64UrlToJson(str) {
 async function fetchEmailFromVerify(token) {
   const API_URL = process.env.REACT_APP_API_URL;
   if (!API_URL || !token) return "";
-  try {
-    const res = await fetch(`${API_URL}/admin/verify`, {
-      headers: { Authorization: `Bearer ${token}` },
-      credentials: "include",
-    });
-    if (!res.ok) return "";
-    const data = await res.json();
-    return (
-      data?.email || data?.user?.email || data?.admin?.email || data?.data?.email || ""
-    );
-  } catch {
-    return "";
-  }
+  const tryFetch = async (path) => {
+    try {
+      const res = await fetch(`${API_URL}${path}`, {
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
+      });
+      if (!res.ok) return "";
+      const data = await res.json();
+      return data?.email || data?.user?.email || data?.agency?.email || data?.data?.email || "";
+    } catch {
+      return "";
+    }
+  };
+  // try agency verify, then admin verify
+  const a = await tryFetch("/agency/verify");
+  if (a) return a;
+  const b = await tryFetch("/admin/verify");
+  return b || "";
 }
 async function resolveCurrentEmail() {
   const token = Cookies.get("token") || "";
@@ -69,9 +74,9 @@ async function resolveCurrentEmail() {
   if (apiEmail && apiEmail.includes("@")) return apiEmail;
   return "";
 }
-/* --------------------------------------------------------------------- */
+/* --------------------------------------------------------------------------- */
 
-function ParticipantInformation() {
+export default function ParticipantInformation() {
   const {
     currentPosition,
     maxPosition,
@@ -95,34 +100,15 @@ function ParticipantInformation() {
     };
   }, []);
 
-  // Default order expiry = today + 10 days
+  // default order expiry = today + 10 days
   useEffect(() => {
     if (!formData.orderExpires) {
       const now = new Date();
       now.setDate(now.getDate() + 10);
-      const formatted = now.toISOString().slice(0, 16);
+      const formatted = now.toISOString().slice(0, 16); // yyyy-MM-ddTHH:mm
       setFormData((prev) => ({ ...prev, orderExpires: formatted }));
     }
   }, [formData.orderExpires, setFormData]);
-
-  // Toggle source: support sendDonorPass or sendLink
-  const donorPassOn = Boolean(
-    typeof formData.sendDonorPass !== "undefined" ? formData.sendDonorPass : formData.donorPass
-  ) || false;
-
-  // Keep donorEmail synced when donor pass is ON
-  useEffect(() => {
-    if (donorPassOn && currentEmail && formData.donorEmail !== currentEmail) {
-      setFormData((prev) => ({ ...prev, donorEmail: currentEmail }));
-    }
-  }, [donorPassOn, currentEmail, formData.donorEmail, setFormData]);
-
-  // Prefill scheduling email when sendLink is ON and field empty
-  useEffect(() => {
-    if (formData.sendLink && currentEmail && !formData.email) {
-      setFormData((prev) => ({ ...prev, email: currentEmail }));
-    }
-  }, [formData.sendLink, currentEmail, formData.email, setFormData]);
 
   const reorderedStates = useMemo(() => {
     if (!formData.state) return US_STATES;
@@ -145,22 +131,20 @@ function ParticipantInformation() {
       const ssnValue = formData.ssn?.replace(/^[A-Z]{2}/, "") || "";
       const combinedSSN = value ? `${value}${ssnValue}` : ssnValue;
       setFormData((prev) => ({ ...prev, ssnState: value, ssn: combinedSSN }));
+    } else if (name === "ssn") {
+      setFormData((prev) => ({ ...prev, ssn: (prev.ssnState || "") + value }));
     } else {
       setFormData((prev) => ({ ...prev, [name]: type === "checkbox" ? checked : value }));
     }
   };
 
   const handlePrevious = () => setCurrentPosition(currentPosition - 1);
-
   const handleContinue = () => {
     if (currentPosition === maxPosition) setMaxPosition(maxPosition + 1);
     setCurrentPosition(currentPosition + 1);
     getSiteInformation();
   };
-
-  const handSubmitLink = () => {
-    getSiteInformation();
-  };
+  const handSubmitLink = () => getSiteInformation();
 
   const getDisplaySSN = () => {
     if (formData.ssn && formData.ssnState) {
@@ -169,8 +153,8 @@ function ParticipantInformation() {
     return formData.ssn || "";
   };
 
-  const validateRequiredFields = () => {
-    const required = [
+  const validateRequiredFields = () =>
+    [
       formData.firstName,
       formData.lastName,
       formData.ssn,
@@ -180,9 +164,7 @@ function ParticipantInformation() {
       formData.city,
       formData.state,
       formData.zip,
-    ];
-    return required.every((val) => val?.toString().trim() !== "");
-  };
+    ].every((v) => v?.toString().trim() !== "");
 
   return (
     <Box p={2}>
@@ -352,8 +334,8 @@ function ParticipantInformation() {
         </Col>
       </Row>
 
-      {/* Donor Pass */}
-      <DonarPass currentEmail={currentEmail} />
+      {/* Donor Pass (now uses companyEmail + managingAgencyEmail from OrderInformation) */}
+      <DonarPass />
 
       {/* Actions */}
       <Box display="flex" justifyContent="space-between">
@@ -375,8 +357,6 @@ function ParticipantInformation() {
     </Box>
   );
 }
-
-export default ParticipantInformation;
 
 /* ---------- constants ---------- */
 const US_STATES = [
