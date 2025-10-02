@@ -1,70 +1,96 @@
-import React, { useContext, useEffect } from "react";
-import {
-  Box,
-  Typography,
-  ToggleButton,
-  ToggleButtonGroup,
-  TextField,
-  InputAdornment,
-} from "@mui/material";
-import EmailIcon from "@mui/icons-material/Email";
+import React, { useContext, useEffect, useMemo, useState } from "react";
+import { Box, Typography, ToggleButton, ToggleButtonGroup, TextField, Stack } from "@mui/material";
 import CreateNewOrderContext from "../../../Context/Agency/CreateNewOrder/CreateNewOrderContext";
 
-function DonarPass({ currentEmail = "" }) {
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+function DonarPass() {
   const { formData, setFormData } = useContext(CreateNewOrderContext);
 
-  // Support either flag name (sendDonorPass or donorPass); keep using formData.donorPass for UI
-  const donorPassOn =
-    typeof formData.sendDonorPass !== "undefined" ? formData.sendDonorPass : formData.donorPass;
+  // We show two editable fields (Company CC + Agency CC), but store a single `ccEmail` as "company;agency"
+  const [companyCc, setCompanyCc] = useState("");
+  const [agencyCc, setAgencyCc] = useState("");
+  const [ccError, setCcError] = useState("");
 
-  // Prefill scheduling email when Send Link is ON
-  useEffect(() => {
-    if (formData.sendLink && currentEmail && !formData.email) {
-      setFormData((prev) => ({ ...prev, email: currentEmail }));
+  // helpers
+  const splitEmails = (raw) =>
+    String(raw || "")
+      .split(";")
+      .map((t) => t.trim())
+      .filter(Boolean);
+
+  const uniqueEmails = (list) => {
+    const seen = new Map();
+    for (const v of list) {
+      const key = v.toLowerCase();
+      if (!key) continue;
+      if (!seen.has(key)) seen.set(key, v);
     }
-  }, [formData.sendLink, currentEmail, formData.email, setFormData]);
-
-  // Sync donorEmail when Donor Pass is ON
-  useEffect(() => {
-    if (donorPassOn && currentEmail && formData.donorEmail !== currentEmail) {
-      setFormData((prev) => ({ ...prev, donorEmail: currentEmail }));
-    }
-  }, [donorPassOn, currentEmail, formData.donorEmail, setFormData]);
-
-  /* ---------------- handlers ---------------- */
-  const handleEmailChange = (event) => {
-    setFormData({ ...formData, email: event.target.value });
+    return Array.from(seen.values());
   };
+  // IMPORTANT: join with ';' (no spaces)
+  const joinEmails = (list) => uniqueEmails(list).join(";");
 
+  // seed once when donor pass is ON and local fields empty
+  useEffect(() => {
+    if (!formData.donorPass) return;
+    if (!companyCc && formData.companyEmail) setCompanyCc(formData.companyEmail);
+    if (!agencyCc && formData.managingAgencyEmail) setAgencyCc(formData.managingAgencyEmail);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.donorPass, formData.companyEmail, formData.managingAgencyEmail]);
+
+  // combined CC -> stored in formData.ccEmail
+  const combinedCc = useMemo(() => {
+    const parts = [...splitEmails(companyCc), ...splitEmails(agencyCc)];
+    return joinEmails(parts);
+  }, [companyCc, agencyCc]);
+
+  // keep formData.ccEmail synced while Donor Pass is ON
+  useEffect(() => {
+    if (!formData.donorPass) return;
+    if (formData.ccEmail !== combinedCc) {
+      setFormData((prev) => ({ ...prev, ccEmail: combinedCc }));
+    }
+  }, [formData.donorPass, combinedCc, formData.ccEmail, setFormData]);
+
+  // toggle Send Link <-> Donor Pass
   const handleSendLinkChange = (_, value) => {
     if (value === null) return;
-    const on = value === "yes";
+    const nextSendLink = value === "yes";
     setFormData((prev) => ({
       ...prev,
-      sendLink: on,
-      donorPass: on ? false : prev.donorPass,
-      sendDonorPass: typeof prev.sendDonorPass !== "undefined" ? (on ? false : prev.sendDonorPass) : prev.sendDonorPass,
-      email: on ? (prev.email || currentEmail || "") : "",
-      ccEmail: on ? "" : prev.ccEmail || "",
-      donorEmail: on ? "" : prev.donorEmail || "",
+      sendLink: nextSendLink,
+      donorPass: nextSendLink ? false : prev.donorPass,
+      email: nextSendLink ? prev.email : prev.email,
+      ccEmail: nextSendLink ? "" : prev.ccEmail,
     }));
+    setCcError("");
   };
 
   const handleDonorPassChange = (_, value) => {
     if (value === null) return;
-    const on = value === "yes";
+    const next = value === "yes";
     setFormData((prev) => ({
       ...prev,
-      donorPass: on,
-      sendDonorPass: on,
-      donorEmail: on ? (currentEmail || prev.donorEmail || "") : "",
-      ccEmail: on ? prev.ccEmail || "" : "",
-      sendLink: on ? false : prev.sendLink,
+      donorPass: next,
+      ccEmail: next ? combinedCc : "",
+      sendLink: next ? false : prev.sendLink,
     }));
+    if (!next) setCcError("");
   };
 
-  const handleCCEmailChange = (event) => {
-    setFormData({ ...formData, ccEmail: event.target.value });
+  // validate the combined CC when Donor Pass is ON
+  useEffect(() => {
+    if (!formData.donorPass) return setCcError("");
+    const raw = combinedCc.trim();
+    if (!raw) return setCcError("");
+    const tokens = splitEmails(raw);
+    const invalid = tokens.filter((t) => !EMAIL_RE.test(t));
+    setCcError(invalid.length ? `Invalid email(s): ${invalid.join(", ")}` : "");
+  }, [formData.donorPass, combinedCc]);
+
+  const handleEmailChange = (event) => {
+    setFormData({ ...formData, email: event.target.value });
   };
 
   return (
@@ -85,32 +111,23 @@ function DonarPass({ currentEmail = "" }) {
         </ToggleButtonGroup>
       </Box>
 
-      {/* If Send Scheduling Link is Yes -> email input (prefilled, editable) */}
       {formData.sendLink ? (
         <TextField
           label="Enter Email (for scheduling link)"
           variant="outlined"
           fullWidth
           required
-          value={formData.email ?? currentEmail ?? ""}
+          value={formData.email || ""}
           onChange={handleEmailChange}
           sx={{ mt: 2 }}
-          InputProps={{
-            startAdornment: (
-              <InputAdornment position="start">
-                <EmailIcon />
-              </InputAdornment>
-            ),
-          }}
         />
       ) : (
-        // Otherwise, show Donor Pass block
         <Box>
           <Typography variant="subtitle1" sx={{ mb: 1, fontWeight: "bold" }}>
             Send Donor Pass
           </Typography>
           <ToggleButtonGroup
-            value={donorPassOn ? "yes" : "no"}
+            value={formData.donorPass ? "yes" : "no"}
             exclusive
             onChange={handleDonorPassChange}
             size="small"
@@ -119,35 +136,37 @@ function DonarPass({ currentEmail = "" }) {
             <ToggleButton value="no">No</ToggleButton>
           </ToggleButtonGroup>
 
-          {donorPassOn && (
-            <Box sx={{ mt: 2, display: "grid", gap: 2 }}>
+          {formData.donorPass && (
+            <Stack spacing={2} sx={{ mt: 2 }}>
+              {/* Editable separate CC fields */}
+              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
+                <TextField
+                  label="Company CC Email"
+                  variant="outlined"
+                  fullWidth
+                  value={companyCc}
+                  onChange={(e) => setCompanyCc(e.target.value)}
+                />
+                <TextField
+                  label="Agency CC Email"
+                  variant="outlined"
+                  fullWidth
+                  value={agencyCc}
+                  onChange={(e) => setAgencyCc(e.target.value)}
+                />
+              </Stack>
+
+              {/* What we submit (no spaces around ';') */}
               <TextField
-                label="Recipient Email (auto)"
+                label="Combined CC (submitted)"
                 variant="outlined"
                 fullWidth
-                value={currentEmail || formData.donorEmail || ""}
-                InputProps={{
-                  readOnly: true,
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <EmailIcon />
-                    </InputAdornment>
-                  ),
-                }}
-                helperText={
-                  currentEmail
-                    ? "The donor pass will be sent to this email."
-                    : "No email found for the current user."
-                }
+                value={combinedCc}
+                InputProps={{ readOnly: true }}
+                error={!!ccError}
+                helperText={ccError || "Format: company@example.com;agency@example.com"}
               />
-              <TextField
-                label="Enter CC Email(s) separated by semicolons"
-                variant="outlined"
-                fullWidth
-                value={formData.ccEmail || ""}
-                onChange={handleCCEmailChange}
-              />
-            </Box>
+            </Stack>
           )}
         </Box>
       )}
