@@ -15,6 +15,7 @@ import {
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import axios from "axios";
+import Cookies from "js-cookie";
 import { formatDateUS } from "../../Utils/formatDateUs";
 
 const API_URL = process.env.REACT_APP_API_URL;
@@ -22,45 +23,25 @@ const API_URL = process.env.REACT_APP_API_URL;
 function ExportDriver() {
     const [open, setOpen] = useState(false);
     const [driverData, setDriverData] = useState([]);
-    
-const handleExport = async () => {
-  try {
-    console.log("Exporting from:", `${API_URL}/admin/exportDriver`);
-    const response = await axios.get(`${API_URL}/admin/exportDriver`);
 
-    // Depending on your backend, this might be response.data or response.data.data
-    const drivers = response.data?.data ?? response.data ?? [];
-    console.log("Driver export response:", drivers);
-
-    setDriverData(drivers);
-    setOpen(true);
-  } catch (error) {
-    console.error("Failed to export driver data:", {
-      message: error.message,
-      status: error.response?.status,
-      data: error.response?.data,
-      url: error.config?.url,
-      method: error.config?.method,
-    });
-
-    alert(
-      `Export failed (${error.response?.status || "no status"}): ${
-        error.response?.data?.message ||
-        error.response?.data ||
-        error.message
-      }`
-    );
-   /* const handleExport = async () => {
+    const handleExport = async () => {
         try {
+            const token = Cookies.get("token");
+            if (!token) {
+                alert('Authentication required. Please login again.');
+                return;
+            }
+            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
             const response = await axios.get(`${API_URL}/admin/exportDriver`);
             const drivers = response.data.data;
             setDriverData(drivers);
             setOpen(true);
         } catch (error) {
             console.error("Failed to export driver data:", error);
+            alert('Failed to export driver data. Please try again.');
         }
     };
-*/
+
    const handleDownload = () => {
     // Always convert to strings in the desired format before exporting
     const excelData = driverData.map(driver => ({
