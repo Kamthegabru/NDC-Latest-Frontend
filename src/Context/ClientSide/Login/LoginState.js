@@ -26,7 +26,19 @@ const LoginState = (props) => {
             });
             let token = response.data.token;
             let role = response.data.role;
+            
+            // Store token and role in cookies for 30 days (persistent session)
             Cookies.set('token', token, { expires: 30 });
+            Cookies.set('userRole', role, { expires: 30 });
+            
+            // Store user info in localStorage for quick access
+            localStorage.setItem('userInfo', JSON.stringify({
+                email: email,
+                role: role,
+                isLoggedIn: true,
+                loginTime: new Date().toISOString()
+            }));
+            
             // Handle navigation based on roles
             if (rememberMe) {
                 localStorage.setItem("rememberedEmail", email);
