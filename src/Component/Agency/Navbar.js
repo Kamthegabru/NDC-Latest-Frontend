@@ -43,7 +43,10 @@ function Navbar({ isMobileOpen, setIsMobileOpen }) {
 
   const handleItemClick = (index) => {
     if (index === 4) {
+      // Clear all session data on logout
       Cookies.remove("token");
+      Cookies.remove("userRole");
+      localStorage.removeItem("userInfo");
       navigate("/");
     } else {
       setCurrentActiveButton(index);
