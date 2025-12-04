@@ -15,6 +15,7 @@ import {
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import axios from "axios";
+import Cookies from "js-cookie";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -24,12 +25,19 @@ function ExportAgency() {
 
   const handleExport = async () => {
     try {
+      const token = Cookies.get("token");
+      if (!token) {
+        alert('Authentication required. Please login again.');
+        return;
+      }
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       const response = await axios.get(`${API_URL}/admin/exportAgency`);
       const agencies = response.data.data;
       setAgencyData(agencies);
-      setOpen(true); // Open modal with data
+      setOpen(true);
     } catch (error) {
       console.error("Failed to export agency data:", error);
+      alert('Failed to export agency data. Please try again.');
     }
   };
 
