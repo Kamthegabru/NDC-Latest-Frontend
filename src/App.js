@@ -10,6 +10,7 @@ import PortalHome from './Component/ClientSide/AfterLogin/PortalHome';
 import AdminHome from './Component/Admin/AdminHome';
 import AgencyHome from './Component/Agency/AgencyHome';
 import Error404Page from './Component/Error404Page';
+import ProtectedRoute from './Component/ProtectedRoute';
 
 import HomeState from './Context/ClientSide/AfterLogin/Home/HomeState';
 import AdminState from './Context/Admin/AdminState';
@@ -31,10 +32,36 @@ function App() {
       <ToastContainer position="top-right" autoClose={3000} />
       <Router>
         <Routes>
+          {/* Public Routes - No authentication required */}
           <Route path="/*" element={<SignupState><Home /></SignupState>} />
-          <Route path="/portal" element={<HomeState><PortalHome /></HomeState>} />
-          <Route path="/admin" element={<AdminState><AdminHome /></AdminState>} />
-          <Route path="/agency" element={<AgencyState><AgencyHome /></AgencyState>} />
+          
+          {/* Protected Routes - Authentication required */}
+          <Route 
+            path="/portal" 
+            element={
+              <ProtectedRoute allowedRoles={['User']}>
+                <HomeState><PortalHome /></HomeState>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/admin" 
+            element={
+              <ProtectedRoute allowedRoles={['Admin']}>
+                <AdminState><AdminHome /></AdminState>
+              </ProtectedRoute>
+            } 
+          />
+          <Route 
+            path="/agency" 
+            element={
+              <ProtectedRoute allowedRoles={['Agency']}>
+                <AgencyState><AgencyHome /></AgencyState>
+              </ProtectedRoute>
+            } 
+          />
+          
+          {/* 404 Error Page */}
           <Route path="*" element={<Error404Page />} />
         </Routes>
       </Router>
