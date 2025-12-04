@@ -11,7 +11,8 @@ import {
     InputAdornment
 } from "@mui/material";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import Cookies from "js-cookie";
 import LoginContext from "../../../Context/ClientSide/Login/LoginContext";
 
 function Login() {
@@ -28,7 +29,26 @@ function Login() {
     const [emailError, setEmailError] = useState(false);
     const [showPassword, setShowPassword] = useState(false);
 
+    const navigate = useNavigate();
+
     useEffect(() => {
+        // Check if user is already logged in
+        const token = Cookies.get('token');
+        const userRole = Cookies.get('userRole');
+        
+        if (token && userRole) {
+            // User already logged in, redirect to dashboard
+            if (userRole === 'Admin') {
+                navigate('/admin');
+            } else if (userRole === 'Agency') {
+                navigate('/agency');
+            } else if (userRole === 'User') {
+                navigate('/portal');
+            }
+            return;
+        }
+
+        // Load remembered credentials if available
         const savedEmail = localStorage.getItem("rememberedEmail");
         const savedPassword = localStorage.getItem("rememberedPassword");
         if (savedEmail && savedPassword) {
@@ -37,7 +57,7 @@ function Login() {
             setRememberMe(true);
         }
         // eslint-disable-next-line
-    }, [setEmail, setPassword]);
+    }, [setEmail, setPassword, navigate]);
 
     const handleEmailChange = (event) => {
         const value = event.target.value;
