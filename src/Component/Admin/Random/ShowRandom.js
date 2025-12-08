@@ -9,6 +9,7 @@ import {
 import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { Refresh } from '@mui/icons-material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ScheduleIcon from '@mui/icons-material/Schedule';
 import RandomContext from '../../../Context/Admin/Random/RandomContext';
 import AddRandom from './AddRandom';
 import ExportRandom from './ExportRandom';
@@ -16,6 +17,8 @@ import { toast } from 'react-toastify';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import dayjs from 'dayjs';
+import RescheduleOrder from '../Result/RescheduleOrder';
+import CloseIcon from '@mui/icons-material/Close';
 
 const PAGE_SIZE = 10;
 const SORT_OPTIONS = ["Alphabetical (A-Z)", "Alphabetical (Z-A)", "Newest First", "Oldest First"];
@@ -31,7 +34,8 @@ function ShowRandom() {
     setYearFilter,
     quarterFilter,
     setQuarterFilter,
-    sendEmailToRandomDriver
+    sendEmailToRandomDriver,
+    getScheduleDataFromRandom
   } = useContext(RandomContext);
 
   // Existing states
@@ -55,6 +59,11 @@ function ShowRandom() {
   // Selection states
   const [selectedIds, setSelectedIds] = useState([]);
   const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
+
+  // Schedule states
+  const [scheduleLoading, setScheduleLoading] = useState(false);
+  const [schedulePrefill, setSchedulePrefill] = useState(null);
+  const [scheduleTarget, setScheduleTarget] = useState(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -201,6 +210,37 @@ function ShowRandom() {
     setCcEmail("");
     setEmailOpen(true);
     handleMenuClose();
+  };
+
+  // Schedule handler
+  const handleSchedule = async () => {
+    try {
+      setScheduleLoading(true);
+      handleMenuClose();
+      const prefillData = await getScheduleDataFromRandom(selectedItem._id);
+      setSchedulePrefill(prefillData);
+      setScheduleTarget(selectedItem);
+    } catch (error) {
+      console.error("Schedule error:", error);
+      toast.error("Failed to load schedule data");
+    } finally {
+      setScheduleLoading(false);
+    }
+  };
+
+  const handleScheduleSuccess = async () => {
+    try {
+      await updateRandomStatus({
+        selectedItem: scheduleTarget,
+        status: "Scheduled"
+      });
+      toast.success("Order scheduled successfully!");
+    } catch (error) {
+      console.error("Failed to update status:", error);
+    } finally {
+      setSchedulePrefill(null);
+      setScheduleTarget(null);
+    }
   };
 
   const handleSendEmailConfirm = async () => {
@@ -600,6 +640,10 @@ function ShowRandom() {
 
       {/* Action Menu */}
       <Menu anchorEl={menuAnchorEl} open={Boolean(menuAnchorEl)} onClose={handleMenuClose}>
+        <MenuItem onClick={handleSchedule}>
+          <ScheduleIcon fontSize="small" sx={{ mr: 1 }} />
+          Schedule
+        </MenuItem>
         <MenuItem onClick={handleSendEmail}>Send Email</MenuItem>
         <MenuItem onClick={handleEdit}>Edit</MenuItem>
         <MenuItem onClick={handleDelete}>Delete</MenuItem>
@@ -703,6 +747,82 @@ function ShowRandom() {
           </Button>
         </DialogActions>
       </Dialog>
+
+      {/* Schedule Order Modal */}
+      {schedulePrefill && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1300, p: 2
+          }}
+        >
+          <Paper
+            sx={{
+              position: 'relative',
+              width: '90%', maxWidth: '1200px', height: '90%',
+              borderRadius: 3, boxShadow: 6, overflow: 'hidden',
+              display: 'flex', flexDirection: 'column'
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                background: 'linear-gradient(90deg, #003366 60%, #1976d2 100%)',
+                color: 'white', px: 3, py: 2
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 'bold', letterSpacing: 1 }}>
+                Schedule Order Test
+              </Typography>
+              <IconButton
+                onClick={() => setSchedulePrefill(null)}
+                sx={{ color: 'white', '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            <Box
+              sx={{
+                flex: 1, overflow: 'auto',
+                '&::-webkit-scrollbar': { width: '6px' },
+                '&::-webkit-scrollbar-track': { background: '#f1f1f1' },
+                '&::-webkit-scrollbar-thumb': { background: '#888', borderRadius: '3px' },
+                '&::-webkit-scrollbar-thumb:hover': { background: '#555' },
+              }}
+            >
+              <RescheduleOrder
+                key={JSON.stringify(schedulePrefill)}
+                prefill={schedulePrefill}
+                onRescheduleSuccess={handleScheduleSuccess}
+                onClose={() => setSchedulePrefill(null)}
+              />
+            </Box>
+          </Paper>
+        </Box>
+      )}
+
+      {/* Loading overlay */}
+      {scheduleLoading && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1400
+          }}
+        >
+          <Paper sx={{ p: 3, borderRadius: 2 }}>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <CircularProgress size={24} />
+              <Typography>Loading schedule data...</Typography>
+            </Stack>
+          </Paper>
+        </Box>
+      )}
     </Box>
   );
 }
