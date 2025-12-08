@@ -120,8 +120,27 @@ const RandomState = (props) => {
         }
     }
 
+     const getScheduleDataFromRandom = async (randomId) => {
+        const token = Cookies.get("token");
+        if (token) {
+            try {
+                axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+                const response = await axios.post(`${API_URL}/admin/getScheduleDataFromRandom`, { randomId });
+                return response.data.data;
+            } catch (error) {
+                const message = error?.response?.data?.message || "Failed to fetch schedule data";
+                toast.error(message);
+                throw error;
+            }
+        } else {
+            toast.error("Invalid access, Please login again");
+            throw new Error("No token");
+        }
+    }
+
+    
     return (
-        <RandomContext.Provider value={{ yearFilter, setYearFilter, quarterFilter, sendEmailToRandomDriver, setQuarterFilter, AddRandomDriver, fetchRandomDriver, fetchRandomData, deleteRandomEntry, updateRandomStatus, randomUserDetails, RandomUserAddDetails }}>
+        <RandomContext.Provider value={{ yearFilter, setYearFilter, quarterFilter, sendEmailToRandomDriver, setQuarterFilter, AddRandomDriver, fetchRandomDriver, fetchRandomData, deleteRandomEntry, updateRandomStatus, randomUserDetails, RandomUserAddDetails, getScheduleDataFromRandom }}>
             {props.children}
         </RandomContext.Provider>
     )
