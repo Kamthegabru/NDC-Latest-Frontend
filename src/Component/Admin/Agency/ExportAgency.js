@@ -16,6 +16,7 @@ import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import axios from "axios";
 import Cookies from "js-cookie";
+import { toUpperCase } from "../../Utils/formatText";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -43,8 +44,8 @@ function ExportAgency() {
 
   const handleDownload = () => {
     const excelData = agencyData.map(agency => ({
-      "Agency Name": agency.agencyName,
-      "Company Name": agency.companyName,
+      "Agency Name": toUpperCase(agency.agencyName),
+      "Company Name": toUpperCase(agency.companyName),
       "Enrollment Date": agency.enrollmentDate,
       "Total Drivers": agency.totalDrivers,
     }));
@@ -93,8 +94,8 @@ function ExportAgency() {
               <TableBody>
                 {agencyData.map((agency, index) => (
                   <TableRow key={index}>
-                    <TableCell>{agency.agencyName}</TableCell>
-                    <TableCell>{agency.companyName}</TableCell>
+                    <TableCell>{toUpperCase(agency.agencyName)}</TableCell>
+                    <TableCell>{toUpperCase(agency.companyName)}</TableCell>
                     <TableCell>{agency.enrollmentDate}</TableCell>
                     <TableCell>{agency.totalDrivers}</TableCell>
                   </TableRow>
