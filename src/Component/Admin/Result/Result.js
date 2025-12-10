@@ -14,6 +14,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
+import { toProperCase, toUpperCase } from "../../Utils/formatText";
 
 // 👉 reschedule confirm + order flow (same directory)
 import Reschedule from "./Reschedule";
@@ -245,8 +246,6 @@ function DisplayResult() {
   const handleReschedule = () => {
     try {
       if (!menuResult) return;
-      const prefill = buildPrefillFromRow(menuResult);
-      setReschedulePrefill(prefill);
       setRescheduleTarget(menuResult);
       setOpenRescheduleModal(true);
     } catch (e) {
@@ -535,9 +534,9 @@ function DisplayResult() {
                     />
                   </TableCell>
                   <TableCell align="center">{(page - 1) * PAGE_SIZE + idx + 1}</TableCell>
-                  <TableCell align="center">{row.companyName || "-"}</TableCell>
+                  <TableCell align="center">{toUpperCase(row.companyName) || "-"}</TableCell>
                   <TableCell align="center">
-                    <Typography fontWeight="bold">{row.driverName || "-"}</Typography>
+                    <Typography fontWeight="bold">{toProperCase(row.driverName) || "-"}</Typography>
                   </TableCell>
                   <TableCell align="center">{row.licenseNumber || row.ssnEid || "-"}</TableCell>
                   <TableCell align="center">
