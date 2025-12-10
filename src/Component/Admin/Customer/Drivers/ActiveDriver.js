@@ -119,8 +119,8 @@ function ActiveDriver() {
   const validateForm = () => {
     const newErrors = {};
     
-    if (!editedDriver.email || !/\S+@\S+\.\S+/.test(editedDriver.email)) {
-      newErrors.email = "Valid email is required";
+    if (editedDriver.email && !/\S+@\S+\.\S+/.test(editedDriver.email)) {
+      newErrors.email = "Please enter a valid email format";
     }
     if (!editedDriver.phone || !/^\d{10}$/.test(editedDriver.phone.replace(/\D/g, ''))) {
       newErrors.phone = "Valid 10-digit phone number is required";
