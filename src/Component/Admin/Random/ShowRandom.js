@@ -35,7 +35,8 @@ function ShowRandom() {
     quarterFilter,
     setQuarterFilter,
     sendEmailToRandomDriver,
-    getScheduleDataFromRandom
+    getScheduleDataFromRandom,
+    linkRandomToResult
   } = useContext(RandomContext);
 
   // Existing states
@@ -115,8 +116,20 @@ function ShowRandom() {
       });
     }
 
+    // Quarter priority mapping (Q4 = 4, Q3 = 3, Q2 = 2, Q1 = 1)
+    const getQuarterPriority = (quarter) => {
+      const qMap = { 'Q4': 4, 'Q3': 3, 'Q2': 2, 'Q1': 1 };
+      return qMap[quarter] || 0;
+    };
+
     // Enhanced sorting
     filtered.sort((a, b) => {
+      // First, sort by quarter (current quarter first: Q4 → Q3 → Q2 → Q1)
+      const quarterA = getQuarterPriority(a.quarter);
+      const quarterB = getQuarterPriority(b.quarter);
+      if (quarterA !== quarterB) return quarterB - quarterA;
+
+      // Then apply user-selected sort option
       switch (sortOption) {
         case "Alphabetical (A-Z)":
           const companyA = (a.company?.name || '').toLowerCase();
@@ -218,7 +231,15 @@ function ShowRandom() {
       setScheduleLoading(true);
       handleMenuClose();
       const prefillData = await getScheduleDataFromRandom(selectedItem._id);
-      setSchedulePrefill(prefillData);
+      
+      // Extract first 2 characters from SSN as state (keep full SSN)
+      const ssnValue = prefillData.ssnEid || "";
+      const extractedState = ssnValue.length >= 2 ? ssnValue.substring(0, 2).toUpperCase() : "";
+      
+      setSchedulePrefill({
+        ...prefillData,
+        ssnState: extractedState
+      });
       setScheduleTarget(selectedItem);
     } catch (error) {
       console.error("Schedule error:", error);
@@ -228,8 +249,11 @@ function ShowRandom() {
     }
   };
 
-  const handleScheduleSuccess = async () => {
+  const handleScheduleSuccess = async (resultId) => {
     try {
+      if (resultId && scheduleTarget?._id) {
+        await linkRandomToResult(scheduleTarget._id, resultId);
+      }
       await updateRandomStatus({
         selectedItem: scheduleTarget,
         status: "Scheduled"
@@ -557,6 +581,8 @@ function ShowRandom() {
               <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Quarter</TableCell>
               <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Test Type</TableCell>
               <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Status</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Order Status</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Result Status</TableCell>
               <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Action</TableCell>
             </TableRow>
           </TableHead>
@@ -564,7 +590,7 @@ function ShowRandom() {
           <TableBody>
             {paginatedData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={9} align="center">
+                <TableCell colSpan={11} align="center">
                   <Typography color="text.secondary">No data found matching your criteria.</Typography>
                 </TableCell>
               </TableRow>
@@ -611,6 +637,30 @@ function ShowRandom() {
                     />
                   </TableCell>
                   <TableCell align="center">
+                    {item.orderStatus ? (
+                      <Chip
+                        label={item.orderStatus}
+                        color={item.orderStatus === "Pending" ? "warning" : "success"}
+                        variant="outlined"
+                        size="small"
+                      />
+                    ) : (
+                      <Typography color="text.secondary">-</Typography>
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
+                    {item.resultStatus ? (
+                      <Chip
+                        label={item.resultStatus}
+                        color={item.resultStatus === "Pending" ? "warning" : "success"}
+                        variant="outlined"
+                        size="small"
+                      />
+                    ) : (
+                      <Typography color="text.secondary">-</Typography>
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
                     <IconButton onClick={(e) => handleMenuOpen(e, item)}>
                       <MoreVertIcon />
                     </IconButton>
@@ -640,10 +690,12 @@ function ShowRandom() {
 
       {/* Action Menu */}
       <Menu anchorEl={menuAnchorEl} open={Boolean(menuAnchorEl)} onClose={handleMenuClose}>
-        <MenuItem onClick={handleSchedule}>
-          <ScheduleIcon fontSize="small" sx={{ mr: 1 }} />
-          Schedule
-        </MenuItem>
+        {selectedItem?.status !== "Scheduled" && (
+          <MenuItem onClick={handleSchedule}>
+            <ScheduleIcon fontSize="small" sx={{ mr: 1 }} />
+            Schedule
+          </MenuItem>
+        )}
         <MenuItem onClick={handleSendEmail}>Send Email</MenuItem>
         <MenuItem onClick={handleEdit}>Edit</MenuItem>
         <MenuItem onClick={handleDelete}>Delete</MenuItem>
