@@ -55,7 +55,7 @@ function ExportDriver() {
       "Date Deleted": driver?.deletionDate
         ? formatDateUS(driver.deletionDate)
         : "Not Deleted",
-      "Agency Name": driver.agencyName || "N/A",
+      "Agency Name": toUpperCase(driver.agencyName) || "N/A",
     }));
 
         const worksheet = XLSX.utils.json_to_sheet(excelData);
@@ -116,7 +116,7 @@ function ExportDriver() {
                                             ? new Date(driver.deletionDate).toLocaleDateString("en-US", { year: 'numeric', month: '2-digit', day: '2-digit' })
                                             : "Not Deleted"}
                                         </TableCell>
-                                        <TableCell>{driver.agencyName}</TableCell>
+                                        <TableCell>{toUpperCase(driver.agencyName)}</TableCell>
                                     </TableRow>
                                 ))}
                             </TableBody>
