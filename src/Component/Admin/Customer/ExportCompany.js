@@ -15,7 +15,9 @@ import {
 import * as XLSX from "xlsx";
 import { saveAs } from "file-saver";
 import axios from "axios";
+import Cookies from "js-cookie";
 import { formatDateUS } from "../../Utils/formatDateUs";
+import { toUpperCase } from "../../Utils/formatText";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -25,18 +27,25 @@ function ExportCompany() {
 
   const handleExport = async () => {
     try {
+      const token = Cookies.get("token");
+      if (!token) {
+        alert('Authentication required. Please login again.');
+        return;
+      }
+      axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
       const response = await axios.get(`${API_URL}/admin/exportCompany`);
       const companies = response.data.data;
       setCompanyData(companies);
       setOpen(true);
     } catch (error) {
       console.error("Failed to export company data:", error);
+      alert('Failed to export company data. Please try again.');
     }
   };
 
   const handleDownload = () => {
     const excelData = companyData.map(company => ({
-      "Company Name": company["Company Name"] || "N/A",
+      "Company Name": toUpperCase(company["Company Name"]) || "N/A",
       "Status": company["Status"] || "Inactive",
       "Membership Active Date": company["Membership Active Date"] !== "N/A" ? formatDateUS(company["Membership Active Date"]) : "Not Available",
       "Membership Price": company["Membership Price"] || "N/A",
