@@ -42,6 +42,7 @@ import CreateNewAgency from "./CreateNewAgency";
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import dayjs from "dayjs";
+import { toUpperCase } from '../../Utils/formatText';
 
 const normalizePhoneNumber = require('../../Utils/normalizePhone');
 
@@ -461,7 +462,7 @@ function ViewAgency() {
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Stack direction="row" alignItems="center" justifyContent="center" spacing={1}>
-                                                    <Typography fontWeight="bold">{agency.agencyName}</Typography>
+                                                    <Typography fontWeight="bold">{toUpperCase(agency.agencyName)}</Typography>
                                                     {topAgencyIds.includes(agency.id) && (
                                                         <Tooltip title="Top Agency by Companies">
                                                             <StarIcon sx={{ color: "#FFD700" }} />
