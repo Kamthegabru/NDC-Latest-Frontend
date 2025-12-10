@@ -120,7 +120,7 @@ const RandomState = (props) => {
         }
     }
 
-     const getScheduleDataFromRandom = async (randomId) => {
+    const getScheduleDataFromRandom = async (randomId) => {
         const token = Cookies.get("token");
         if (token) {
             try {
@@ -138,9 +138,25 @@ const RandomState = (props) => {
         }
     }
 
-    
+    const linkRandomToResult = async (randomId, resultId) => {
+        const token = Cookies.get("token");
+        if (token) {
+            try {
+                axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+                await axios.post(`${API_URL}/admin/linkRandomToResult`, { randomId, resultId });
+            } catch (error) {
+                const message = error?.response?.data?.message || "Failed to link random to result";
+                toast.error(message);
+                throw error;
+            }
+        } else {
+            toast.error("Invalid access, Please login again");
+            throw new Error("No token");
+        }
+    }
+
     return (
-        <RandomContext.Provider value={{ yearFilter, setYearFilter, quarterFilter, sendEmailToRandomDriver, setQuarterFilter, AddRandomDriver, fetchRandomDriver, fetchRandomData, deleteRandomEntry, updateRandomStatus, randomUserDetails, RandomUserAddDetails, getScheduleDataFromRandom }}>
+        <RandomContext.Provider value={{ yearFilter, setYearFilter, quarterFilter, sendEmailToRandomDriver, setQuarterFilter, AddRandomDriver, fetchRandomDriver, fetchRandomData, deleteRandomEntry, updateRandomStatus, randomUserDetails, RandomUserAddDetails, getScheduleDataFromRandom, linkRandomToResult }}>
             {props.children}
         </RandomContext.Provider>
     )
