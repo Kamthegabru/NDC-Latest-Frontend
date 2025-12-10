@@ -107,6 +107,13 @@ const CreateNewOrderState = (props) => {
       });
 
       if (formData.sendLink === true) {
+        const resultId = data?.resultId;
+        if (props.onRescheduleSuccess && resultId) {
+          props.onRescheduleSuccess(resultId);
+        }
+        if (props.onClose) {
+          props.onClose();
+        }
         hardReset();
         toast.success("Scheduling URL sent successfully");
       } else {
@@ -159,6 +166,13 @@ const CreateNewOrderState = (props) => {
         formData,
         finlSelectedSite,
       });
+      const resultId = response?.data?.resultId;
+      if (props.onRescheduleSuccess && resultId) {
+        props.onRescheduleSuccess(resultId);
+      }
+      if (props.onClose) {
+        props.onClose();
+      }
       toast.success(response?.data?.message || "Order submitted");
       hardReset();
     } catch (error) {
