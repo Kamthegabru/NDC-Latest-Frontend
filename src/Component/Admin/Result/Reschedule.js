@@ -50,7 +50,15 @@ export default function Reschedule({
 }) {
   const handleConfirm = () => {
     const prefill = buildPrefillFromRow(row || {});
-    onConfirm?.(prefill);
+    
+    // Extract first 2 characters from SSN as state (keep full SSN)
+    const ssnValue = prefill.ssnEid || "";
+    const extractedState = ssnValue.length >= 2 ? ssnValue.substring(0, 2).toUpperCase() : "";
+    
+    onConfirm?.({
+      ...prefill,
+      ssnState: extractedState
+    });
   };
 
   return (
