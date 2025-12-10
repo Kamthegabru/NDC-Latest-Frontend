@@ -49,7 +49,7 @@ function ExportCompany() {
       "Status": company["Status"] || "Inactive",
       "Membership Active Date": company["Membership Active Date"] !== "N/A" ? formatDateUS(company["Membership Active Date"]) : "Not Available",
       "Membership Price": company["Membership Price"] || "N/A",
-      "Agency Name": company["Agency Name"] || "N/A",
+      "Agency Name": toUpperCase(company["Agency Name"]) || "N/A",
       "Total Drivers": company["Total Drivers"] || 0,
       "Address": company["Address"] || "N/A",
       "City": company["City"] || "N/A",
@@ -123,7 +123,7 @@ function ExportCompany() {
                     <TableCell>{company["Status"] || "Inactive"}</TableCell>
                     <TableCell>{company["Membership Active Date"] !== "N/A" ? formatDateUS(company["Membership Active Date"]) : "Not Available"}</TableCell>
                     <TableCell>{company["Membership Price"] || "N/A"}</TableCell>
-                    <TableCell>{company["Agency Name"] || "N/A"}</TableCell>
+                    <TableCell>{toUpperCase(company["Agency Name"]) || "N/A"}</TableCell>
                     <TableCell>{company["Total Drivers"] || 0}</TableCell>
                     <TableCell>{company["Address"] || "N/A"}</TableCell>
                     <TableCell>{company["City"] || "N/A"}</TableCell>
