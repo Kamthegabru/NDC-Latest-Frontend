@@ -14,6 +14,7 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import dayjs from 'dayjs';
+import { toProperCase, toUpperCase } from '../../Utils/formatText';
 
 const API_URL = process.env.REACT_APP_API_URL;
 const PAGE_SIZE = 10;
@@ -453,9 +454,9 @@ function ShowRandom() {
                     {(page - 1) * PAGE_SIZE + index + 1}
                   </TableCell>
                   <TableCell align="center">
-                    <Typography fontWeight="bold">{item.company?.name || "N/A"}</Typography>
+                    <Typography fontWeight="bold">{toUpperCase(item.company?.name) || "N/A"}</Typography>
                   </TableCell>
-                  <TableCell align="center">{item.driver?.name || "N/A"}</TableCell>
+                  <TableCell align="center">{toProperCase(item.driver?.name) || "N/A"}</TableCell>
                   <TableCell align="center">
                     <Chip
                       label={item.year}
