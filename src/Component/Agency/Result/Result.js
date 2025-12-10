@@ -21,7 +21,7 @@ import dayjs from "dayjs";
 // ✅ v7 import (default) — this fixes the runtime error
 import { DayPicker } from "react-day-picker";
 import "react-day-picker/dist/style.css";
-
+import { toProperCase, toUpperCase } from "../../Utils/formatText";
 
 import Cookies from "js-cookie";
 
@@ -495,8 +495,8 @@ export default function DisplayResult() {
                     />
                   </TableCell>
                   <TableCell align="center">{(page - 1) * PAGE_SIZE + index + 1}</TableCell>
-                  <TableCell align="center"><Typography fontWeight="bold">{result.companyName}</Typography></TableCell>
-                  <TableCell align="center">{result.driverName}</TableCell>
+                  <TableCell align="center"><Typography fontWeight="bold">{toUpperCase(result.companyName)}</Typography></TableCell>
+                  <TableCell align="center">{toProperCase(result.driverName)}</TableCell>
                   <TableCell align="center">{result.licenseNumber}</TableCell>
                   <TableCell align="center">
                     <Chip label={formatDate(result.testDate)} color="secondary" variant="outlined" sx={{ fontWeight: "bold", fontSize: 12 }} />
