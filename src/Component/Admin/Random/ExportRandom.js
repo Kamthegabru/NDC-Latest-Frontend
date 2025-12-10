@@ -4,6 +4,7 @@ import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
 import autoTable from 'jspdf-autotable';
 import RandomContext from '../../../Context/Admin/Random/RandomContext';
+import { toProperCase, toUpperCase } from '../../Utils/formatText';
 
 function ExportRandom() {
     const columns = ["Company Name", "Driver Name", "Year", "Quarter", "Test Type", "Status"];
@@ -18,8 +19,8 @@ function ExportRandom() {
 
     const prepareDataRows = (data) => {
         return data.map(item => [
-            item.company?.name || 'N/A',
-            item.driver?.name || 'N/A',
+            toUpperCase(item.company?.name) || 'N/A',
+            toProperCase(item.driver?.name) || 'N/A',
             item.year,
             item.quarter,
             item.testType,
