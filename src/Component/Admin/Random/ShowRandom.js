@@ -19,6 +19,7 @@ import 'react-day-picker/dist/style.css';
 import dayjs from 'dayjs';
 import RescheduleOrder from '../Result/RescheduleOrder';
 import CloseIcon from '@mui/icons-material/Close';
+import { toProperCase, toUpperCase } from '../../Utils/formatText';
 
 const PAGE_SIZE = 10;
 const SORT_OPTIONS = ["Alphabetical (A-Z)", "Alphabetical (Z-A)", "Newest First", "Oldest First"];
@@ -608,9 +609,9 @@ function ShowRandom() {
                     {(page - 1) * PAGE_SIZE + index + 1}
                   </TableCell>
                   <TableCell align="center">
-                    <Typography fontWeight="bold">{item.company?.name || "N/A"}</Typography>
+                    <Typography fontWeight="bold">{toUpperCase(item.company?.name) || "N/A"}</Typography>
                   </TableCell>
-                  <TableCell align="center">{item.driver?.name || "N/A"}</TableCell>
+                  <TableCell align="center">{toProperCase(item.driver?.name) || "N/A"}</TableCell>
                   <TableCell align="center">
                     <Chip
                       label={item.year}
