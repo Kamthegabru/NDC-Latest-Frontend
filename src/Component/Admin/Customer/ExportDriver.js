@@ -17,6 +17,7 @@ import { saveAs } from "file-saver";
 import axios from "axios";
 import Cookies from "js-cookie";
 import { formatDateUS } from "../../Utils/formatDateUs";
+import { toProperCase, toUpperCase } from "../../Utils/formatText";
 
 const API_URL = process.env.REACT_APP_API_URL;
 
@@ -45,10 +46,10 @@ function ExportDriver() {
    const handleDownload = () => {
     // Always convert to strings in the desired format before exporting
     const excelData = driverData.map(driver => ({
-      "Driver Name": `${driver.first_name ?? ""} ${driver.last_name ?? ""}`.trim(),
+      "Driver Name": toProperCase(`${driver.first_name ?? ""} ${driver.last_name ?? ""}`.trim()) || "N/A",
       "DOB": formatDateUS(driver.dob),
       "License Number": driver.government_id || "N/A",
-      "Company Name": driver.companyName || "N/A",
+      "Company Name": toUpperCase(driver.companyName) || "N/A",
       "Company Email": driver.companyEmail || "N/A",
       "Date Added": formatDateUS(driver.creationDate),
       "Date Deleted": driver?.deletionDate
