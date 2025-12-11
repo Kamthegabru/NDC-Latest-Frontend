@@ -48,6 +48,7 @@ function PrefillBootstrap({ prefill }) {
       firstName: prefill.firstName ?? prev.firstName,
       middleName: prefill.middleName ?? prev.middleName,
       lastName: prefill.lastName ?? prev.lastName,
+      ssnState: prefill.ssnState ?? prev.ssnState,
       ssn: prefill.ssnEid ?? prev.ssn,
       dob: prefill.dob ? new Date(prefill.dob).toISOString().slice(0,10) : prev.dob,
       phone1: prefill.phone1 ?? prev.phone1,
@@ -100,7 +101,7 @@ function PrefillBootstrap({ prefill }) {
   return null;
 }
 
-function RescheduleOrderInner({ prefill }) {
+function RescheduleOrderInner({ prefill, rescheduleEnabled }) {
   const { currentPosition } = useContext(CreateNewOrderContext);
 
   const renderStep = () => {
@@ -152,7 +153,7 @@ function RescheduleOrderInner({ prefill }) {
             align="center"
             sx={{ fontWeight: 800, mb: 3, letterSpacing: "0.5px", color: "#093378" }}
           >
-            Reschedule Order
+            {rescheduleEnabled ? "Reschedule Order" : "Schedule Order"}
           </Typography>
 
           <Divider sx={{ mb: 4 }} />
@@ -198,10 +199,10 @@ function RescheduleOrderInner({ prefill }) {
   );
 }
 
-export default function RescheduleOrder({ prefill, onRescheduleSuccess, onClose }) {
+export default function RescheduleOrder({ prefill, onRescheduleSuccess, onClose, rescheduleEnabled }) {
   return (
     <CreateNewOrderState rescheduleEnabled initialPrefill={prefill} onRescheduleSuccess={onRescheduleSuccess} onClose={onClose}>
-      <RescheduleOrderInner prefill={prefill} />
+      <RescheduleOrderInner prefill={prefill} rescheduleEnabled={rescheduleEnabled} />
     </CreateNewOrderState>
   );
 }
