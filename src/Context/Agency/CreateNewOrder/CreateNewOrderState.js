@@ -11,6 +11,7 @@ const CreateNewOrderState = (props) => {
 
     const [allCompanyData, setAllCompanyData] = useState([]);
     const [companyId, setCompanyId] = useState("");
+    const [selectedCompanyEmail, setSelectedCompanyEmail] = useState("");
     const [packageId, setPackageId] = useState("");
     const [orderReasonId, setOrderReasonId] = useState("");
     const [dotAgency, setDotAgency] = useState("");
@@ -18,7 +19,7 @@ const CreateNewOrderState = (props) => {
 
     const [selectedSiteId, setSelectedSiteId] = useState(null);
     const [selectedSiteDetails, setSelectedSiteDetails] = useState(null);
-    const [finlSelectedSite, setFinalSelectedSite] = useState(null)
+    const [finlSelectedSite, setFinalSelectedSite] = useState(null);
     const [savedPincode, setSavedPincode] = useState("");
 
     const [formData, setFormData] = useState({
@@ -26,6 +27,7 @@ const CreateNewOrderState = (props) => {
         middleName: "",
         lastName: "",
         ssn: "",
+        ssnState: "",
         dob: "",
         phone1: "",
         phone2: "",
@@ -39,6 +41,7 @@ const CreateNewOrderState = (props) => {
         state: "",
         zip: "",
         sendLink: false,
+        donorPass: true,
         ccEmail: ""
     });
 
@@ -46,125 +49,177 @@ const CreateNewOrderState = (props) => {
     const [siteInformationLoading, setSiteInformationLoading] = useState(false);
     const [submitLoading, setSubmitLoading] = useState(false);
 
+    const hardReset = () => {
+        setCurrentPosition(1);
+        setMaxPosition(1);
+        setFormData({
+            firstName: "",
+            middleName: "",
+            lastName: "",
+            ssn: "",
+            ssnState: "",
+            dob: "",
+            phone1: "",
+            phone2: "",
+            email: "",
+            orderExpires: "",
+            observed: "0",
+            participantAddress: true,
+            address: "",
+            address2: "",
+            city: "",
+            state: "",
+            zip: "",
+            sendLink: false,
+            donorPass: true,
+            ccEmail: ""
+        });
+        setAllCompanyData([]);
+        setCompanyId("");
+        setSelectedCompanyEmail("");
+        setPackageId("");
+        setOrderReasonId("");
+        setDotAgency("");
+        setSelectedSiteId(null);
+        setSelectedSiteDetails(null);
+        setFinalSelectedSite(null);
+        setSavedPincode("");
+        setCaseNumber("");
+    };
+
     const getSiteInformation = async () => {
         const token = Cookies.get("token");
-        if (token) {
+        if (!token) {
+            toast.error("Invalid access, Please login again");
+            return;
+        }
+        try {
             setSiteInformationLoading(true);
             axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-            await axios.post(`${API_URL}/agency/getSiteInformation`, { companyId, packageId, orderReasonId,dotAgency, setDotAgency, formData })
-                .then(response => {
-                    if (formData.sendLink === true) {
-                        setCurrentPosition(1);
-                        setMaxPosition(1);
-                        setFormData({
-                            firstName: "",
-                            middleName: "",
-                            lastName: "",
-                            ssn: "",
-                            dob: "",
-                            phone1: "",
-                            phone2: "",
-                            email: "",
-                            orderExpires: "",
-                            observed: "0",
-                            participantAddress: true,
-                            address: "",
-                            address2: "",
-                            city: "",
-                            state: "",
-                            zip: "",
-                            sendLink: false,
-                            ccEmail: ""
-                        })
-                        setAllCompanyData([])
-                        setCompanyId("");
-                        setPackageId("");
-                        setDotAgency("");
-                        setOrderReasonId("");
-                        toast.success("Scheduling URL sent successfully")
-                    } else {
-                        setSiteInformation(response.data.data);
-                        setSiteInformationLoading(false);
-                        setCaseNumber(response.data.caseNumber);
-                    }
-                })
-                .catch((error) => {
-                    setSiteInformationLoading(false);
-                    console.error("Error fetching user details:", error);
-                });
-        } else {
-            toast.error("Invalid access, Please login again");
+            const { data } = await axios.post(`${API_URL}/agency/getSiteInformation`, {
+                companyId,
+                packageId,
+                orderReasonId,
+                dotAgency,
+                formData
+            });
+
+            if (formData.sendLink === true) {
+                const resultId = data?.resultId;
+                if (props.onRescheduleSuccess && resultId) {
+                    props.onRescheduleSuccess(resultId);
+                }
+                if (props.onClose) {
+                    props.onClose();
+                }
+                hardReset();
+                toast.success("Scheduling URL sent successfully");
+            } else {
+                setSiteInformation(data?.data || []);
+                setCaseNumber(data?.caseNumber || "");
+            }
+        } catch (error) {
+            console.error("Error fetching site info:", error);
+        } finally {
+            setSiteInformationLoading(false);
         }
-    }
+    };
 
     const handleNewPincode = async (data) => {
         const token = Cookies.get("token");
-        formData.zip = savedPincode;
-        if (token) {
+        if (!token) {
+            toast.error("Invalid access, Please login again");
+            return;
+        }
+        try {
+            setFormData((prev) => ({ ...prev, zip: savedPincode }));
             setSiteInformationLoading(true);
             axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-            await axios.post(`${API_URL}/agency/handleNewPincode`, { caseNumber, data })
-                .then(response => {
-                    setSiteInformation(response.data.data);
-                    setSiteInformationLoading(false);
-                })
-                .catch((error) => {
-                    setSiteInformationLoading(false);
-                    console.error("Error fetching user details:", error);
-                });
-        } else {
-            toast.error("Invalid access, Please login again");
+            const res = await axios.post(`${API_URL}/agency/handleNewPincode`, {
+                caseNumber,
+                data
+            });
+            setSiteInformation(res?.data?.data || []);
+        } catch (error) {
+            console.error("Error fetching new pincode data:", error);
+        } finally {
+            setSiteInformationLoading(false);
         }
-    }
+    };
 
     const newDriverSubmitOrder = async () => {
         const token = Cookies.get("token");
-        if (token) {
+        if (!token) {
+            toast.error("Invalid access, Please login again");
+            return;
+        }
+        try {
             setSubmitLoading(true);
             axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-            await axios.post(`${API_URL}/agency/newDriverSubmitOrder`, { companyId, packageId, orderReasonId,dotAgency, caseNumber, formData, finlSelectedSite })
-                .then(response => {
-                    toast.success(response.data.message)
-                    setSubmitLoading(false);
-                    setAllCompanyData([])
-                    setCompanyId("");
-                    setPackageId("");
-                    setOrderReasonId("");
-                    setDotAgency("");
-                    setFormData({
-                        firstName: "",
-                        middleName: "",
-                        lastName: "",
-                        ssn: "",
-                        dob: "",
-                        phone1: "",
-                        phone2: "",
-                        email: "",
-                        orderExpires: "",
-                        observed: "1",
-                        participantAddress: true,
-                        address: "",
-                        address2: "",
-                        city: "",
-                        state: "",
-                        zip: "",
-                        sendLink: false,
-                        ccEmail: ""
-                    })
-                })
-                .catch((error) => {
-                    toast.error(error?.response?.data?.message)
-                });
-        } else {
-            toast.error("Invalid access, Please login again");
+            const response = await axios.post(`${API_URL}/agency/newDriverSubmitOrder`, {
+                companyId,
+                packageId,
+                orderReasonId,
+                dotAgency,
+                caseNumber,
+                formData,
+                finlSelectedSite
+            });
+            const resultId = response?.data?.resultId;
+            if (props.onRescheduleSuccess && resultId) {
+                props.onRescheduleSuccess(resultId);
+            }
+            if (props.onClose) {
+                props.onClose();
+            }
+            toast.success(response?.data?.message || "Order submitted");
+            hardReset();
+        } catch (error) {
+            toast.error(error?.response?.data?.message || "Submit failed");
+        } finally {
+            setSubmitLoading(false);
         }
-    }
+    };
 
     return (
-        <CreateNewOrderContext.Provider value={{ orderReasonId, packageId, companyId, allCompanyData, currentPosition, maxPosition, formData, siteInformation, siteInformationLoading, selectedSiteId, selectedSiteDetails, finlSelectedSite, submitLoading,dotAgency, setDotAgency, handleNewPincode, setSavedPincode, setSubmitLoading, newDriverSubmitOrder, setFinalSelectedSite, setSelectedSiteDetails, setSelectedSiteId, setSiteInformation, getSiteInformation, setFormData, setAllCompanyData, setCurrentPosition, setCompanyId, setPackageId, setOrderReasonId, setMaxPosition }}>
+        <CreateNewOrderContext.Provider value={{
+            orderReasonId,
+            packageId,
+            companyId,
+            dotAgency,
+            allCompanyData,
+            selectedCompanyEmail,
+            currentPosition,
+            maxPosition,
+            formData,
+            siteInformation,
+            siteInformationLoading,
+            selectedSiteId,
+            selectedSiteDetails,
+            finlSelectedSite,
+            submitLoading,
+            setDotAgency,
+            handleNewPincode,
+            setSavedPincode,
+            setSubmitLoading,
+            newDriverSubmitOrder,
+            setFinalSelectedSite,
+            setSelectedSiteDetails,
+            setSelectedSiteId,
+            setSiteInformation,
+            getSiteInformation,
+            setFormData,
+            setAllCompanyData,
+            setCurrentPosition,
+            setCompanyId,
+            setPackageId,
+            setOrderReasonId,
+            setMaxPosition,
+            setSelectedCompanyEmail
+        }}>
             {props.children}
         </CreateNewOrderContext.Provider>
-    )
-}
+    );
+};
 
 export default CreateNewOrderState;
