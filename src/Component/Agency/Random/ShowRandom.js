@@ -1,61 +1,79 @@
-import React, { useEffect, useState, useMemo } from 'react';
-import axios from "axios";
-import Cookies from "js-cookie";
-import { toast } from "react-toastify";
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import {
-  Box, CircularProgress, FormControl, InputLabel, MenuItem,
-  Paper, Select, Table, TableBody, TableCell, TableContainer,
-  TableHead, TableRow, Typography, TextField, Chip, Tooltip,
-  IconButton, Pagination, Stack, Checkbox, Button, Dialog,
-  DialogTitle, DialogContent, DialogActions
+  Table, TableBody, TableCell, TableContainer, TableHead, TableRow,
+  IconButton, Menu, MenuItem, Typography, Paper, Box, CircularProgress,
+  FormControl, Select, InputLabel, MenuItem as SelectItem,
+  Dialog, DialogTitle, DialogContent, DialogActions, Button, TextField,
+  Chip, Tooltip, Checkbox, Pagination, Stack
 } from '@mui/material';
+import MoreVertIcon from '@mui/icons-material/MoreVert';
 import { Refresh } from '@mui/icons-material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import ScheduleIcon from '@mui/icons-material/Schedule';
+import RandomContext from '../../../Context/Agency/Random/RandomContext';
+import AddRandom from './AddRandom';
+import ExportRandom from './ExportRandom';
+import { toast } from 'react-toastify';
 import { DayPicker } from 'react-day-picker';
 import 'react-day-picker/dist/style.css';
 import dayjs from 'dayjs';
+import RescheduleOrder from '../Result/RescheduleOrder';
+import CloseIcon from '@mui/icons-material/Close';
 import { toProperCase, toUpperCase } from '../../Utils/formatText';
 
-const API_URL = process.env.REACT_APP_API_URL;
 const PAGE_SIZE = 10;
 const SORT_OPTIONS = ["Alphabetical (A-Z)", "Alphabetical (Z-A)", "Newest First", "Oldest First"];
 const STATUS_OPTIONS = ["All", "Completed", "Pending", "Scheduled"];
 
 function ShowRandom() {
-  const [randomUserDetails, setRandomUserDetails] = useState([]);
+  const {
+    randomUserDetails,
+    deleteRandomEntry,
+    fetchRandomData,
+    updateRandomStatus,
+    yearFilter,
+    setYearFilter,
+    quarterFilter,
+    setQuarterFilter,
+    sendEmailToRandomDriver,
+    getScheduleDataFromRandom,
+    linkRandomToResult
+  } = useContext(RandomContext);
+
+  // Existing states
+  const [menuAnchorEl, setMenuAnchorEl] = useState(null);
+  const [selectedItem, setSelectedItem] = useState(null);
   const [loading, setLoading] = useState(true);
-  
-  // Filter states
-  const [yearFilter, setYearFilter] = useState("All");
-  const [quarterFilter, setQuarterFilter] = useState("All");
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [editOpen, setEditOpen] = useState(false);
+  const [statusValue, setStatusValue] = useState('');
+  const [emailOpen, setEmailOpen] = useState(false);
+  const [ccEmail, setCcEmail] = useState("");
+
+  // New enhanced filter states
+  const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("All");
   const [sortOption, setSortOption] = useState("Alphabetical (A-Z)");
-  const [searchTerm, setSearchTerm] = useState("");
   const [page, setPage] = useState(1);
   const [range, setRange] = useState({ from: undefined, to: undefined });
   const [showCalendar, setShowCalendar] = useState(false);
-  
+
   // Selection states
   const [selectedIds, setSelectedIds] = useState([]);
-  const [showRemoveDialog, setShowRemoveDialog] = useState(false);
+  const [showBulkDeleteDialog, setShowBulkDeleteDialog] = useState(false);
+
+  // Schedule states
+  const [scheduleLoading, setScheduleLoading] = useState(false);
+  const [schedulePrefill, setSchedulePrefill] = useState(null);
+  const [scheduleTarget, setScheduleTarget] = useState(null);
 
   useEffect(() => {
-    const load = async () => {
-      const token = Cookies.get("token");
-      try {
-        setLoading(true);
-        axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
-        const response = await axios.get(`${API_URL}/agency/fetchRandomData`);
-        setRandomUserDetails(response.data.data || []);
-      } catch (error) {
-        console.error("Error fetching random data:", error);
-        toast.error("Server error, Please try again later");
-      } finally {
-        setLoading(false);
-      }
+    const fetchData = async () => {
+      await fetchRandomData();
+      setLoading(false);
     };
-    load();
-  }, []);
+    fetchData();
+  }, [fetchRandomData]);
 
   const handleSortOptionChange = (event) => {
     setSortOption(event.target.value);
@@ -89,10 +107,9 @@ function ShowRandom() {
       return matchYear && matchQuarter && matchStatus && matchSearch;
     });
 
-    // Date range filter (assuming there's a createdAt or testDate field)
+    // Date range filter
     if (range.from && range.to && filtered.length > 0) {
       filtered = filtered.filter((item) => {
-        // You may need to adjust this based on your actual date field
         const itemDate = dayjs(item.createdAt || item.testDate);
         if (!itemDate.isValid()) return true;
         return itemDate.isAfter(dayjs(range.from).subtract(1, 'day')) &&
@@ -100,8 +117,20 @@ function ShowRandom() {
       });
     }
 
+    // Quarter priority mapping (Q4 = 4, Q3 = 3, Q2 = 2, Q1 = 1)
+    const getQuarterPriority = (quarter) => {
+      const qMap = { 'Q4': 4, 'Q3': 3, 'Q2': 2, 'Q1': 1 };
+      return qMap[quarter] || 0;
+    };
+
     // Enhanced sorting
     filtered.sort((a, b) => {
+      // First, sort by quarter (current quarter first: Q4 → Q3 → Q2 → Q1)
+      const quarterA = getQuarterPriority(a.quarter);
+      const quarterB = getQuarterPriority(b.quarter);
+      if (quarterA !== quarterB) return quarterB - quarterA;
+
+      // Then apply user-selected sort option
       switch (sortOption) {
         case "Alphabetical (A-Z)":
           const companyA = (a.company?.name || '').toLowerCase();
@@ -118,7 +147,6 @@ function ShowRandom() {
           return 0;
         
         case "Newest First":
-          // Assuming there's a createdAt or testDate field
           const dateA = dayjs(a.createdAt || a.testDate);
           const dateB = dayjs(b.createdAt || b.testDate);
           if (!dateA.isValid() || !dateB.isValid()) return 0;
@@ -144,6 +172,118 @@ function ShowRandom() {
     return filteredAndSortedData.slice(start, start + PAGE_SIZE);
   }, [filteredAndSortedData, page]);
 
+  // Menu handlers
+  const handleMenuOpen = (event, item) => {
+    setMenuAnchorEl(event.currentTarget);
+    setSelectedItem(item);
+  };
+
+  const handleMenuClose = () => {
+    setMenuAnchorEl(null);
+  };
+
+  // Delete handlers
+  const handleDelete = () => {
+    setDeleteOpen(true);
+    handleMenuClose();
+  };
+
+  const handleDeleteConfirm = async () => {
+    try {
+      await deleteRandomEntry({ selectedItem });
+      setDeleteOpen(false);
+      setSelectedItem(null);
+    } catch (error) {
+      toast.error("Delete failed");
+    }
+  };
+
+  // Edit handlers
+  const handleEdit = () => {
+    setStatusValue(selectedItem?.status || 'Pending');
+    setEditOpen(true);
+    handleMenuClose();
+  };
+
+  const handleEditConfirm = async () => {
+    try {
+      const data = {
+        selectedItem,
+        status: statusValue
+      };
+      await updateRandomStatus(data);
+      setEditOpen(false);
+      setSelectedItem(null);
+    } catch (error) {
+      toast.error("Update failed");
+    }
+  };
+
+  // Email handlers
+  const handleSendEmail = () => {
+    setCcEmail("");
+    setEmailOpen(true);
+    handleMenuClose();
+  };
+
+  // Schedule handler
+  const handleSchedule = async () => {
+    try {
+      setScheduleLoading(true);
+      handleMenuClose();
+      const prefillData = await getScheduleDataFromRandom(selectedItem._id);
+      
+      console.log("[Agency Random] Prefill data received:", prefillData);
+      
+      // Extract first 2 characters from SSN as state (keep full SSN)
+      const ssnValue = prefillData.ssnEid || "";
+      const extractedState = ssnValue.length >= 2 ? ssnValue.substring(0, 2).toUpperCase() : "";
+      
+      const finalPrefill = {
+        ...prefillData,
+        ssnState: extractedState
+      };
+      
+      console.log("[Agency Random] Final prefill with ssnState:", finalPrefill);
+      
+      setSchedulePrefill(finalPrefill);
+      setScheduleTarget(selectedItem);
+    } catch (error) {
+      console.error("Schedule error:", error);
+      toast.error("Failed to load schedule data");
+    } finally {
+      setScheduleLoading(false);
+    }
+  };
+
+  const handleScheduleSuccess = async (resultId) => {
+    try {
+      if (resultId && scheduleTarget?._id) {
+        await linkRandomToResult(scheduleTarget._id, resultId);
+      }
+      await updateRandomStatus({
+        selectedItem: scheduleTarget,
+        status: "Scheduled"
+      });
+      toast.success("Order scheduled successfully!");
+    } catch (error) {
+      console.error("Failed to update status:", error);
+    } finally {
+      setSchedulePrefill(null);
+      setScheduleTarget(null);
+    }
+  };
+
+  const handleSendEmailConfirm = async () => {
+    try {
+      await sendEmailToRandomDriver(selectedItem, ccEmail);
+      setEmailOpen(false);
+      setSelectedItem(null);
+    } catch (error) {
+      toast.error("Failed to send email.");
+    }
+  };
+
   // Selection handlers
   const handleSelect = (itemId) => {
     setSelectedIds((prev) =>
@@ -162,15 +302,25 @@ function ShowRandom() {
     }
   };
 
-  const handleRemoveSelected = () => {
-    setShowRemoveDialog(true);
+  const handleBulkDelete = () => {
+    setShowBulkDeleteDialog(true);
   };
 
-  const confirmRemove = () => {
-    // API call to remove selected items would go here
-    console.log("Removing selected items:", selectedIds);
-    setSelectedIds([]);
-    setShowRemoveDialog(false);
+  const confirmBulkDelete = async () => {
+    try {
+      // API call to delete multiple items
+      for (const id of selectedIds) {
+        const item = randomUserDetails.find(item => item._id === id);
+        if (item) {
+          await deleteRandomEntry({ selectedItem: item });
+        }
+      }
+      setSelectedIds([]);
+      setShowBulkDeleteDialog(false);
+      toast.success("Selected items deleted successfully");
+    } catch (error) {
+      toast.error("Failed to delete selected items");
+    }
   };
 
   const handleResetFilters = () => {
@@ -204,20 +354,20 @@ function ShowRandom() {
 
   return (
     <Box>
-      {/* Remove Dialog */}
-      <Dialog open={showRemoveDialog} onClose={() => setShowRemoveDialog(false)}>
-        <DialogTitle>Confirm Removal</DialogTitle>
+      {/* Bulk Delete Dialog */}
+      <Dialog open={showBulkDeleteDialog} onClose={() => setShowBulkDeleteDialog(false)}>
+        <DialogTitle>Confirm Bulk Delete</DialogTitle>
         <DialogContent>
           <Typography>
-            Are you sure you want to remove the selected item(s)?
+            Are you sure you want to delete {selectedIds.length} selected item(s)?
           </Typography>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setShowRemoveDialog(false)} color="primary">
+          <Button onClick={() => setShowBulkDeleteDialog(false)} color="primary">
             Cancel
           </Button>
-          <Button onClick={confirmRemove} color="error" variant="contained">
-            Remove
+          <Button onClick={confirmBulkDelete} color="error" variant="contained">
+            Delete All
           </Button>
         </DialogActions>
       </Dialog>
@@ -257,132 +407,139 @@ function ShowRandom() {
             gap: 2, 
             flexWrap: "wrap",
             width: "100%",
-            justifyContent: "flex-end"
+            justifyContent: "space-between"
           }}>
-            <TextField
-              size="small"
-              label="Search Company/Driver"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              sx={{ minWidth: 180 }}
-            />
-            
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Year</InputLabel>
-              <Select
-                value={yearFilter}
-                label="Year"
-                onChange={(e) => { setYearFilter(e.target.value); setPage(1); }}
-              >
-                {uniqueYears.map((year, i) => (
-                  <MenuItem key={i} value={year}>{year}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+            <Box sx={{ display: "flex", alignItems: "center", gap: 2, flexWrap: "wrap" }}>
+              <TextField
+                size="small"
+                label="Search Company/Driver"
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                sx={{ minWidth: 180 }}
+              />
+              
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Year</InputLabel>
+                <Select
+                  value={yearFilter}
+                  label="Year"
+                  onChange={(e) => { setYearFilter(e.target.value); setPage(1); }}
+                >
+                  {uniqueYears.map((year, i) => (
+                    <SelectItem key={i} value={year}>{year}</SelectItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Quarter</InputLabel>
-              <Select
-                value={quarterFilter}
-                label="Quarter"
-                onChange={(e) => { setQuarterFilter(e.target.value); setPage(1); }}
-              >
-                {uniqueQuarters.map((qtr, i) => (
-                  <MenuItem key={i} value={qtr}>{qtr}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Quarter</InputLabel>
+                <Select
+                  value={quarterFilter}
+                  label="Quarter"
+                  onChange={(e) => { setQuarterFilter(e.target.value); setPage(1); }}
+                >
+                  {uniqueQuarters.map((qtr, i) => (
+                    <SelectItem key={i} value={qtr}>{qtr}</SelectItem>
+                  ))}
+                </Select>
+              </FormControl>
 
-            <FormControl size="small" sx={{ minWidth: 120 }}>
-              <InputLabel>Status</InputLabel>
-              <Select
-                value={statusFilter}
-                label="Status"
-                onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
-              >
-                {STATUS_OPTIONS.map((status) => (
-                  <MenuItem key={status} value={status}>{status}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            
-            <FormControl size="small" sx={{ minWidth: 180 }}>
-              <InputLabel>Sort By</InputLabel>
-              <Select
-                value={sortOption}
-                label="Sort By"
-                onChange={handleSortOptionChange}
-              >
-                {SORT_OPTIONS.map((option) => (
-                  <MenuItem key={option} value={option}>{option}</MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            
-            <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
-              <Typography variant="body2" sx={{ fontWeight: "bold", color: "#003366" }}>
-                Date Range:
-              </Typography>
-              <Box sx={{ position: "relative" }}>
-                <Chip
-                  label={
-                    range.from && range.to
-                      ? `${dayjs(range.from).format("DD MMM YYYY")} - ${dayjs(range.to).format("DD MMM YYYY")}`
-                      : "Select Range"
-                  }
-                  color="info"
-                  variant="outlined"
-                  onClick={() => setShowCalendar(!showCalendar)}
-                  sx={{ cursor: "pointer", fontWeight: "bold" }}
-                />
-                {showCalendar && (
-                  <Box sx={{
-                    position: "absolute",
-                    zIndex: 10,
-                    mt: 2,
-                    background: "#fff",
-                    boxShadow: 6,
-                    borderRadius: 2,
-                    p: 2,
-                    right: 0
-                  }}>
-                    <DayPicker
-                      mode="range"
-                      selected={range}
-                      onSelect={setRange}
-                      numberOfMonths={2}
-                      showOutsideDays
-                      footer={
-                        <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
-                          <Chip
-                            label="Done"
-                            color="primary"
-                            onClick={() => setShowCalendar(false)}
-                            sx={{ cursor: "pointer" }}
-                          />
-                        </Box>
-                      }
-                    />
-                  </Box>
-                )}
+              <FormControl size="small" sx={{ minWidth: 120 }}>
+                <InputLabel>Status</InputLabel>
+                <Select
+                  value={statusFilter}
+                  label="Status"
+                  onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }}
+                >
+                  {STATUS_OPTIONS.map((status) => (
+                    <SelectItem key={status} value={status}>{status}</SelectItem>
+                  ))}
+                </Select>
+              </FormControl>
+              
+              <FormControl size="small" sx={{ minWidth: 180 }}>
+                <InputLabel>Sort By</InputLabel>
+                <Select
+                  value={sortOption}
+                  label="Sort By"
+                  onChange={handleSortOptionChange}
+                >
+                  {SORT_OPTIONS.map((option) => (
+                    <SelectItem key={option} value={option}>{option}</SelectItem>
+                  ))}
+                </Select>
+              </FormControl>
+              
+              <Box sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+                <Typography variant="body2" sx={{ fontWeight: "bold", color: "#003366" }}>
+                  Date Range:
+                </Typography>
+                <Box sx={{ position: "relative" }}>
+                  <Chip
+                    label={
+                      range.from && range.to
+                        ? `${dayjs(range.from).format("DD MMM YYYY")} - ${dayjs(range.to).format("DD MMM YYYY")}`
+                        : "Select Range"
+                    }
+                    color="info"
+                    variant="outlined"
+                    onClick={() => setShowCalendar(!showCalendar)}
+                    sx={{ cursor: "pointer", fontWeight: "bold" }}
+                  />
+                  {showCalendar && (
+                    <Box sx={{
+                      position: "absolute",
+                      zIndex: 10,
+                      mt: 2,
+                      background: "#fff",
+                      boxShadow: 6,
+                      borderRadius: 2,
+                      p: 2,
+                      right: 0
+                    }}>
+                      <DayPicker
+                        mode="range"
+                        selected={range}
+                        onSelect={setRange}
+                        numberOfMonths={2}
+                        showOutsideDays
+                        footer={
+                          <Box sx={{ display: "flex", justifyContent: "flex-end", mt: 1 }}>
+                            <Chip
+                              label="Done"
+                              color="primary"
+                              onClick={() => setShowCalendar(false)}
+                              sx={{ cursor: "pointer" }}
+                            />
+                          </Box>
+                        }
+                      />
+                    </Box>
+                  )}
+                </Box>
               </Box>
+              
+              <Button
+                variant="contained"
+                color="error"
+                startIcon={<DeleteIcon />}
+                disabled={selectedIds.length === 0}
+                onClick={handleBulkDelete}
+              >
+                Remove
+              </Button>
+              
+              <Tooltip title="Reset Filters">
+                <IconButton onClick={handleResetFilters} color="info">
+                  <Refresh />
+                </IconButton>
+              </Tooltip>
             </Box>
-            
-            <Button
-              variant="contained"
-              color="error"
-              startIcon={<DeleteIcon />}
-              disabled={selectedIds.length === 0}
-              onClick={handleRemoveSelected}
-            >
-              Remove
-            </Button>
-            
-            <Tooltip title="Reset Filters">
-              <IconButton onClick={handleResetFilters} color="info">
-                <Refresh />
-              </IconButton>
-            </Tooltip>
+
+            <Box sx={{ display: "flex", gap: 2 }}>
+              <ExportRandom />
+              <AddRandom />
+            </Box>
           </Box>
         </Box>
 
@@ -431,12 +588,16 @@ function ShowRandom() {
               <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Quarter</TableCell>
               <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Test Type</TableCell>
               <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Status</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Order Status</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Result Status</TableCell>
+              <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Action</TableCell>
             </TableRow>
           </TableHead>
+
           <TableBody>
             {paginatedData.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={8} align="center">
+                <TableCell colSpan={11} align="center">
                   <Typography color="text.secondary">No data found matching your criteria.</Typography>
                 </TableCell>
               </TableRow>
@@ -476,11 +637,40 @@ function ShowRandom() {
                   <TableCell align="center">{item.testType}</TableCell>
                   <TableCell align="center">
                     <Chip
-                      label={item.status}
+                      label={item.status || "Pending"}
                       color={getStatusColor(item.status)}
                       variant="filled"
                       sx={{ fontWeight: "bold" }}
                     />
+                  </TableCell>
+                  <TableCell align="center">
+                    {item.orderStatus ? (
+                      <Chip
+                        label={item.orderStatus}
+                        color={item.orderStatus === "Pending" ? "warning" : "success"}
+                        variant="outlined"
+                        size="small"
+                      />
+                    ) : (
+                      <Typography color="text.secondary">-</Typography>
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
+                    {item.resultStatus ? (
+                      <Chip
+                        label={item.resultStatus}
+                        color={item.resultStatus === "Pending" ? "warning" : "success"}
+                        variant="outlined"
+                        size="small"
+                      />
+                    ) : (
+                      <Typography color="text.secondary">-</Typography>
+                    )}
+                  </TableCell>
+                  <TableCell align="center">
+                    <IconButton onClick={(e) => handleMenuOpen(e, item)}>
+                      <MoreVertIcon />
+                    </IconButton>
                   </TableCell>
                 </TableRow>
               ))
@@ -504,6 +694,195 @@ function ShowRandom() {
           />
         </Stack>
       </TableContainer>
+
+      {/* Action Menu */}
+      <Menu anchorEl={menuAnchorEl} open={Boolean(menuAnchorEl)} onClose={handleMenuClose}>
+        {selectedItem?.status !== "Scheduled" && (
+          <MenuItem onClick={handleSchedule}>
+            <ScheduleIcon fontSize="small" sx={{ mr: 1 }} />
+            Schedule
+          </MenuItem>
+        )}
+        <MenuItem onClick={handleSendEmail}>Send Email</MenuItem>
+        <MenuItem onClick={handleEdit}>Edit</MenuItem>
+        <MenuItem onClick={handleDelete}>Delete</MenuItem>
+      </Menu>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Confirm Delete</DialogTitle>
+        <DialogContent dividers>
+          {selectedItem && (
+            <Box>
+              <Typography><strong>Company:</strong> {selectedItem.company?.name || "N/A"}</Typography>
+              <Typography><strong>Driver:</strong> {selectedItem.driver?.name || "N/A"}</Typography>
+              <Typography><strong>Year:</strong> {selectedItem.year}</Typography>
+              <Typography><strong>Quarter:</strong> {selectedItem.quarter}</Typography>
+              <Typography><strong>Test Type:</strong> {selectedItem.testType}</Typography>
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
+          <Button color="error" variant="contained" onClick={handleDeleteConfirm}>
+            Confirm Delete
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Edit Status Modal */}
+      <Dialog open={editOpen} onClose={() => setEditOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Edit Status</DialogTitle>
+        <DialogContent dividers>
+          <FormControl fullWidth>
+            <InputLabel>Status</InputLabel>
+            <Select
+              value={statusValue}
+              label="Status"
+              onChange={(e) => setStatusValue(e.target.value)}
+            >
+              <SelectItem value="Pending">Pending</SelectItem>
+              <SelectItem value="Scheduled">Scheduled</SelectItem>
+              <SelectItem value="Completed">Completed</SelectItem>
+            </Select>
+          </FormControl>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEditOpen(false)}>Cancel</Button>
+          <Button
+            variant="contained"
+            onClick={handleEditConfirm}
+            style={{
+              backgroundColor: "#002D72",
+              color: "#fff",
+              borderRadius: "6px",
+              padding: "10px 20px",
+              fontWeight: "bold",
+              textTransform: "none",
+              display: "flex",
+              alignItems: "center",
+              gap: "8px",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+            }}
+          >
+            Save
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Send Email Modal */}
+      <Dialog open={emailOpen} onClose={() => setEmailOpen(false)} maxWidth="xs" fullWidth>
+        <DialogTitle>Send Email</DialogTitle>
+        <DialogContent dividers>
+          <Typography sx={{ mb: 2 }}>
+            Are you sure you want to send an email to <b>{selectedItem?.driver?.name || "this driver"}</b>?
+          </Typography>
+          <TextField
+            label="CC Email (optional)"
+            type="email"
+            fullWidth
+            value={ccEmail}
+            onChange={(e) => setCcEmail(e.target.value)}
+            variant="outlined"
+            margin="dense"
+            placeholder="Enter CC email address"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setEmailOpen(false)}>Cancel</Button>
+          <Button
+            color="primary"
+            variant="contained"
+            onClick={handleSendEmailConfirm}
+            style={{
+              backgroundColor: "#1976d2",
+              color: "#fff",
+              borderRadius: "6px",
+              padding: "8px 20px",
+              fontWeight: "bold"
+            }}
+          >
+            Send
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Schedule Order Modal */}
+      {schedulePrefill && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.5)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1300, p: 2
+          }}
+        >
+          <Paper
+            sx={{
+              position: 'relative',
+              width: '90%', maxWidth: '1200px', height: '90%',
+              borderRadius: 3, boxShadow: 6, overflow: 'hidden',
+              display: 'flex', flexDirection: 'column'
+            }}
+          >
+            <Box
+              sx={{
+                display: 'flex', justifyContent: 'space-between', alignItems: 'center',
+                background: 'linear-gradient(90deg, #003366 60%, #1976d2 100%)',
+                color: 'white', px: 3, py: 2
+              }}
+            >
+              <Typography variant="h6" sx={{ fontWeight: 'bold', letterSpacing: 1 }}>
+                Schedule Order Test
+              </Typography>
+              <IconButton
+                onClick={() => setSchedulePrefill(null)}
+                sx={{ color: 'white', '&:hover': { backgroundColor: 'rgba(255,255,255,0.1)' } }}
+              >
+                <CloseIcon />
+              </IconButton>
+            </Box>
+            <Box
+              sx={{
+                flex: 1, overflow: 'auto',
+                '&::-webkit-scrollbar': { width: '6px' },
+                '&::-webkit-scrollbar-track': { background: '#f1f1f1' },
+                '&::-webkit-scrollbar-thumb': { background: '#888', borderRadius: '3px' },
+                '&::-webkit-scrollbar-thumb:hover': { background: '#555' },
+              }}
+            >
+              <RescheduleOrder
+                key={JSON.stringify(schedulePrefill)}
+                prefill={schedulePrefill}
+                onRescheduleSuccess={handleScheduleSuccess}
+                onClose={() => setSchedulePrefill(null)}
+                rescheduleEnabled={false}
+              />
+            </Box>
+          </Paper>
+        </Box>
+      )}
+
+      {/* Loading overlay */}
+      {scheduleLoading && (
+        <Box
+          sx={{
+            position: 'fixed',
+            top: 0, left: 0, right: 0, bottom: 0,
+            backgroundColor: 'rgba(0, 0, 0, 0.3)',
+            display: 'flex', alignItems: 'center', justifyContent: 'center',
+            zIndex: 1400
+          }}
+        >
+          <Paper sx={{ p: 3, borderRadius: 2 }}>
+            <Stack direction="row" spacing={2} alignItems="center">
+              <CircularProgress size={24} />
+              <Typography>Loading schedule data...</Typography>
+            </Stack>
+          </Paper>
+        </Box>
+      )}
     </Box>
   );
 }
