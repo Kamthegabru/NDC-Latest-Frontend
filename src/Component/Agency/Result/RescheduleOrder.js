@@ -36,6 +36,8 @@ function PrefillBootstrap({ prefill }) {
   // 1) Seed participant/address/comms immediately
   useEffect(() => {
     if (!prefill) return;
+    
+    console.log("[PrefillBootstrap] Seeding form data with:", prefill);
 
     setFormData((prev) => ({
       ...prev,
@@ -71,20 +73,28 @@ function PrefillBootstrap({ prefill }) {
 
     const norm = (s) => (s || "").toString().trim().toLowerCase();
     const targetName = norm(prefill.companyName);
+    
+    console.log("[PrefillBootstrap] Looking for company:", targetName);
+    console.log("[PrefillBootstrap] Available companies:", allCompanyData.length);
+    console.log("[PrefillBootstrap] Company names:", allCompanyData.map(c => c.companyName));
 
     const match = allCompanyData.find((c) => norm(c.companyName) === targetName);
+    
     if (match?._id) {
+      console.log("[PrefillBootstrap] Company matched:", match.companyName);
       setCompanyId(match._id);
       if (prefill.packageName) setPackageId(prefill.packageName);
       if (prefill.orderReason) setOrderReasonId(prefill.orderReason);
       if (prefill.dotAgency) setDotAgency(prefill.dotAgency);
+    } else {
+      console.log("[PrefillBootstrap] No company match found for:", targetName);
     }
   }, [prefill, allCompanyData, setCompanyId, setPackageId, setOrderReasonId, setDotAgency]);
 
   return null;
 }
 
-function RescheduleOrderInner({ prefill }) {
+function RescheduleOrderInner({ prefill, rescheduleEnabled }) {
   const { currentPosition } = useContext(CreateNewOrderContext);
 
   const renderStep = () => {
@@ -136,7 +146,7 @@ function RescheduleOrderInner({ prefill }) {
             align="center"
             sx={{ fontWeight: 800, mb: 3, letterSpacing: "0.5px", color: "#093378" }}
           >
-            Reschedule Order
+            {rescheduleEnabled ? "Reschedule Order" : "Schedule Order"}
           </Typography>
 
           <Divider sx={{ mb: 4 }} />
@@ -182,15 +192,15 @@ function RescheduleOrderInner({ prefill }) {
   );
 }
 
-export default function RescheduleOrder({ prefill, onRescheduleSuccess, onClose }) {
+export default function RescheduleOrder({ prefill, onRescheduleSuccess, onClose, rescheduleEnabled }) {
   return (
     <CreateNewOrderState
-      rescheduleEnabled
+      rescheduleEnabled={rescheduleEnabled}
       initialPrefill={prefill}
       onRescheduleSuccess={onRescheduleSuccess}
       onClose={onClose}
     >
-      <RescheduleOrderInner prefill={prefill} />
+      <RescheduleOrderInner prefill={prefill} rescheduleEnabled={rescheduleEnabled} />
     </CreateNewOrderState>
   );
 }
