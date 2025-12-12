@@ -1,0 +1,165 @@
+import React, { useState } from "react";
+import RandomContext from "./RandomContext";
+import axios from "axios";
+import Cookies from "js-cookie";
+import { toast } from "react-toastify";
+const API_URL = process.env.REACT_APP_API_URL;
+
+const RandomState = (props) => {
+
+    const [RandomUserAddDetails, setRandomUserAddDetails] = useState([])
+    const [randomUserDetails, setRandomUserDetails] = useState([])
+    const [yearFilter, setYearFilter] = useState("All");
+    const [quarterFilter, setQuarterFilter] = useState("All");
+    const AddRandomDriver = async (data) => {
+        const token = Cookies.get("token");
+        if (token) {
+            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+            axios.post(`${API_URL}/agency/addRandomDriver`, data)
+                .then(response => {
+                    toast.success(response.data.message || "Random Driver added successfully");
+                    fetchRandomData();
+                })
+                .catch(error => {
+                    const message = error?.response?.data?.message || "Server error, Please try again later";
+                    toast.error(message);
+                });
+        } else {
+            toast.error("Invalid access, Please login again");
+        }
+    };
+
+
+    const fetchRandomDriver = async () => {
+        const token = Cookies.get("token");
+        if (token) {
+            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+            axios.get(`${API_URL}/agency/fetchRandomDriver`)
+                .then(response => {
+                    setRandomUserAddDetails(response.data.data);
+                })
+                .catch(() => {
+                    toast.error("Server error, Please try again later");
+                });
+        } else {
+            toast.error("Invalid access, Please login again");
+        }
+    }
+
+    const fetchRandomData = async () => {
+        const token = Cookies.get("token");
+        if (token) {
+            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+            axios.get(`${API_URL}/agency/fetchRandomData`)
+                .then(response => {
+                    setRandomUserDetails(response.data.data);
+                })
+                .catch(() => {
+                    toast.error("Server error, Please try again later");
+                });
+        } else {
+            toast.error("Invalid access, Please login again");
+        }
+    }
+
+    const deleteRandomEntry = async (data) => {
+        const token = Cookies.get("token");
+        if (token) {
+            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+            axios.post(`${API_URL}/agency/deleteRandomDriver`, data)
+                .then(response => {
+                    toast.success(response.data.message || "Random Driver deleted successfully");
+                    fetchRandomData();
+                })
+                .catch(error => {
+                    const message = error?.response?.data?.message || "Server error, Please try again later";
+                    toast.error(message);
+                });
+        } else {
+            toast.error("Invalid access, Please login again");
+        }
+    }
+
+    const updateRandomStatus = async (data) => {
+        const token = Cookies.get("token");
+        if (token) {
+            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+            axios.post(`${API_URL}/agency/updateRandomStatus`, data)
+                .then(response => {
+                    toast.success(response.data.message || "Random Updated successfully");
+                    fetchRandomData();
+                })
+                .catch(error => {
+                    const message = error?.response?.data?.message || "Server error, Please try again later";
+                    toast.error(message);
+                });
+        } else {
+            toast.error("Invalid access, Please login again");
+        }
+    }
+
+    const sendEmailToRandomDriver = async (selectedItem, ccEmail) => {
+        const token = Cookies.get("token");
+        if (token) {
+            const data = {
+                selectedItem,
+                ccEmail
+            }
+            axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+            axios.post(`${API_URL}/agency/sendEmailToRandomDriver`, data)
+                .then(response => {
+                    toast.success(response.data.message || "Email sent successfully!");
+                    fetchRandomData();
+                })
+                .catch(error => {
+                    const message = error?.response?.data?.message || "Server error, Please try again later";
+                    toast.error(message);
+                });
+        } else {
+            toast.error("Invalid access, Please login again");
+        }
+    }
+
+    const getScheduleDataFromRandom = async (randomId) => {
+        const token = Cookies.get("token");
+        if (token) {
+            try {
+                axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+                const response = await axios.post(`${API_URL}/agency/getScheduleDataFromRandom`, { randomId });
+                return response.data.data;
+            } catch (error) {
+                const message = error?.response?.data?.message || "Failed to fetch schedule data";
+                toast.error(message);
+                throw error;
+            }
+        } else {
+            toast.error("Invalid access, Please login again");
+            throw new Error("No token");
+        }
+    }
+
+    const linkRandomToResult = async (randomId, resultId) => {
+        const token = Cookies.get("token");
+        if (token) {
+            try {
+                axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
+                await axios.post(`${API_URL}/agency/linkRandomToResult`, { randomId, resultId });
+            } catch (error) {
+                const message = error?.response?.data?.message || "Failed to link random to result";
+                toast.error(message);
+                throw error;
+            }
+        } else {
+            toast.error("Invalid access, Please login again");
+            throw new Error("No token");
+        }
+    }
+
+    return (
+        <RandomContext.Provider value={{ yearFilter, setYearFilter, quarterFilter, sendEmailToRandomDriver, setQuarterFilter, AddRandomDriver, fetchRandomDriver, fetchRandomData, deleteRandomEntry, updateRandomStatus, randomUserDetails, RandomUserAddDetails, getScheduleDataFromRandom, linkRandomToResult }}>
+            {props.children}
+        </RandomContext.Provider>
+    )
+}
+
+export default RandomState;
