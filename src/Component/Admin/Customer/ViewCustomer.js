@@ -74,6 +74,15 @@ function ViewCustomer() {
         // eslint-disable-next-line
     }, []);
 
+    // Debug: Check membership data
+    useEffect(() => {
+        if (AllUserData && AllUserData.length > 0) {
+            console.log('Sample user data:', AllUserData[0]);
+            console.log('Membership data:', AllUserData[0].Membership);
+            console.log('Plan start date:', AllUserData[0].Membership?.planStartDate);
+        }
+    }, [AllUserData]);
+
     const handleViewDetails = (user) => {
         setUserDetails(null);
         setLoading(true);
