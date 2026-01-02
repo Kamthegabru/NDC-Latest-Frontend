@@ -43,7 +43,7 @@ import dayjs from "dayjs";
 
 const normalizePhoneNumber = require('../../Utils/normalizePhone');
 
-const STATUS_OPTIONS = ["All", "Active", "Inactive"];
+const STATUS_OPTIONS = ["All", "Active", "Inactive", "Pending"];
 const SORT_OPTIONS = ["Alphabetical (A-Z)", "Alphabetical (Z-A)", "Newest First", "Oldest First"];
 const PAGE_SIZE = 10;
 
@@ -78,7 +78,7 @@ function ViewCustomer() {
     const [searchTerm, setSearchTerm] = useState("");
     const [searchTermByUSDOT, setSearchTermByUSDOT] = useState("");
     const [sortOption, setSortOption] = useState("Alphabetical (A-Z)");
-    const [statusFilter, setStatusFilter] = useState("All");
+    const [statusFilter, setStatusFilter] = useState("Active");
     const [loading, setLocalLoading] = useState(false);
     const [page, setPage] = useState(1);
     const [range, setRange] = useState({ from: undefined, to: undefined });
@@ -159,7 +159,7 @@ function ViewCustomer() {
     const handleResetFilters = () => {
         setSearchTerm("");
         setSearchTermByUSDOT("");
-        setStatusFilter("All");
+        setStatusFilter("Active");
         setSortOption("Alphabetical (A-Z)");
         setRange({ from: undefined, to: undefined });
         setPage(1);

@@ -254,7 +254,7 @@ function DisplayResult() {
 
   return (
     <>
-      <TableContainer className=" overflow-hidden" component={Paper} sx={{ borderRadius: 3, border: 1, borderColor: 'divider' }}>
+      <TableContainer className=" overflow-hidden" component={Paper} sx={{ borderRadius: 3, border: 1, borderColor: 'divider', overflowX: 'auto' }}>
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>

@@ -439,7 +439,8 @@ function DisplayResult() {
           borderRadius: 3, 
           border: 1, 
           borderColor: 'divider',
-          overflow: 'hidden'
+          overflow: 'hidden',
+          overflowX: 'auto'
         }}
       >
         <Table>
