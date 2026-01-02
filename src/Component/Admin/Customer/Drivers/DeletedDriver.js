@@ -142,7 +142,7 @@ function DeletedDriver() {
 
   return (
     <>
-      <TableContainer component={Paper} sx={{ borderRadius: 3, border: 1, borderColor: 'divider' }}>
+      <TableContainer component={Paper} sx={{ borderRadius: 3, border: 1, borderColor: 'divider', overflowX: 'auto' }}>
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: alpha(theme.palette.error.main, 0.1) }}>

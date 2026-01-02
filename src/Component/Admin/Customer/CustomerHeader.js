@@ -195,7 +195,8 @@ function CustomerHeader() {
             value={activeTab}
             onChange={handleTabChange}
             variant="scrollable"
-            scrollButtons={false}
+            scrollButtons="auto"
+            allowScrollButtonsMobile
             aria-label="scrollable customer tabs"
             TabIndicatorProps={{
               style: { display: 'none' } // Hide default indicator

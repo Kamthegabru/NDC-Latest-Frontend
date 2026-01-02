@@ -222,7 +222,7 @@ function DisplayInvoice() {
 
   return (
     <>
-      <TableContainer component={Paper} sx={{ borderRadius: 3, border: 1, borderColor: 'divider' }}>
+      <TableContainer component={Paper} sx={{ borderRadius: 3, border: 1, borderColor: 'divider', overflowX: 'auto' }}>
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>

@@ -254,7 +254,7 @@ function DisplayResult() {
 
   return (
     <>
-      <TableContainer className=" overflow-hidden" component={Paper} sx={{ borderRadius: 3, border: 1, borderColor: 'divider', overflowX: 'auto' }}>
+      <TableContainer component={Paper} sx={{ borderRadius: 3, border: 1, borderColor: 'divider', overflowX: 'auto' }}>
         <Table>
           <TableHead>
             <TableRow sx={{ bgcolor: alpha(theme.palette.primary.main, 0.1) }}>
@@ -741,13 +741,13 @@ function DisplayResult() {
                   id="result-edit-file-input"
                   type="file"
                   hidden
-                  accept="image/*"
+                  accept="image/*,application/pdf"
                   onChange={handleImageUpload}
                 />
                 <Stack spacing={1} alignItems="center">
                   <CloudUploadIcon color="primary" />
                   <Typography variant="body2">
-                    Click to upload new image
+                    Click to upload image or PDF
                   </Typography>
                 </Stack>
               </Paper>
@@ -755,26 +755,48 @@ function DisplayResult() {
 
             <Grid item xs={12}>
               <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                Image Preview:
+                File Preview:
               </Typography>
               {previewUrl ? (
-                <Box
-                  component="img"
-                  src={previewUrl}
-                  alt="New Preview"
-                  sx={{ width: "100%", maxHeight: 300, objectFit: 'contain', borderRadius: 1, border: 1, borderColor: 'divider' }}
-                />
-              ) : selectedResult?.resultImages?.[0] && selectedResult.resultImages[0].mimeType?.startsWith("image/") ? (
-                <Box
-                  component="img"
-                  src={selectedResult.resultImages[0].url}
-                  alt="Current"
-                  sx={{ width: "100%", maxHeight: 300, objectFit: 'contain', borderRadius: 1, border: 1, borderColor: 'divider' }}
-                />
+                selectedResult?.resultImages?.[0]?.mimeType === "application/pdf" || previewUrl.includes('pdf') ? (
+                  <iframe
+                    src={previewUrl}
+                    title="PDF Preview"
+                    style={{ width: "100%", height: "300px", borderRadius: 8, border: '1px solid #ddd' }}
+                  />
+                ) : (
+                  <Box
+                    component="img"
+                    src={previewUrl}
+                    alt="New Preview"
+                    sx={{ width: "100%", maxHeight: 300, objectFit: 'contain', borderRadius: 1, border: 1, borderColor: 'divider' }}
+                  />
+                )
+              ) : selectedResult?.resultImages?.[0] ? (
+                selectedResult.resultImages[0].mimeType?.startsWith("image/") ? (
+                  <Box
+                    component="img"
+                    src={selectedResult.resultImages[0].url}
+                    alt="Current"
+                    sx={{ width: "100%", maxHeight: 300, objectFit: 'contain', borderRadius: 1, border: 1, borderColor: 'divider' }}
+                  />
+                ) : selectedResult.resultImages[0].mimeType === "application/pdf" ? (
+                  <iframe
+                    src={selectedResult.resultImages[0].url}
+                    title="Current PDF"
+                    style={{ width: "100%", height: "300px", borderRadius: 8, border: '1px solid #ddd' }}
+                  />
+                ) : (
+                  <Box sx={{ textAlign: 'center', py: 4, bgcolor: 'grey.50', borderRadius: 1 }}>
+                    <Typography color="text.secondary">
+                      File available but cannot preview
+                    </Typography>
+                  </Box>
+                )
               ) : (
                 <Box sx={{ textAlign: 'center', py: 4, bgcolor: 'grey.50', borderRadius: 1 }}>
                   <Typography color="text.secondary">
-                    No image available
+                    No file available
                   </Typography>
                 </Box>
               )}
