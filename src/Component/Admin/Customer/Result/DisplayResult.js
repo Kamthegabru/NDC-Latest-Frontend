@@ -129,10 +129,13 @@ function DisplayResult() {
       formData.append("currentId", currentId);
       formData.append("resultId", selectedResult._id);
       formData.append("updatedData", JSON.stringify(editData));
-      const fileInput = document.querySelector("input[type='file']");
-      if (previewUrl && fileInput && fileInput.files[0]) {
+      
+      // Only append file if a new file was uploaded
+      const fileInput = document.getElementById('result-edit-file-input');
+      if (fileInput && fileInput.files[0]) {
         formData.append("file", fileInput.files[0]);
       }
+      
       await updateResult(formData);
       getSingleUserData(currentId);
       handleClose();
@@ -160,19 +163,9 @@ function DisplayResult() {
     const file = e.target.files[0];
     if (!file) return;
     
+    // Create preview URL for display
     const objectURL = URL.createObjectURL(file);
     setPreviewUrl(objectURL);
-
-    const reader = new FileReader();
-    reader.onload = (ev) => {
-      const base64 = ev.target.result.split(",")[1];
-      setEditData((prev) => ({
-        ...prev,
-        file: { data: Array.from(atob(base64), c => c.charCodeAt(0)) },
-        mimeType: file.type
-      }));
-    };
-    reader.readAsDataURL(file);
   };
 
   const formatDate = (dateStr) => {
@@ -758,20 +751,25 @@ function DisplayResult() {
                 File Preview:
               </Typography>
               {previewUrl ? (
-                selectedResult?.resultImages?.[0]?.mimeType === "application/pdf" || previewUrl.includes('pdf') ? (
-                  <iframe
-                    src={previewUrl}
-                    title="PDF Preview"
-                    style={{ width: "100%", height: "300px", borderRadius: 8, border: '1px solid #ddd' }}
-                  />
-                ) : (
-                  <Box
-                    component="img"
-                    src={previewUrl}
-                    alt="New Preview"
-                    sx={{ width: "100%", maxHeight: 300, objectFit: 'contain', borderRadius: 1, border: 1, borderColor: 'divider' }}
-                  />
-                )
+                // Check if uploaded file is PDF by getting the file from input
+                (() => {
+                  const fileInput = document.getElementById('result-edit-file-input');
+                  const uploadedFile = fileInput?.files[0];
+                  return uploadedFile?.type === "application/pdf" ? (
+                    <iframe
+                      src={previewUrl}
+                      title="PDF Preview"
+                      style={{ width: "100%", height: "300px", borderRadius: 8, border: '1px solid #ddd' }}
+                    />
+                  ) : (
+                    <Box
+                      component="img"
+                      src={previewUrl}
+                      alt="New Preview"
+                      sx={{ width: "100%", maxHeight: 300, objectFit: 'contain', borderRadius: 1, border: 1, borderColor: 'divider' }}
+                    />
+                  );
+                })()
               ) : selectedResult?.resultImages?.[0] ? (
                 selectedResult.resultImages[0].mimeType?.startsWith("image/") ? (
                   <Box
