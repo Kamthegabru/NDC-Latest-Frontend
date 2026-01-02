@@ -535,7 +535,7 @@ function ViewCustomer() {
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Contact No</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Email</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>
-                                        Date Created
+                                        Joining Date
                                         {(sortOption === "Newest First" || sortOption === "Oldest First") && (
                                             <Box component="span" sx={{ ml: 1, fontSize: 12, opacity: 0.7 }}>
                                                 ({sortOption})
@@ -609,14 +609,10 @@ function ViewCustomer() {
                                             <TableCell align="center">
                                                 <Chip
                                                     label={(() => {
-                                                        const dateValue = user.createdAt || user.timestamp || user.createdDate;
-                                                        console.log(`User ${index} date value:`, dateValue);
-                                                        console.log(`User ${index} available date fields:`, {
-                                                            createdAt: user.createdAt,
-                                                            timestamp: user.timestamp,
-                                                            updatedAt: user.updatedAt,
-                                                            createdDate: user.createdDate
-                                                        });
+                                                        const joiningDate = user.Membership?.planStartDate;
+                                                        const fallbackDate = user.createdAt || user.timestamp || user.createdDate;
+                                                        const dateValue = joiningDate || fallbackDate;
+                                                        console.log(`User ${index} joining date:`, joiningDate, 'fallback:', fallbackDate);
                                                         return formatDate(dateValue);
                                                     })()}
                                                     color="secondary"

@@ -444,7 +444,7 @@ function ViewCustomer() {
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Contact No</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Email</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>
-                                        Date Created
+                                        Joining Date
                                         {(sortOption === "Newest First" || sortOption === "Oldest First") && (
                                             <Box component="span" sx={{ ml: 1, fontSize: 12, opacity: 0.7 }}>
                                                 ({sortOption})
@@ -502,7 +502,7 @@ function ViewCustomer() {
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Chip
-                                                    label={formatDate(user.createdAt)}
+                                                    label={formatDate(user.Membership?.planStartDate || user.createdAt)}
                                                     color="secondary"
                                                     variant="outlined"
                                                     sx={{ fontWeight: "bold", fontSize: 12 }}
