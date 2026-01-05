@@ -50,6 +50,7 @@ export default function Pricing() {
                             bg: 'rgba(164, 152, 152, 1)',
                             features: [
                                 'Drug Account Only',
+                                'For All Employees',
                                 '$75 Per Drug Test',
                                 '$65 Per Alcohol Test',
                                 'Online 24/7 Access',
@@ -66,6 +67,9 @@ export default function Pricing() {
                             features: [
                                 'DOT Random Enrollment',
                                 'Random Enrollment Certificate',
+                                'For DOT Regulated Companies',
+                                'Mixed Large Pool',
+                                'Eligible for Individual Pool',
                                 'Access to 50,000 + Labs Nationwide',
                                 'DOT Drug Test $79',
                                 'Alcohol Test $65',
@@ -83,6 +87,7 @@ export default function Pricing() {
                             features: [
                                 'DOT Random Enrollment',
                                 'Instant Random Enrollment Certificate',
+                                'Larger Fleet Owner',
                                 'Access to 50,000+ Labs Nationwide',
                                 'Drug Test $75',
                                 'Alcohol Test $65',
