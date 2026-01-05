@@ -115,14 +115,15 @@ export default function Pricing() {
                                         <p style={{ fontSize: '15px', marginBottom: '4px' }}>Every Year</p>
                                         {plan.driverLimit && (
                                             <div style={{ 
-                                                backgroundColor: '#ff6b35', 
-                                                color: 'white', 
+                                                backgroundColor: plan.title === '3 Year Random Enrollment' ? 'linear-gradient(135deg, #FFD700, #FFA500)' : '#ff6b35',
+                                                background: plan.title === '3 Year Random Enrollment' ? 'linear-gradient(135deg, #FFD700, #FFA500)' : '#ff6b35',
+                                                color: plan.title === '3 Year Random Enrollment' ? '#000' : 'white',
                                                 padding: '8px 12px', 
                                                 borderRadius: '8px', 
                                                 margin: '8px auto',
                                                 fontWeight: 'bold',
                                                 fontSize: '14px',
-                                                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                                                boxShadow: plan.title === '3 Year Random Enrollment' ? '0 4px 12px rgba(255, 215, 0, 0.5)' : '0 2px 8px rgba(0,0,0,0.2)',
                                                 maxWidth: 'fit-content'
                                             }}>
                                                 ✓ {plan.driverLimit}

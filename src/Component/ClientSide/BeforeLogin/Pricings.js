@@ -86,7 +86,7 @@ function PlanCard({ tone, name, price, billedCopy, cta, features, planId, handle
             
             {isPremiumPlan && (
               <div className="mt-3">
-                <div className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-2 text-sm font-bold text-white shadow-lg">
+                <div className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-yellow-400 via-yellow-500 to-amber-500 px-3 py-2 text-sm font-bold text-gray-900 shadow-lg" style={{ boxShadow: '0 4px 15px rgba(255, 215, 0, 0.5)' }}>
                   <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
                     <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
                   </svg>
