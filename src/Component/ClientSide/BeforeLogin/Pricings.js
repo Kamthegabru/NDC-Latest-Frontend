@@ -48,6 +48,9 @@ function Feature({ label, enabled }) {
 }
 
 function PlanCard({ tone, name, price, billedCopy, cta, features, planId, handlePlan }) {
+  const isPlusPlan = name === "Plus";
+  const isPremiumPlan = name === "Premium";
+  
   return (
     <div
       className="rounded-2xl border border-gray-100 bg-gradient-to-b p-2 shadow-2xl shadow-black/40 md:p-7"
@@ -55,7 +58,7 @@ function PlanCard({ tone, name, price, billedCopy, cta, features, planId, handle
     >
       <div className="rounded-2xl min-h-[700px] bg-[#03232B] p-4 ring-1 ring-white/10">
         <div className="mb-5 flex items-start justify-between">
-          <div>
+          <div className="w-full">
             <div className="text-sm font-medium uppercase tracking-wide text-white/80">
               {name}
             </div>
@@ -66,6 +69,31 @@ function PlanCard({ tone, name, price, billedCopy, cta, features, planId, handle
               <div className="pb-1 text-sm text-white/70">/year</div>
             </div>
             <div className="mt-1 text-xs text-white/70">{billedCopy}</div>
+            
+            {isPlusPlan && (
+              <div className="mt-3 space-y-2">
+                <div className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-orange-500 to-red-500 px-3 py-2 text-sm font-bold text-white shadow-lg">
+                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                  </svg>
+                  Up to 5 Drivers
+                </div>
+                <div className="inline-block rounded-md bg-amber-500/20 px-3 py-1.5 text-xs font-semibold text-amber-300 ring-1 ring-amber-500/30">
+                  + $25 per additional driver
+                </div>
+              </div>
+            )}
+            
+            {isPremiumPlan && (
+              <div className="mt-3">
+                <div className="inline-flex items-center gap-2 rounded-lg bg-gradient-to-r from-green-500 to-emerald-500 px-3 py-2 text-sm font-bold text-white shadow-lg">
+                  <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                  </svg>
+                  Unlimited Drivers
+                </div>
+              </div>
+            )}
           </div>
         </div>
 
@@ -112,6 +140,10 @@ export default function PricingSection() {
   const plusFeatures = [
     { label: "1 Year Random Enrollment", enabled: true },
     { label: "DOT Random Drug & Alcohol Testing Program", enabled: true },
+    "divider",
+    { label: "✓ Up to 5 Drivers Included", enabled: true },
+    { label: "+ $25 per additional driver", enabled: true },
+    "divider",
     { label: "DOT Random Enrollment", enabled: true },
     { label: "Random Enrollment Certificate", enabled: true },
     { label: "Access to 50,000+ Labs Nationwide", enabled: true },
@@ -125,6 +157,9 @@ export default function PricingSection() {
   const premiumFeatures = [
     { label: "3 Year Random Enrollment", enabled: true },
     { label: "Perfect for Trucking Companies", enabled: true },
+    "divider",
+    { label: "✓ Unlimited Drivers Included", enabled: true },
+    "divider",
     { label: "DOT Random Enrollment", enabled: true },
     { label: "Instant Random Enrollment Certificate", enabled: true },
     { label: "Access to 50,000+ Labs Nationwide", enabled: true },
@@ -182,7 +217,7 @@ export default function PricingSection() {
             planId={3}
             tone="purple"
             name="Premium"
-            price="$275"
+            price="$499"
             billedCopy="Every Year"
             cta="Get Started"
             features={premiumFeatures}

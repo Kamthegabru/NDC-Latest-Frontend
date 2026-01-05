@@ -61,6 +61,8 @@ export default function Pricing() {
                             price: '$150',
                             subtitle: 'DOT Random Drug & Alcohol Testing Program',
                             bg: '#00FFFF',
+                            driverLimit: 'Up to 5 Drivers',
+                            extraCharge: '$25 per additional driver',
                             features: [
                                 'DOT Random Enrollment',
                                 'Random Enrollment Certificate',
@@ -74,9 +76,10 @@ export default function Pricing() {
                         },
                         {
                             title: '3 Year Random Enrollment',
-                            price: '$275',
+                            price: '$499',
                             subtitle: 'Perfect for Trucking Companies',
                             bg: '#00FF00',
+                            driverLimit: 'Unlimited Drivers',
                             features: [
                                 'DOT Random Enrollment',
                                 'Instant Random Enrollment Certificate',
@@ -105,6 +108,35 @@ export default function Pricing() {
                                         <p style={{ fontSize: '22px', marginBottom: '4px' }}>{plan.title}</p>
                                         <p style={{ fontSize: '22px', marginBottom: '2px' }}>{plan.price}</p>
                                         <p style={{ fontSize: '15px', marginBottom: '4px' }}>Every Year</p>
+                                        {plan.driverLimit && (
+                                            <div style={{ 
+                                                backgroundColor: '#ff6b35', 
+                                                color: 'white', 
+                                                padding: '8px 12px', 
+                                                borderRadius: '8px', 
+                                                margin: '8px auto',
+                                                fontWeight: 'bold',
+                                                fontSize: '14px',
+                                                boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                                                maxWidth: 'fit-content'
+                                            }}>
+                                                ✓ {plan.driverLimit}
+                                            </div>
+                                        )}
+                                        {plan.extraCharge && (
+                                            <p style={{ 
+                                                fontSize: '13px', 
+                                                color: '#d32f2f', 
+                                                backgroundColor: '#fff3e0',
+                                                padding: '6px 10px',
+                                                borderRadius: '6px',
+                                                margin: '6px auto',
+                                                fontWeight: 'bold',
+                                                maxWidth: 'fit-content'
+                                            }}>
+                                                + {plan.extraCharge}
+                                            </p>
+                                        )}
                                         <p style={{ fontSize: '15px', color: '#444' }}>{plan.subtitle}</p>
                                         <hr style={{ color: "white", height: '2px' }} />
                                     </div>
