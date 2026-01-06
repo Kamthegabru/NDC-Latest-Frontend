@@ -198,7 +198,7 @@ const Welcome = () => {
   const [counts, setCounts] = useState({
     totalCustomers: 0,
     activeCustomers: 0,
-    activeDrivers: 0,
+    totalDrivers: 0,
     totalAgencies: 0,
   });
 
@@ -227,24 +227,12 @@ const Welcome = () => {
         const token = Cookies.get("token");
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         
-        // Fetch dashboard counts and all drivers from API
-        const [countsRes, driversRes] = await Promise.all([
-          axios.get(`${API_URL}/agency/getCustomerAndAgencyCount`),
-          axios.get(`${API_URL}/agency/getAllDrivers`)
-        ]);
+        // Fetch dashboard counts from API
+        const res = await axios.get(`${API_URL}/agency/getCustomerAndAgencyCount`);
+        console.log("API Response:", res.data);
+        console.log("Available keys:", Object.keys(res.data));
         
-        console.log("API Response:", countsRes.data);
-        console.log("Available keys:", Object.keys(countsRes.data));
-        console.log("All Drivers:", driversRes.data);
-        
-        // Count active drivers from all drivers
-        const activeDriversCount = driversRes.data.filter(driver => 
-          driver.status === 'Active' || driver.driverStatus === 'Active'
-        ).length;
-        
-        console.log('Active Drivers Count:', activeDriversCount);
-        
-        setCounts({ ...countsRes.data, activeDrivers: activeDriversCount });
+        setCounts(res.data);
         
         // Also fetch all user data for driver count calculation
         if (getAllUserData && adminContext) {
@@ -259,6 +247,16 @@ const Welcome = () => {
       fetchData();
     }
   }, [adminContext, getAllUserData]);
+
+  // Update counts when AllUserData changes
+  useEffect(() => {
+    if (AllUserData && Array.isArray(AllUserData)) {
+      setCounts(prevCounts => ({
+        ...prevCounts,
+        totalDrivers: totalDriversFromCustomers
+      }));
+    }
+  }, [AllUserData, totalDriversFromCustomers]);
 
   // Sample chart data - you can replace this with real data
   const generateChartData = () => [10, 15, 12, 18, 20, 25, 22, 30];
@@ -289,7 +287,7 @@ const Welcome = () => {
     {
       icon: <StoreIcon sx={{ fontSize: 28, color: 'inherit' }} />,
       title: "Total Drivers",
-      total: counts.activeDrivers || 0,
+      total: totalDriversFromCustomers,
       color: 'warning',
       percent: -2.5,
       chart: {
@@ -298,9 +296,6 @@ const Welcome = () => {
       },
     },
   ];
-
-  console.log('Agency Dashboard - counts:', counts);
-  console.log('Agency Dashboard - activeDrivers:', counts.activeDrivers);
 
   return (
     <Box sx={{ width: "100%", maxWidth: "100%", ml: 0, mr: "auto", p: 3 }}>
