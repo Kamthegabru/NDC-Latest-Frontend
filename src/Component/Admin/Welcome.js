@@ -794,11 +794,18 @@ const Welcome = () => {
       axios.get(`${API_URL}/admin/getUserCountsLast6Months`),
       axios.get(`${API_URL}/admin/getMonthlyTestScheduleStats`),
       axios.get(`${API_URL}/admin/getWebsiteVisitsLast6Months`),
+      axios.get(`${API_URL}/admin/getAllUser`),
     ])
-      .then(([countsRes, usersRes, testsRes, visitsRes]) => {
+      .then(([countsRes, usersRes, testsRes, visitsRes, allUsersRes]) => {
         console.log('API Response from getCustomerAndAgencyCount:', countsRes.data);
+        
+        // Calculate active drivers from all users
+        const activeDriversCount = allUsersRes.data.reduce((total, user) => {
+          return total + (user.activeDriversCount || 0);
+        }, 0);
+        
         const newData = {
-          counts: countsRes.data,
+          counts: { ...countsRes.data, activeDrivers: activeDriversCount },
           userData: usersRes.data.data.map((d) => ({
             name: `${d.month} ${d.year}`,
             count: d.count,

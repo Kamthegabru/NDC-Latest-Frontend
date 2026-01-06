@@ -198,7 +198,7 @@ const Welcome = () => {
   const [counts, setCounts] = useState({
     totalCustomers: 0,
     activeCustomers: 0,
-    totalDrivers: 0,
+    activeDrivers: 0,
     totalAgencies: 0,
   });
 
@@ -227,12 +227,26 @@ const Welcome = () => {
         const token = Cookies.get("token");
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         
-        // Fetch dashboard counts from API
-        const res = await axios.get(`${API_URL}/agency/getCustomerAndAgencyCount`);
-        console.log("API Response:", res.data);
-        console.log("Available keys:", Object.keys(res.data));
+        // Fetch dashboard counts and all users from API
+        const [countsRes, allUsersRes] = await Promise.all([
+          axios.get(`${API_URL}/agency/getCustomerAndAgencyCount`),
+          axios.get(`${API_URL}/agency/getAllUser`)
+        ]);
         
-        setCounts(res.data);
+        console.log("API Response:", countsRes.data);
+        console.log("Available keys:", Object.keys(countsRes.data));
+        console.log("All Users:", allUsersRes.data);
+        
+        // Calculate active drivers from all users
+        const activeDriversCount = allUsersRes.data.reduce((total, user) => {
+          const driverCount = 
+            parseInt(user.companyInfoData?.employees) || 
+            parseInt(user.companyInfoData?.driverCount) || 
+            parseInt(user.activeDriversCount) || 0;
+          return total + driverCount;
+        }, 0);
+        
+        setCounts({ ...countsRes.data, activeDrivers: activeDriversCount });
         
         // Also fetch all user data for driver count calculation
         if (getAllUserData && adminContext) {
@@ -247,16 +261,6 @@ const Welcome = () => {
       fetchData();
     }
   }, [adminContext, getAllUserData]);
-
-  // Update counts when AllUserData changes
-  useEffect(() => {
-    if (AllUserData && Array.isArray(AllUserData)) {
-      setCounts(prevCounts => ({
-        ...prevCounts,
-        totalDrivers: totalDriversFromCustomers
-      }));
-    }
-  }, [AllUserData, totalDriversFromCustomers]);
 
   // Sample chart data - you can replace this with real data
   const generateChartData = () => [10, 15, 12, 18, 20, 25, 22, 30];
