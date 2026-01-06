@@ -545,14 +545,13 @@ function ViewCustomer() {
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Active Employees</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Status</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>USDOT</TableCell>
-                                    <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Logo</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Details</TableCell>
                                 </TableRow>
                             </TableHead>
                             <TableBody>
                                 {paginatedUsers.length === 0 ? (
                                     <TableRow>
-                                        <TableCell colSpan={11} align="center">
+                                        <TableCell colSpan={10} align="center">
                                             <Typography color="text.secondary">No customers found matching your criteria.</Typography>
                                         </TableCell>
                                     </TableRow>
@@ -657,15 +656,6 @@ function ViewCustomer() {
                                                 <Typography fontWeight="medium">
                                                     {user.companyInfoData?.usdot || user.companyUSDOTNumber || 'N/A'}
                                                 </Typography>
-                                            </TableCell>
-                                            <TableCell align="center">
-                                                <Avatar
-                                                    src={user.logoUrl || ""}
-                                                    alt={user.companyInfoData?.companyName || user.companyName || 'Company'}
-                                                    sx={{ width: 32, height: 32, bgcolor: "#e0e0e0", mx: "auto" }}
-                                                >
-                                                    <BusinessIcon />
-                                                </Avatar>
                                             </TableCell>
                                             <TableCell align="center" onClick={(e) => e.stopPropagation()}>
                                                 <Tooltip title="View Details">

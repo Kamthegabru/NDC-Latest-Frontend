@@ -227,24 +227,22 @@ const Welcome = () => {
         const token = Cookies.get("token");
         axios.defaults.headers.common["Authorization"] = `Bearer ${token}`;
         
-        // Fetch dashboard counts and all users from API
-        const [countsRes, allUsersRes] = await Promise.all([
+        // Fetch dashboard counts and all drivers from API
+        const [countsRes, driversRes] = await Promise.all([
           axios.get(`${API_URL}/agency/getCustomerAndAgencyCount`),
-          axios.get(`${API_URL}/agency/getAllUser`)
+          axios.get(`${API_URL}/agency/getAllDrivers`)
         ]);
         
         console.log("API Response:", countsRes.data);
         console.log("Available keys:", Object.keys(countsRes.data));
-        console.log("All Users:", allUsersRes.data);
+        console.log("All Drivers:", driversRes.data);
         
-        // Calculate active drivers from all users
-        const activeDriversCount = allUsersRes.data.reduce((total, user) => {
-          const driverCount = 
-            parseInt(user.companyInfoData?.employees) || 
-            parseInt(user.companyInfoData?.driverCount) || 
-            parseInt(user.activeDriversCount) || 0;
-          return total + driverCount;
-        }, 0);
+        // Count active drivers from all drivers
+        const activeDriversCount = driversRes.data.filter(driver => 
+          driver.status === 'Active' || driver.driverStatus === 'Active'
+        ).length;
+        
+        console.log('Active Drivers Count:', activeDriversCount);
         
         setCounts({ ...countsRes.data, activeDrivers: activeDriversCount });
         
