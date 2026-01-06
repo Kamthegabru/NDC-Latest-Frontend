@@ -51,10 +51,19 @@ export default function Pricing() {
                             features: [
                                 'Drug Account Only',
                                 'For All Employees',
+                                'For Hospitals',
+                                'For Construction Companies',
+                                'For Manufacturing Facilities',
+                                'For Warehouses',
+                                'For Retail Businesses',
                                 '$75 Per Drug Test',
                                 '$65 Per Alcohol Test',
+                                'Pre-Employment Testing',
+                                'Random Testing Available',
                                 'Online 24/7 Access',
                                 'Access to 20,000 labs Nationwide',
+                                'Quick Results Turnaround',
+                                'HIPAA Compliant',
                             ]
                         },
                         {

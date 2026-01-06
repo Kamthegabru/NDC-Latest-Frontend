@@ -132,10 +132,19 @@ export default function PricingSection() {
     { label: "Occupation Health Service Plan", enabled: true },
     { label: "Drug Account Only", enabled: true },
     { label: "For All Employees", enabled: true },
+    { label: "For Hospitals", enabled: true },
+    { label: "For Construction Companies", enabled: true },
+    { label: "For Manufacturing Facilities", enabled: true },
+    { label: "For Warehouses", enabled: true },
+    { label: "For Retail Businesses", enabled: true },
     { label: "$75 Per Drug Test", enabled: true },
     { label: "$65 Per Alcohol Test", enabled: true },
+    { label: "Pre-Employment Testing", enabled: true },
+    { label: "Random Testing Available", enabled: true },
     { label: "Online 24/7 Access", enabled: true },
     { label: "Access to 20,000 labs Nationwide", enabled: true },
+    { label: "Quick Results Turnaround", enabled: true },
+    { label: "HIPAA Compliant", enabled: true },
   ];
 
   const plusFeatures = [
