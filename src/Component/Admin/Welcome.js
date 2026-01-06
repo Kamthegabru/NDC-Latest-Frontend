@@ -794,16 +794,10 @@ const Welcome = () => {
       axios.get(`${API_URL}/admin/getUserCountsLast6Months`),
       axios.get(`${API_URL}/admin/getMonthlyTestScheduleStats`),
       axios.get(`${API_URL}/admin/getWebsiteVisitsLast6Months`),
-      axios.get(`${API_URL}/admin/getAllUser`),
     ])
-      .then(([countsRes, usersRes, testsRes, visitsRes, allUsersRes]) => {
-        // Calculate total drivers from all companies
-        const totalDrivers = allUsersRes.data.reduce((sum, company) => {
-          return sum + (company.activeDriversCount || 0);
-        }, 0);
-
+      .then(([countsRes, usersRes, testsRes, visitsRes]) => {
         const newData = {
-          counts: { ...countsRes.data, totalDrivers },
+          counts: countsRes.data,
           userData: usersRes.data.data.map((d) => ({
             name: `${d.month} ${d.year}`,
             count: d.count,
@@ -831,7 +825,7 @@ const Welcome = () => {
   const metrics = [
     { icon: <FolderOpenIcon />, title: "Today Customers", value: counts.totalCustomers, color: "#1976d2" },
     { icon: <GroupIcon />, title: "Active Customers", value: counts.activeCustomers, color: "#4caf50" },
-    { icon: <StoreIcon />, title: "Total Drivers", value: counts.totalDrivers, color: "#ff9800" },
+    { icon: <StoreIcon />, title: "Total Drivers", value: counts.activeDrivers, color: "#ff9800" },
     { icon: <PersonAddAltIcon />, title: "Agency's", value: counts.totalAgencies, color: "#9c27b0" },
   ];
 
