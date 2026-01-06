@@ -459,7 +459,14 @@ function ViewCustomer() {
                                     </TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Contact No</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Email</TableCell>
-                                   
+                                    <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>
+                                        Joining Date
+                                        {(sortOption === "Newest First" || sortOption === "Oldest First") && (
+                                            <Box component="span" sx={{ ml: 1, fontSize: 12, opacity: 0.7 }}>
+                                                ({sortOption})
+                                            </Box>
+                                        )}
+                                    </TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Active Employees</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>Status</TableCell>
                                     <TableCell align="center" sx={{ color: "#003366", background: "#e3f2fd", fontWeight: "bold", fontSize: 16 }}>USDOT</TableCell>
