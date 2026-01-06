@@ -126,13 +126,17 @@ function ViewCustomer() {
         // eslint-disable-next-line
     }, [adminContext, customerContext]);
 
-    // Debug: Log the data structure
+    // Debug: Check membership data
     useEffect(() => {
         if (AllUserData && AllUserData.length > 0) {
-            console.log('AllUserData sample:', AllUserData[0]);
-            console.log('Available keys:', Object.keys(AllUserData[0]));
-            console.log('createdAt value:', AllUserData[0].createdAt);
-            console.log('Full user object:', JSON.stringify(AllUserData[0], null, 2));
+            console.log('Sample user data:', AllUserData[0]);
+            console.log('Membership data:', AllUserData[0].Membership);
+            console.log('Plan start date:', AllUserData[0].Membership?.planStartDate);
+            console.log('Created at:', AllUserData[0].createdAt);
+            
+            // Check all users for membership data
+            const usersWithMembership = AllUserData.filter(u => u.Membership?.planStartDate);
+            console.log(`Users with membership date: ${usersWithMembership.length} out of ${AllUserData.length}`);
         }
     }, [AllUserData]);
 
@@ -611,13 +615,7 @@ function ViewCustomer() {
                                             </TableCell>
                                             <TableCell align="center">
                                                 <Chip
-                                                    label={(() => {
-                                                        const joiningDate = user.Membership?.planStartDate;
-                                                        const fallbackDate = user.createdAt || user.timestamp || user.createdDate;
-                                                        const dateValue = joiningDate || fallbackDate;
-                                                        console.log(`User ${index} joining date:`, joiningDate, 'fallback:', fallbackDate);
-                                                        return formatDate(dateValue);
-                                                    })()}
+                                                    label={formatDate(user.Membership?.planStartDate || user.createdAt)}
                                                     color="secondary"
                                                     variant="outlined"
                                                     sx={{ fontWeight: "bold", fontSize: 12 }}
