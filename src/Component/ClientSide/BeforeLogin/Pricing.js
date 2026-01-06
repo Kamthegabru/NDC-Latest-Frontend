@@ -150,6 +150,14 @@ export default function Pricing() {
                                         <p style={{ fontSize: '15px', color: '#444' }}>{plan.subtitle}</p>
                                         <hr style={{ color: "white", height: '2px' }} />
                                     </div>
+                                    <div className="flex-grow-1">
+                                        {plan.features.map((item, i) => (
+                                            <p key={i} style={{ margin: '6px 0' }}>
+                                                <CheckIcon style={{ marginRight: '6px', fontSize: '16px' }} />
+                                                {item}
+                                            </p>
+                                        ))}
+                                    </div>
                                     {plan.bestFor && (
                                         <div style={{ 
                                             backgroundColor: 'rgba(255,255,255,0.2)', 
@@ -173,14 +181,6 @@ export default function Pricing() {
                                             </div>
                                         </div>
                                     )}
-                                    <div className="flex-grow-1">
-                                        {plan.features.map((item, i) => (
-                                            <p key={i} style={{ margin: '6px 0' }}>
-                                                <CheckIcon style={{ marginRight: '6px', fontSize: '16px' }} />
-                                                {item}
-                                            </p>
-                                        ))}
-                                    </div>
                                     <button
                                         type="button"
                                         className="btn custom-btn mt-auto"

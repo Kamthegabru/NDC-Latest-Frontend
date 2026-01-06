@@ -104,6 +104,14 @@ function PlanCard({ tone, name, price, billedCopy, cta, features, planId, handle
           {cta}
         </button>
 
+        <ul className="mt-6 space-y-2">
+          {features.map((f, idx) => {
+            if (f === "divider") return <Divider key={idx} />;
+            const item = typeof f === "string" ? { label: f, enabled: true } : f;
+            return <Feature key={idx} label={item.label} enabled={item.enabled} />;
+          })}
+        </ul>
+
         {bestFor && (
           <div className="mt-4 rounded-lg bg-white/10 p-3">
             <p className="text-center text-sm font-bold text-white mb-2">Best For:</p>
@@ -116,14 +124,6 @@ function PlanCard({ tone, name, price, billedCopy, cta, features, planId, handle
             </div>
           </div>
         )}
-
-        <ul className="mt-6 space-y-2">
-          {features.map((f, idx) => {
-            if (f === "divider") return <Divider key={idx} />;
-            const item = typeof f === "string" ? { label: f, enabled: true } : f;
-            return <Feature key={idx} label={item.label} enabled={item.enabled} />;
-          })}
-        </ul>
       </div>
     </div>
   );
