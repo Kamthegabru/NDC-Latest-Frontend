@@ -48,14 +48,9 @@ export default function Pricing() {
                             price: '$99',
                             subtitle: 'Occupation Health Service Plan',
                             bg: 'rgba(164, 152, 152, 1)',
+                            bestFor: ['Hospitals', 'Construction Companies', 'Manufacturing Facilities', 'Warehouses', 'Retail Businesses', 'All Non-DOT Employers'],
                             features: [
                                 'Drug Account Only',
-                                'For All Employees',
-                                'For Hospitals',
-                                'For Construction Companies',
-                                'For Manufacturing Facilities',
-                                'For Warehouses',
-                                'For Retail Businesses',
                                 '$75 Per Drug Test',
                                 '$65 Per Alcohol Test',
                                 'Pre-Employment Testing',
@@ -73,10 +68,10 @@ export default function Pricing() {
                             bg: '#00FFFF',
                             driverLimit: 'Up to 5 Drivers',
                             extraCharge: '$25 per additional driver',
+                            bestFor: ['Small Trucking Companies', 'Owner Operators', 'DOT Regulated Businesses', 'Transportation Services', 'Delivery Companies'],
                             features: [
                                 'DOT Random Enrollment',
                                 'Random Enrollment Certificate',
-                                'For DOT Regulated Companies',
                                 'Mixed Large Pool',
                                 'Eligible for Individual Pool',
                                 'Access to 50,000 + Labs Nationwide',
@@ -93,10 +88,10 @@ export default function Pricing() {
                             subtitle: 'Perfect for Trucking Companies',
                             bg: '#00FF00',
                             driverLimit: 'Unlimited Drivers',
+                            bestFor: ['Large Fleet Owners', 'Trucking Companies', 'Logistics Companies', 'Transportation Corporations', 'Multi-State Carriers'],
                             features: [
                                 'DOT Random Enrollment',
                                 'Instant Random Enrollment Certificate',
-                                'Larger Fleet Owner',
                                 'Access to 50,000+ Labs Nationwide',
                                 'Drug Test $75',
                                 'Alcohol Test $65',
@@ -155,6 +150,29 @@ export default function Pricing() {
                                         <p style={{ fontSize: '15px', color: '#444' }}>{plan.subtitle}</p>
                                         <hr style={{ color: "white", height: '2px' }} />
                                     </div>
+                                    {plan.bestFor && (
+                                        <div style={{ 
+                                            backgroundColor: 'rgba(255,255,255,0.2)', 
+                                            padding: '12px', 
+                                            borderRadius: '8px', 
+                                            marginBottom: '12px'
+                                        }}>
+                                            <p style={{ fontSize: '14px', fontWeight: 'bold', marginBottom: '8px', textAlign: 'center' }}>Best For:</p>
+                                            <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px', justifyContent: 'center' }}>
+                                                {plan.bestFor.map((item, i) => (
+                                                    <span key={i} style={{ 
+                                                        backgroundColor: 'rgba(0,0,0,0.15)', 
+                                                        padding: '4px 8px', 
+                                                        borderRadius: '4px', 
+                                                        fontSize: '12px',
+                                                        fontWeight: '600'
+                                                    }}>
+                                                        {item}
+                                                    </span>
+                                                ))}
+                                            </div>
+                                        </div>
+                                    )}
                                     <div className="flex-grow-1">
                                         {plan.features.map((item, i) => (
                                             <p key={i} style={{ margin: '6px 0' }}>

@@ -47,7 +47,7 @@ function Feature({ label, enabled }) {
   );
 }
 
-function PlanCard({ tone, name, price, billedCopy, cta, features, planId, handlePlan }) {
+function PlanCard({ tone, name, price, billedCopy, cta, features, planId, handlePlan, bestFor }) {
   const isPlusPlan = name === "Plus";
   const isPremiumPlan = name === "Premium";
   
@@ -104,6 +104,19 @@ function PlanCard({ tone, name, price, billedCopy, cta, features, planId, handle
           {cta}
         </button>
 
+        {bestFor && (
+          <div className="mt-4 rounded-lg bg-white/10 p-3">
+            <p className="text-center text-sm font-bold text-white mb-2">Best For:</p>
+            <div className="flex flex-wrap gap-2 justify-center">
+              {bestFor.map((item, i) => (
+                <span key={i} className="rounded bg-white/20 px-2 py-1 text-xs font-semibold text-white">
+                  {item}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+
         <ul className="mt-6 space-y-2">
           {features.map((f, idx) => {
             if (f === "divider") return <Divider key={idx} />;
@@ -131,12 +144,6 @@ export default function PricingSection() {
     { label: "NON-DOT Account", enabled: true },
     { label: "Occupation Health Service Plan", enabled: true },
     { label: "Drug Account Only", enabled: true },
-    { label: "For All Employees", enabled: true },
-    { label: "For Hospitals", enabled: true },
-    { label: "For Construction Companies", enabled: true },
-    { label: "For Manufacturing Facilities", enabled: true },
-    { label: "For Warehouses", enabled: true },
-    { label: "For Retail Businesses", enabled: true },
     { label: "$75 Per Drug Test", enabled: true },
     { label: "$65 Per Alcohol Test", enabled: true },
     { label: "Pre-Employment Testing", enabled: true },
@@ -147,6 +154,8 @@ export default function PricingSection() {
     { label: "HIPAA Compliant", enabled: true },
   ];
 
+  const essentialBestFor = ['Hospitals', 'Construction Companies', 'Manufacturing Facilities', 'Warehouses', 'Retail Businesses', 'All Non-DOT Employers'];
+
   const plusFeatures = [
     { label: "1 Year Random Enrollment", enabled: true },
     { label: "DOT Random Drug & Alcohol Testing Program", enabled: true },
@@ -156,7 +165,6 @@ export default function PricingSection() {
     "divider",
     { label: "DOT Random Enrollment", enabled: true },
     { label: "Random Enrollment Certificate", enabled: true },
-    { label: "For DOT Regulated Companies", enabled: true },
     { label: "Mixed Large Pool", enabled: true },
     { label: "Eligible for Individual Pool", enabled: true },
     { label: "Access to 50,000+ Labs Nationwide", enabled: true },
@@ -167,6 +175,8 @@ export default function PricingSection() {
     { label: "24/7 Online Access", enabled: true },
   ];
 
+  const plusBestFor = ['Small Trucking Companies', 'Owner Operators', 'DOT Regulated Businesses', 'Transportation Services', 'Delivery Companies'];
+
   const premiumFeatures = [
     { label: "3 Year Random Enrollment", enabled: true },
     { label: "Perfect for Trucking Companies", enabled: true },
@@ -175,7 +185,6 @@ export default function PricingSection() {
     "divider",
     { label: "DOT Random Enrollment", enabled: true },
     { label: "Instant Random Enrollment Certificate", enabled: true },
-    { label: "Larger Fleet Owner", enabled: true },
     { label: "Access to 50,000+ Labs Nationwide", enabled: true },
     { label: "Drug Test $75", enabled: true },
     { label: "Alcohol Test $65", enabled: true },
@@ -184,6 +193,8 @@ export default function PricingSection() {
     { label: "Unlimited Drivers/Employees", enabled: true },
     { label: "One-Time Setup - No renewal cost", enabled: true },
   ];
+
+  const premiumBestFor = ['Large Fleet Owners', 'Trucking Companies', 'Logistics Companies', 'Transportation Corporations', 'Multi-State Carriers'];
 
   return (
     <section className="w-full bg-[#03151A] px-4 py-8 sm:py-10 md:py-14">
@@ -215,6 +226,7 @@ export default function PricingSection() {
             billedCopy="Every Year"
             cta="Get Started"
             features={essentialFeatures}
+            bestFor={essentialBestFor}
             handlePlan={handlePlan}
           />
           <PlanCard
@@ -225,6 +237,7 @@ export default function PricingSection() {
             billedCopy="Every Year"
             cta="Get Started"
             features={plusFeatures}
+            bestFor={plusBestFor}
             handlePlan={handlePlan}
           />
           <PlanCard
@@ -235,6 +248,7 @@ export default function PricingSection() {
             billedCopy="Every Year"
             cta="Get Started"
             features={premiumFeatures}
+            bestFor={premiumBestFor}
             handlePlan={handlePlan}
           />
         </div>
