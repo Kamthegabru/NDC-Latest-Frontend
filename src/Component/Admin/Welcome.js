@@ -796,6 +796,7 @@ const Welcome = () => {
       axios.get(`${API_URL}/admin/getWebsiteVisitsLast6Months`),
     ])
       .then(([countsRes, usersRes, testsRes, visitsRes]) => {
+        console.log('API Response from getCustomerAndAgencyCount:', countsRes.data);
         const newData = {
           counts: countsRes.data,
           userData: usersRes.data.data.map((d) => ({

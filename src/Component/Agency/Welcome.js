@@ -287,7 +287,7 @@ const Welcome = () => {
     {
       icon: <StoreIcon sx={{ fontSize: 28, color: 'inherit' }} />,
       title: "Total Drivers",
-      total: counts.activeDrivers,
+      total: counts.activeDrivers || 0,
       color: 'warning',
       percent: -2.5,
       chart: {
@@ -296,6 +296,9 @@ const Welcome = () => {
       },
     },
   ];
+
+  console.log('Agency Dashboard - counts:', counts);
+  console.log('Agency Dashboard - activeDrivers:', counts.activeDrivers);
 
   return (
     <Box sx={{ width: "100%", maxWidth: "100%", ml: 0, mr: "auto", p: 3 }}>
