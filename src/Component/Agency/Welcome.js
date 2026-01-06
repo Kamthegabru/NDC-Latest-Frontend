@@ -287,7 +287,7 @@ const Welcome = () => {
     {
       icon: <StoreIcon sx={{ fontSize: 28, color: 'inherit' }} />,
       title: "Total Drivers",
-      total: totalDriversFromCustomers, // Use calculated total from customers
+      total: counts.activeDrivers,
       color: 'warning',
       percent: -2.5,
       chart: {

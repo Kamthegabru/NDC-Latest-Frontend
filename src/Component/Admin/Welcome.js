@@ -825,7 +825,7 @@ const Welcome = () => {
   const metrics = [
     { icon: <FolderOpenIcon />, title: "Today Customers", value: counts.totalCustomers, color: "#1976d2" },
     { icon: <GroupIcon />, title: "Active Customers", value: counts.activeCustomers, color: "#4caf50" },
-    { icon: <StoreIcon />, title: "Total Drivers", value: counts.totalDrivers, color: "#ff9800" },
+    { icon: <StoreIcon />, title: "Total Drivers", value: counts.activeDrivers, color: "#ff9800" },
     { icon: <PersonAddAltIcon />, title: "Agency's", value: counts.totalAgencies, color: "#9c27b0" },
   ];
 

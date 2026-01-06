@@ -558,8 +558,13 @@ function ViewCustomer() {
                                     </TableRow>
                                 ) : (
                                     paginatedUsers.map((user, index) => (
-                                        <TableRow key={user._id || user.id || index} hover>
-                                            <TableCell align="center">
+                                        <TableRow 
+                                            key={user._id || user.id || index} 
+                                            hover
+                                            onClick={() => handleViewDetails(user)}
+                                            sx={{ cursor: 'pointer' }}
+                                        >
+                                            <TableCell align="center" onClick={(e) => e.stopPropagation()}>
                                                 <Checkbox
                                                     checked={selectedIds.includes(user.id || user._id)}
                                                     onChange={() => handleSelect(user.id || user._id)}
@@ -662,7 +667,7 @@ function ViewCustomer() {
                                                     <BusinessIcon />
                                                 </Avatar>
                                             </TableCell>
-                                            <TableCell align="center">
+                                            <TableCell align="center" onClick={(e) => e.stopPropagation()}>
                                                 <Tooltip title="View Details">
                                                     <IconButton onClick={() => handleViewDetails(user)} color="primary">
                                                         <ArrowForwardIosIcon />
