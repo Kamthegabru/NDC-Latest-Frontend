@@ -80,6 +80,11 @@ function ViewCustomer() {
             console.log('Sample user data:', AllUserData[0]);
             console.log('Membership data:', AllUserData[0].Membership);
             console.log('Plan start date:', AllUserData[0].Membership?.planStartDate);
+            console.log('Created at:', AllUserData[0].createdAt);
+            
+            // Check all users for membership data
+            const usersWithMembership = AllUserData.filter(u => u.Membership?.planStartDate);
+            console.log(`Users with membership date: ${usersWithMembership.length} out of ${AllUserData.length}`);
         }
     }, [AllUserData]);
 
@@ -192,10 +197,12 @@ function ViewCustomer() {
     const formatDate = (dateStr) => {
         if (!dateStr) return "-";
         try {
-            return dayjs(dateStr).format("DD MMM YYYY, hh:mm A");
+            const date = dayjs(dateStr);
+            if (!date.isValid()) return "-";
+            return date.format("MMM DD, YYYY");
         } catch (error) {
-            console.error('Date formatting error:', error);
-            return dateStr;
+            console.error('Date formatting error:', error, 'Input:', dateStr);
+            return "-";
         }
     };
 
