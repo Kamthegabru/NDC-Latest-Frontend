@@ -256,15 +256,14 @@ function ViewCustomer() {
     }, [filteredAndSortedUsers, page]);
 
     const formatDate = (dateStr) => {
-        console.log('formatDate called with:', dateStr, typeof dateStr);
         if (!dateStr) return "-";
         try {
-            const formatted = dayjs(dateStr).format("DD MMM YYYY, hh:mm A");
-            console.log('Formatted date:', formatted);
-            return formatted;
+            const date = dayjs(dateStr);
+            if (!date.isValid()) return "-";
+            return date.format("MMM DD, YYYY");
         } catch (error) {
-            console.error('Date formatting error:', error);
-            return dateStr; // Return original if formatting fails
+            console.error('Date formatting error:', error, 'Input:', dateStr);
+            return "-";
         }
     };
 
